@@ -1,0 +1,25 @@
+<form action="{% url comments-create %}" method="post" accept-charset="utf-8">
+	<span class="loading-box" data-type="loading-box"></span>
+	{% csrf_token %}
+	<div class="field">
+		{{ form.name.errors }}
+		{{ form.name }}
+	</div>
+	<div class="field">
+		{{ form.email.errors }}
+		{{ form.email }}
+	</div>
+	<div class="field">
+		{{ form.text.errors }}
+		{{ form.text }}
+	</div>
+	{{ form.post.errors }}
+	{{ form.post }}
+	{{ form.parent.errors }}
+	{{ form.parent }}
+	{{ form.check.errors }}
+	{{ form.check }}
+	<div class="form-button">
+		<span data-type="send-comment" class="btn">Опубликовать</span>
+	</div>
+</form>

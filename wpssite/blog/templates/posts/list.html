@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Блог | Web and programming solutions{% endblock title %}
+{% block meta-title %}Блог | Web and programming solutions{% endblock meta-title %}
+{% block content %}
+<div class="span-16">
+    <div class="content">
+	    {% block list-title %}{% endblock list-title %}
+        {% for post in posts %}
+            <div class="post ">
+                <h2 class="post_header" id="post-12">
+                    <div class="date">{{ post.create_time|date:"F d, Y" }}</div>
+                    <a href="{% url posts-view post.id %}"><span class="post-title">{{ post.name }}</span></a>
+                </h2>
+                <div class="clear"></div>
+                <div class="post_content">
+                    {{ post.short_text|safe }} <a href="{% url posts-view post.id %}">&gt;&gt;</a>
+                </div>
+                <div class="posts-list__tags">
+                    Теги:
+                    {% for item in post.tagged_items.all %}
+                        {% with item.tag as tag %}
+                            <a href="{% url posts-tag tag.slug %}" rel="tag">{{ tag.name }}</a>
+                            {% if not forloop.last %}, {% endif %}
+                        {% endwith %}
+                    {% endfor %}
+                </div>
+                <div class="clear"></div>
+            </div>
+        {% endfor %}
+        {% block pagination %}
+		{% if posts.paginator.num_pages > 1 %}
+            <div class="pagination">
+                {% if posts.has_previous %}
+                    <a href="?page={{ posts.previous_page_number }}">Предыдущая</a>
+                {% endif %}
+
+                {% for n in posts.paginator.page_range %}
+                    {% if n == posts.number %}
+                        <span class="pagination__page current">
+                            {{ n }}
+                        </span>
+                    {% else %}
+                        <span class="pagination__page">
+                            <a href="?page={{ n }}">{{ n }}</a>
+                        </span>
+                    {% endif %}
+                {% endfor %}
+
+                {% if posts.has_next %}
+                    <a href="?page={{ posts.next_page_number }}">Следующая</a>
+                {% endif %}
+            </div>
+	    {% endif %}
+        {% endblock pagination %}
+    </div>
+</div>
+{% endblock content %}

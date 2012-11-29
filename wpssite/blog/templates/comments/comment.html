@@ -1,0 +1,49 @@
+{% load static %}
+<div id="comment-{{ node.id }}" data-type="comment" class="comment-wrap clearfix sub-thread-comment">
+    <div class="cmt-head">
+        <img width="20" height="20" class="commuseravatar" src="{% static "images/comment-icon.png" %}" />
+        <div class="subtext">
+            <span class="cmt-totalvotes">
+				<span>Рейтинг: <span data-type="comment-rating">{{ node.rating }}</span></span>
+			</span>
+            <span class="cmt-author">
+                Опубликовал
+                <span class="cmt-author__name">{{ node.name }}</span>
+            </span>
+            {{ node.days_ago }} дн. назад
+        </div>
+    </div>
+    <span class="cmt-voting">
+        <a data-type="change-rate" href="{% url comments-rate node.id "down" %}" title="Не нравится">
+            <img alt="Не нравится" src="{% static "images/cmt-bury.png" %}">
+        </a>
+        <a data-type="change-rate" href="{% url comments-rate node.id "up" %}" title="Нравится">
+            <img alt="Нравится" src="{% static "images/cmt-vote.png" %}">
+        </a>
+    </span>
+    <div class="comment-right">
+        {{ node.text }}
+    </div>
+    {% if node.level < 11 %} {# Максимальный уровень вложенности #}
+        <div class="subtext commenttools">
+            <span data-type="comment-reply" class="comment-reply" data-comment-id="{{ node.id }}">
+                <a href="javascript:void(0);">ответить</a>
+            </span>
+			{% if node.parent %}
+			<span class="answer-to">
+			    В ответ на <a href="#comment-{{ node.parent_id }}">комментарий</a>
+			</span>
+			{% endif %}
+            <br class="clear">
+        </div>
+    {% endif %}
+    <div data-type=sub-comments class="sub-comments">
+        <div class="unfolder"></div>
+        <div data-type="comment-form" data-action="reply" class="comment-form"></div>
+        <div data-type="sub-comments-list">
+            {% if not node.is_leaf_node %}
+                {{ children }}
+            {% endif %}
+        </div>
+    </div>
+</div>

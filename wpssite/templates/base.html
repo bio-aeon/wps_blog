@@ -1,0 +1,134 @@
+{% load smart_load %}
+{% load static %}
+{% import blocks from blog as blog_blocks %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="content-Type" content="text/html; charset=utf-8" />
+	<title>{% block title %}{{ META_TITLE }}{% endblock title %}</title>
+	<meta name="title" content="{% block meta-title %}{{ META_TITLE }}{% endblock meta-title %}" />
+	<meta name="keywords" content="{% block meta-keywords %}{{ META_KEYWORDS }}{% endblock meta-keywords %}" />
+	<meta name="description" content="{% block meta-description %}{{ META_DESCRIPTION }}{% endblock meta-description %}" />
+	<link rel="stylesheet" href="{% static "css/style.css" %}" type="text/css" media="screen" />
+	<link rel="stylesheet" href="{% static "css/idea.css" %}" type="text/css" media="screen" />
+
+	<script type="text/javascript" src="{% static "js/jquery.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/noty/jquery.noty.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/noty/layouts/center.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/noty/themes/default.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/cufon.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/PT_Sans_700.font.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/Myriad_Pro_700.font.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/highlight.pack.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/fix.js" %}"></script>
+</head>
+<body>
+<div class="whole">
+<div class="topper"></div>
+<div class="wrap">
+	<div class="container">
+		<div class="span-16 logo">
+			<h1 class="m_title"><a href="{% url posts-start %}">wps.su</a></h1>
+			<h5 class="s_title"><span class="f">&nbsp;</span><br/><span class="s">блог про IT - программирование, web и не только</span></h5>
+		</div>
+		<div class="span-8 last search_box">
+			<div class="span-5 margin_left_10" style="margin-top:17px;">
+				<form method="get" action="{% url posts-search %}">
+					<input type="text" class="search_input emp" name="q" data-id="search-field" data-hint="Поиск..." />
+					<input type="button" class="btn" value="Ок" data-id="search-button" />
+				</form>
+			</div>
+			<div class="plus-one">
+				<!-- Place this tag where you want the +1 button to render. -->
+				<div class="g-plusone" data-href="http://wps.su"></div>
+
+				<!-- Place this tag after the last +1 button tag. -->
+				<script type="text/javascript">
+					window.___gcfg = {lang: 'ru'};
+
+					(function() {
+						var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+						po.src = 'https://apis.google.com/js/plusone.js';
+						var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+					})();
+				</script>
+			</div>
+		</div>
+		<div class="clear"></div>
+		<div class="span-24 menu">
+			<div class="span-24 menu_left">
+				<div class="span-24 menu_right">
+					<ul>
+						<li class="page_item page-item-5"><a href="{% url posts-index %}" title="Блог">Блог</a></li>
+						<li class="page_item page-item-7">
+							<a href="{% url django.contrib.flatpages.views.flatpage url="about" %}/" title="Обо мне">Об&nbsp;&nbsp;авторе</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<div class="clear"></div>
+		<!-- Mainbar -->
+		<div class="mainbar">
+			{% block content %}{% endblock %}
+		</div>
+		<!-- Sidebar -->
+		<div class="span-7 sidebar last">
+			<ul>
+				<li>
+					<h2 class="tags-title">Теги</h2>
+					{% blog_blocks.tag_cloud %}
+				</li>
+				<li>
+					<h2>Популярные сообщения</h2>
+					{% blog_blocks.top_posts %}
+				</li>
+				<li>
+					<span class="moikrug">
+						<a target="_blank" href="http://chigrinets-alexandr.moikrug.ru/?from=userlink">
+							<span class="fr">М</span>ой круг
+						</a>
+					</span>
+				</li>
+			</ul>
+		</div>
+	</div>
+</div>
+<div class="footer container">
+	<div class="span-20 copyright">
+		Copyright &copy; 2012
+	</div>
+	<div class="span-4 last powered" style="text-align:right;">
+            Powered by
+            <a target="_blank" rel="external" href="https://www.djangoproject.com/">Django Framework</a>.
+	</div>
+</div>
+</div>
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+	(function (d, w, c) {
+		(w[c] = w[c] || []).push(function() {
+			try {
+				w.yaCounter18409441 = new Ya.Metrika({id:18409441,
+					clickmap:true,
+					trackLinks:true,
+					accurateTrackBounce:true});
+			} catch(e) { }
+		});
+
+		var n = d.getElementsByTagName("script")[0],
+				s = d.createElement("script"),
+				f = function () { n.parentNode.insertBefore(s, n); };
+		s.type = "text/javascript";
+		s.async = true;
+		s.src = (d.location.protocol == "https:" ? "https:" : "http:") + "//mc.yandex.ru/metrika/watch.js";
+
+		if (w.opera == "[object Opera]") {
+			d.addEventListener("DOMContentLoaded", f);
+		} else { f(); }
+	})(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="//mc.yandex.ru/watch/18409441" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+</body>
+</html>
