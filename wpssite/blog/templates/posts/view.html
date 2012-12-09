@@ -8,6 +8,8 @@
 {% block meta-keywords %}{{ post.meta_keywords }}{% endblock meta-keywords %}
 {% block meta-description %}{{ post.meta_description }}{% endblock meta-description %}
 {% block content %}
+<link rel="stylesheet" href="{% static "js/fancybox/jquery.fancybox.css" %}" type="text/css" media="screen" />
+<script type="text/javascript" src="{% static "js/fancybox/jquery.fancybox.pack.js" %}"></script>
 <script type="text/javascript" src="{% static "js/comments.js" %}"></script>
 <div class="span-16">
     <div class="content">
@@ -36,6 +38,16 @@
 		    </div>
 			<div class="clear"></div>
         </div>
+	    <script type="text/javascript">
+			$("a.fancybox").fancybox({
+				'transitionIn'	:	'elastic',
+				'transitionOut'	:	'elastic',
+				'speedIn'		:	600,
+				'speedOut'		:	200,
+				'overlayShow'	:	false,
+				'title '        :   ''
+			});
+	    </script>
 
     </div>
 
