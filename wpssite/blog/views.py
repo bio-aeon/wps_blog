@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from wpssite.views import CallableView
+from wpssite.views import CallableClassView
 from wpssite.blog.models import Post, Comment, CommentRate
 from wpssite.blog.models.tagmodel import BlogTag
 from wpssite.blog.forms import CommentForm
@@ -11,7 +11,7 @@ from django.core.paginator import Paginator, EmptyPage
 from django.core.urlresolvers import reverse
 
 
-class Posts(CallableView):
+class Posts(CallableClassView):
     def index(self):
         post_list = Post.tagged.order_by('-create_time')
         paginator = Paginator(post_list, 10)
@@ -76,7 +76,7 @@ class Posts(CallableView):
         return self._render('posts/tag.html', {'posts': posts, 'tag_name': tag.name})
 
 
-class Comments(CallableView):
+class Comments(CallableClassView):
     def create(self):
         if self._request.is_ajax() and self._request.method == 'POST':
             form = CommentForm(self._request.POST)
