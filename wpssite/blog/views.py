@@ -91,7 +91,7 @@ class Comments(CallableClassView):
                                                       'id': comment.id,
                                                       'result': 'success'}))
             else:
-                errors = {k: form.errors[k][0] for k in form.errors}
+                errors = dict((k, form.errors[k][0]) for k in form.errors)
                 return HttpResponse(simplejson.dumps({'data': errors, 'result': 'error'}))
         else:
             raise Http404
