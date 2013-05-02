@@ -106,6 +106,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.static',
     'django.contrib.auth.context_processors.auth',
     'wpssite.context_processors.meta',
+    'wpssite.context_processors.is_localhost',
 )
 
 MIDDLEWARE_CLASSES = (

@@ -7,12 +7,12 @@ from django.utils.translation import ugettext as _
 from django.views.generic import ListView
 
 
-class CallableClassViewException(Http404): pass
+class ClassViewException(Http404): pass
 
 
-class CallableClassView(object):
+class ClassView(object):
     def __new__(cls, request, *args, **kwargs):
-        obj = super(CallableClassView, cls).__new__(cls)
+        obj = super(ClassView, cls).__new__(cls)
         return obj(request, *args, **kwargs)
 
     def __call__(self, request, *args, **kwargs):
@@ -28,9 +28,9 @@ class CallableClassView(object):
             if inspect.ismethod(handler): #если это метод
                 return handler(*args, **kwargs) #вызываем действие
             else:
-                raise CallableClassViewException(u'"%s" is not a method' % self._action)
+                raise ClassViewException(u'"%s" is not a method' % self._action)
         else:
-            raise CallableClassViewException(u'"%s" have not public method "%s"' % (self._view, self._action))
+            raise ClassViewException(u'"%s" have not public method "%s"' % (self._view, self._action))
 
     def _add_route_info(self, params):
         params['route'] = {'app': self._app, 'view': self._view, 'action': self._action}
@@ -49,7 +49,7 @@ class CallableClassView(object):
         try:
             model = cls.objects.get(pk=id)
         except cls.DoesNotExist:
-            raise CallableClassViewException(u'Запись не существует')
+            raise ClassViewException(u'Запись не существует')
         else:
             return model
 

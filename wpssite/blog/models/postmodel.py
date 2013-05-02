@@ -11,6 +11,7 @@ class Post(models.Model):
     text = models.TextField(verbose_name=u'Текст')
     create_time = models.DateTimeField(verbose_name=u'Время создания')
     views = models.IntegerField(verbose_name=u'Просмотры', default=0)
+    hidden = models.BooleanField(verbose_name=u'Скрыт', default=True)
     meta_title = models.CharField(max_length=255, null=True, blank=True)
     meta_keywords = models.CharField(max_length=255, null=True, blank=True)
     meta_description = models.CharField(max_length=255, null=True, blank=True)
