@@ -40,7 +40,7 @@ class Posts(ClassView):
     def start(self):
         Exception(socket.gethostbyname(socket.gethostname()))
         posts = Post.tagged.all().order_by('-create_time')[:10]
-        return self._render('posts/start.html', {'posts': posts})
+        # return self._render('posts/start.html', {'posts': posts})
 
     def search(self):
         search_text = unicode(self._request.GET.get('q', ''))
