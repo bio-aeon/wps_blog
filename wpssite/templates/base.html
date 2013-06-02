@@ -28,12 +28,12 @@
 <div class="wrap">
 	<div class="container">
 		<div class="span-16 logo">
-			<h1 class="m_title"><a href="{% url posts-start %}">wps.su</a></h1>
+			<h1 class="m_title"><a href="{% url 'posts-start' %}">wps.su</a></h1>
 			<h5 class="s_title"><span class="f">&nbsp;</span><br/><span class="s">блог про IT - программирование, web и не только</span></h5>
 		</div>
 		<div class="span-8 last search_box">
 			<div class="span-5 margin_left_10" style="margin-top:17px;">
-				<form method="get" action="{% url posts-search %}">
+				<form method="get" action="{% url 'posts-search' %}">
 					<input type="text" class="search_input emp" name="q" data-id="search-field" data-hint="Поиск..." />
 					<input type="button" class="btn" value="Ок" data-id="search-button" />
 				</form>
@@ -59,9 +59,9 @@
 			<div class="span-24 menu_left">
 				<div class="span-24 menu_right">
 					<ul>
-						<li class="page_item page-item-5"><a href="{% url posts-index %}" title="Блог">Блог</a></li>
+						<li class="page_item page-item-5"><a href="{% url 'posts-index' %}" title="Блог">Блог</a></li>
 						<li class="page_item page-item-7">
-							<a href="{% url django.contrib.flatpages.views.flatpage url="about" %}/" title="Обо мне">Об&nbsp;&nbsp;авторе</a>
+							<a href="{% url 'django.contrib.flatpages.views.flatpage' url="about" %}/" title="Обо мне">Об&nbsp;&nbsp;авторе</a>
 						</li>
 					</ul>
 				</div>

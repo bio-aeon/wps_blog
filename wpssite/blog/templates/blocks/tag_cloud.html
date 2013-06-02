@@ -1,7 +1,7 @@
 <div class="tagsCloud">
 	<ul>
 		{% for tag in tags %}
-		<li class="tag{{ tag.index }}"><a href="{% url posts-tag tag.slug %}">{{ tag.name }}</a></li>
+		<li class="tag{{ tag.index }}"><a href="{% url 'posts-tag' tag.slug %}">{{ tag.name }}</a></li>
 		{% endfor %}
 	</ul>
 </div>

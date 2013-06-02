@@ -14,10 +14,10 @@
         </div>
     </div>
     <span class="cmt-voting">
-        <a data-type="change-rate" href="{% url comments-rate node.id "down" %}" title="Не нравится">
+        <a data-type="change-rate" href="{% url 'comments-rate' node.id "down" %}" title="Не нравится">
             <img alt="Не нравится" src="{% static "images/cmt-bury.png" %}">
         </a>
-        <a data-type="change-rate" href="{% url comments-rate node.id "up" %}" title="Нравится">
+        <a data-type="change-rate" href="{% url 'comments-rate' node.id "up" %}" title="Нравится">
             <img alt="Нравится" src="{% static "images/cmt-vote.png" %}">
         </a>
     </span>

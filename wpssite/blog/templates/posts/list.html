@@ -9,17 +9,17 @@
             <div class="post ">
                 <h2 class="post_header" id="post-12">
                     <div class="date">{{ post.create_time|date:"F d, Y" }}</div>
-                    <a href="{% url posts-view post.id %}"><span class="post-title">{{ post.name }}</span></a>
+                    <a href="{% url 'posts-view' post.id %}"><span class="post-title">{{ post.name }}</span></a>
                 </h2>
                 <div class="clear"></div>
                 <div class="post_content">
-                    {{ post.short_text|safe }} <a href="{% url posts-view post.id %}">&gt;&gt;</a>
+                    {{ post.short_text|safe }} <a href="{% url 'posts-view' post.id %}">&gt;&gt;</a>
                 </div>
                 <div class="posts-list__tags">
                     Теги:
                     {% for item in post.tagged_items.all %}
                         {% with item.tag as tag %}
-                            <a href="{% url posts-tag tag.slug %}" rel="tag">{{ tag.name }}</a>
+                            <a href="{% url 'posts-tag' tag.slug %}" rel="tag">{{ tag.name }}</a>
                             {% if not forloop.last %}, {% endif %}
                         {% endwith %}
                     {% endfor %}

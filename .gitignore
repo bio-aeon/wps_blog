@@ -1,5 +1,7 @@
 .directory
 .idea/*
 logs/*
+pids/*
 www/media/*
+venv/*
 *.pyc

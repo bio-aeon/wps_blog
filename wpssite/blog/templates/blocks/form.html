@@ -1,4 +1,4 @@
-<form action="{% url comments-create %}" method="post" accept-charset="utf-8">
+<form action="{% url 'comments-create' %}" method="post" accept-charset="utf-8">
 	<span class="loading-box" data-type="loading-box"></span>
 	{% csrf_token %}
 	<div class="field">
