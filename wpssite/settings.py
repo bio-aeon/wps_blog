@@ -10,6 +10,8 @@ else:
     DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
+Exception(socket.gethostbyname(socket.gethostname()))
+
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
