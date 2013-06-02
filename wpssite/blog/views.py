@@ -9,7 +9,6 @@ from django.utils import simplejson
 from django.template.loader import render_to_string
 from django.core.paginator import Paginator, EmptyPage
 from django.core.urlresolvers import reverse
-import socket
 
 
 class Posts(ClassView):
@@ -38,9 +37,8 @@ class Posts(ClassView):
                                                                                       args=[post.id]))})
 
     def start(self):
-        raise Exception(socket.gethostbyname(socket.gethostname()))
         posts = Post.tagged.all().order_by('-create_time')[:10]
-        # return self._render('posts/start.html', {'posts': posts})
+        return self._render('posts/start.html', {'posts': posts})
 
     def search(self):
         search_text = unicode(self._request.GET.get('q', ''))
