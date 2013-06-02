@@ -38,7 +38,7 @@ class Posts(ClassView):
                                                                                       args=[post.id]))})
 
     def start(self):
-        Exception(socket.gethostbyname(socket.gethostname()))
+        raise Exception(socket.gethostbyname(socket.gethostname()))
         posts = Post.tagged.all().order_by('-create_time')[:10]
         # return self._render('posts/start.html', {'posts': posts})
 
