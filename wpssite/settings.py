@@ -7,7 +7,7 @@ PUBLIC_ROOT = os.path.join(os.path.dirname(PROJECT_ROOT), 'www').replace('\\', '
 if socket.gethostbyname(socket.gethostname()) == '127.0.0.1':
     DEBUG = True
 else:
-    DEBUG = False
+    DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -28,7 +28,7 @@ DATABASES = {
     }
 }
 
-if DEBUG:
+if not DEBUG:
     DATABASES['default']['USER'] = 'root'
     DATABASES['default']['PASSWORD'] = '123'
 else:
@@ -179,7 +179,7 @@ LOGGING = {
     }
 }
 
-if DEBUG:
+if not DEBUG:
     MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
     INTERNAL_IPS = ('127.0.0.1',)
     INSTALLED_APPS += ('debug_toolbar',)
