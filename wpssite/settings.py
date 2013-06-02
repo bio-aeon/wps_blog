@@ -1,8 +1,9 @@
 import os.path
 import socket
+import logging
 # Django settings for wpssite project.
-PROJECT_ROOT = os.path.dirname(__file__)
-PUBLIC_ROOT = os.path.join(os.path.dirname(PROJECT_ROOT), 'www').replace('\\', '/')
+PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
+PUBLIC_ROOT = os.path.join(PROJECT_ROOT, 'www').replace('\\', '/')
 
 if socket.gethostbyname(socket.gethostname()) == '127.0.0.1':
     DEBUG = True
@@ -178,6 +179,13 @@ LOGGING = {
         },
     }
 }
+
+logging.basicConfig(
+    level = logging.ERROR,
+    format = '%(asctime)s %(levelname)s %(message)s',
+    filename = os.path.join(PROJECT_ROOT, 'logs').replace('\\', '/') + '/myapp.log',
+    filemode = 'a'
+)
 
 if DEBUG:
     MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
