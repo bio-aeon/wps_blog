@@ -2,7 +2,8 @@ import os.path
 import socket
 import logging
 # Django settings for wpssite project.
-PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
+SETTINGS_ROOT = os.path.dirname(__file__)
+PROJECT_ROOT = os.path.dirname(SETTINGS_ROOT)
 PUBLIC_ROOT = os.path.join(PROJECT_ROOT, 'www').replace('\\', '/')
 
 if socket.gethostbyname(socket.gethostname()) == '127.0.0.1':
@@ -129,7 +130,7 @@ ROOT_URLCONF = 'wpssite.urls'
 WSGI_APPLICATION = 'wpssite.wsgi.application'
 
 TEMPLATE_DIRS = (
-    os.path.join(os.path.dirname(__file__), 'templates').replace('\\', '/'),
+    os.path.join(SETTINGS_ROOT, 'templates').replace('\\', '/'),
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
