@@ -9,7 +9,7 @@ class ParamsManager(models.Manager):
         return self.__class__
 
     def get(self, param_name, preselect_all=False):
-        """Get value of param with given name
+        """Get value of param with the given name
 
         :param param_name: Param name to use.
         :type param_name: str.
