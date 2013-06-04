@@ -2,7 +2,7 @@
 from django.db import models
 from taggit.models import Tag, TaggedItem
 from django.db.models import Count, Min, Max
-from wpssite.utils import Helper
+from wpssite import utils
 
 
 class TagStructuresManager(models.Manager):
@@ -39,7 +39,7 @@ class BlogTag(Tag):
         proxy = True
 
     def slugify(self, tag, i=None):
-        slug = Helper.translit(tag.lower().replace(' ', '-'))
+        slug = utils.translit(tag.lower().replace(' ', '-'))
         if i is not None:
             slug += "_%d" % i
         return slug
