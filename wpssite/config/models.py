@@ -9,6 +9,15 @@ class ParamsManager(models.Manager):
         return self.__class__
 
     def get(self, param_name, preselect_all=False):
+        """Get value of param with given name
+
+        :param param_name: Param name to use.
+        :type param_name: str.
+        :param preselect_all: If preselect all params.
+        :type preselect_all: bool.
+        :rtype: str.
+
+        """
         try:
             if self.get_class().params:
                 param = self.get_class().params[param_name]
