@@ -149,6 +149,7 @@ INSTALLED_APPS = (
     'taggit',
     'mptt',
     'south',
+    'markitup',
     'wpssite.config',
     'wpssite.blog',
     'wpssite.sitestatic',
@@ -206,3 +207,6 @@ if DEBUG:
         'debug_toolbar.panels.logger.LoggingPanel',)
     DEBUG_TOOLBAR_CONFIG = {
         'INTERCEPT_REDIRECTS': False,}
+
+MARKITUP_FILTER = ('markdown.markdown', {'safe_mode': False})
+MARKITUP_SET = 'markitup/sets/markdown'

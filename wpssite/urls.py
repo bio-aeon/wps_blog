@@ -14,6 +14,7 @@ urlpatterns += patterns('',
     url(r'^blog/', include('wpssite.blog.urls')),
     url(r'^page/', include('django.contrib.flatpages.urls')),
     url(r'^djadmin/', include(admin.site.urls)),
+    url(r'^markitup/', include('markitup.urls')),
 )
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

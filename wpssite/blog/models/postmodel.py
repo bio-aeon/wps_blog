@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
-from django.db import models
-from taggit.managers import TaggableManager
-from wpssite.blog.models.tagmodel import BlogTaggedItem, TaggedManager
 from django.contrib.auth.models import User
+from django.db import models
+
+from taggit.managers import TaggableManager
+from markitup.fields import MarkupField
+
+from ..models.tagmodel import BlogTaggedItem, TaggedManager
 
 
 class Post(models.Model):
     name = models.CharField(max_length=255, verbose_name=u'Наименование')
     short_text = models.TextField(verbose_name=u'Краткое описание')
-    text = models.TextField(verbose_name=u'Текст')
+    text = MarkupField(verbose_name=u'Текст')
     create_time = models.DateTimeField(verbose_name=u'Время создания')
     views = models.IntegerField(verbose_name=u'Просмотры', default=0)
     hidden = models.BooleanField(verbose_name=u'Скрыт', default=True)

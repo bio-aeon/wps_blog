@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-from wpssite.views import ClassView
-from wpssite.blog.models import Post, Comment, CommentRate
-from wpssite.blog.models.tagmodel import BlogTag
-from wpssite.blog.forms import CommentForm
 from django.db import models
 from django.http import HttpResponse, Http404
 from django.utils import simplejson
@@ -10,10 +6,18 @@ from django.template.loader import render_to_string
 from django.core.paginator import Paginator, EmptyPage
 from django.core.urlresolvers import reverse
 
+from wpssite.views import ClassView
+from wpssite.blog.models import Post, Comment, CommentRate
+from wpssite.blog.models.tagmodel import BlogTag
+from wpssite.blog.forms import CommentForm
+
 
 class Posts(ClassView):
     def index(self):
         post_list = Post.tagged.order_by('-create_time')
+        if not self._request.user.is_authenticated():
+            post_list = post_list.filter(hidden=False)
+
         paginator = Paginator(post_list, 10)
         page = int(self._request.GET.get('page', 1))
         try:
@@ -25,6 +29,10 @@ class Posts(ClassView):
     def view(self, id):
         try:
             post = Post.objects.get(pk=id)
+
+            if post.hidden and not self._request.user.is_authenticated():
+                raise Http404
+
             if not self._request.session.get('post-' + id, False):
                 post.views = models.F('views') + 1
                 post.save()
@@ -37,16 +45,21 @@ class Posts(ClassView):
                                                                                       args=[post.id]))})
 
     def start(self):
-        posts = Post.tagged.all().order_by('-create_time')[:10]
-        return self._render('posts/start.html', {'posts': posts})
+        posts = Post.tagged.order_by('-create_time')
+        if not self._request.user.is_authenticated():
+            posts = posts.filter(hidden=False)
+
+        return self._render('posts/start.html', {'posts': posts[:10]})
 
     def search(self):
         search_text = unicode(self._request.GET.get('q', ''))
         if search_text:
             post_list = Post.objects.filter(models.Q(text__icontains=search_text) |
-                                        models.Q(name__icontains=search_text))\
-                                .prefetch_related('tagged_items__tag')\
-                                .order_by('-create_time')
+                                            models.Q(name__icontains=search_text))\
+                                    .prefetch_related('tagged_items__tag')\
+                                    .order_by('-create_time')
+            if not self._request.user.is_authenticated():
+                post_list = post_list.filter(hidden=False)
         else:
             post_list = Post.objects.none()
 
@@ -64,9 +77,11 @@ class Posts(ClassView):
         except BlogTag.DoesNotExist:
             raise Http404
 
-        post_list = Post.tagged.all()\
-                               .filter(tags__slug=tag.slug)\
+        post_list = Post.tagged.filter(tags__slug=tag.slug)\
                                .order_by('-create_time')
+        if not self._request.user.is_authenticated():
+                post_list = post_list.filter(hidden=False)
+
         paginator = Paginator(post_list, 10)
         page = int(self._request.GET.get('page', 1))
         try:
