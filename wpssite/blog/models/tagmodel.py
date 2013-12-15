@@ -7,22 +7,36 @@ from wpssite import utils
 
 class TagStructuresManager(models.Manager):
     def tag_cloud(self):
-        raw_tags = self.annotate(posts_count=Count('taggit_taggeditem_items')).order_by('name')
-        stat = raw_tags.aggregate(posts_min=Min('posts_count'), posts_max=Max('posts_count'))
-        min_count, max_count = int(stat['posts_min'] or 0), int(stat['posts_max'] or 0)
-        max_index = 5 # максимально возможный относительный вес тега
+        raw_tags = list(self.filter(post__hidden=False)
+                            .values('tag__id', 'tag__name', 'tag__slug')
+                            .annotate(posts_count=Count('post'))
+                            .order_by('tag__name'))
 
+        if len(raw_tags):
+            min_count = raw_tags[0]['posts_count']
+        else:
+            min_count = 0
+        max_count = 0
+
+        for raw_tag in raw_tags:
+            if raw_tag['posts_count'] < min_count:
+                min_count = raw_tag['posts_count']
+
+            if raw_tag['posts_count'] > max_count:
+                max_count = raw_tag['posts_count']
+
+        max_index = 5 # максимально возможный относительный вес тега
         tags = []
-        if(raw_tags):
+        if raw_tags:
             #на сколько различаются самое большое и самое малое количество постов тега
             dif = max_count - min_count if max_count != min_count else 1
 
             for raw_tag in raw_tags:
-                index = int(round(float(raw_tag.posts_count - min_count) / dif * max_index))
+                index = int(round(float(raw_tag['posts_count'] - min_count) / dif * max_index))
                 if not index:
                     index = 1
 
-                tags.append({'name': raw_tag.name, 'slug': raw_tag.slug, 'index': index})
+                tags.append({'name': raw_tag['tag__name'], 'slug': raw_tag['tag__slug'], 'index': index})
         return tags
 
 
@@ -32,9 +46,6 @@ class TaggedManager(models.Manager):
 
 
 class BlogTag(Tag):
-    structures = TagStructuresManager()
-    objects = models.Manager()
-
     class Meta:
         proxy = True
 
@@ -46,6 +57,9 @@ class BlogTag(Tag):
 
 
 class BlogTaggedItem(TaggedItem):
+    structures = TagStructuresManager()
+    objects = models.Manager()
+
     class Meta:
         proxy = True
         app_label = 'blog'
