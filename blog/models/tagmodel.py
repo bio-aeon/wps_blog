@@ -13,20 +13,13 @@ class TagStructuresManager(models.Manager):
                             .annotate(posts_count=Count('post'))
                             .order_by('tag__name'))
 
-        if len(raw_tags):
-            min_count = raw_tags[0]['posts_count']
+        tag_counts = [raw_tag['posts_count'] for raw_tag in raw_tags]
+        if tag_counts:
+            min_count, max_count = min(tag_counts), max(tag_counts)
         else:
-            min_count = 0
-        max_count = 0
+            min_count, max_count = 0, 0
 
-        for raw_tag in raw_tags:
-            if raw_tag['posts_count'] < min_count:
-                min_count = raw_tag['posts_count']
-
-            if raw_tag['posts_count'] > max_count:
-                max_count = raw_tag['posts_count']
-
-        max_index = 5 # максимально возможный относительный вес тега
+        max_index = 5  # максимально возможный относительный вес тега
         tags = []
         if raw_tags:
             #на сколько различаются самое большое и самое малое количество постов тега
