@@ -148,6 +148,7 @@ INSTALLED_APPS = (
     'mptt',
     'south',
     'markitup',
+    'wps_blog',
     'config',
     'blog',
     'sitestatic',
