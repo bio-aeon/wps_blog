@@ -1,0 +1,1 @@
+My simple blog on Django with search, tags and tree comments with rating.

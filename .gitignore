@@ -3,6 +3,10 @@
 logs/*
 pids/*
 www/media/*
+www/static/*
 venv/*
 .python-eggs/*
 *.pyc
+
+wps_blog/settings.py
+wps_blog/urls.py

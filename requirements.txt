@@ -2,3 +2,8 @@ Django==1.5.5
 django-markitup==2.0
 Markdown==2.3.1
 MySQL-python==1.2.4
+django-mptt==0.6.0
+django-smart-load-tag==0.3.2
+South==0.7.6
+django-taggit==0.9.3
+django-debug-toolbar==1.2
