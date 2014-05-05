@@ -147,7 +147,7 @@ INSTALLED_APPS = (
     'taggit',
     'mptt',
     'south',
-    'markitup',
+    'ckeditor',
     'wps_blog',
     'config',
     'blog',
@@ -212,5 +212,5 @@ if DEBUG:
     DEBUG_TOOLBAR_CONFIG = {
         'INTERCEPT_REDIRECTS': False,}
 
-MARKITUP_FILTER = ('markdown.markdown', {'safe_mode': False})
-MARKITUP_SET = 'markitup/sets/markdown'
+CKEDITOR_UPLOAD_PATH = 'uploads/'
+CKEDITOR_IMAGE_BACKEND = 'pillow'
