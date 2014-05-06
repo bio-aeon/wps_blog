@@ -7,3 +7,4 @@ django-taggit==0.9.3
 django-debug-toolbar==1.2
 django-ckeditor-updated==4.2.8
 Pillow==2.4.0
+django-configurations==0.8
