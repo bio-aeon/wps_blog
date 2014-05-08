@@ -113,9 +113,9 @@ class Comments(ClassView):
 
     def rate(self, id, to):
         if self._request.is_ajax():
-            ip = ip=self._request.META.get('REMOTE_ADDR', None)
+            ip = self._request.META.get('REMOTE_ADDR', None)
             try:
-                CommentRate.objects.get(comment=id, ip=self._request.META.get('REMOTE_ADDR', None))
+                CommentRate.objects.get(comment=id, ip=ip)
             except CommentRate.DoesNotExist:
                 comment = self._load_model(Comment, id)
                 if to == 'up':
