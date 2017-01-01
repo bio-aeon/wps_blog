@@ -166,7 +166,7 @@ a:focus,
 a:hover     { color: #d81e08; text-decoration:none;}
 a           { color: #233487; text-decoration: underline; }
 
-blockquote  { margin-bottom: 1.7em; padding:0 0 0 40px; background:url(http://preview.wordpresse.ru/wp-content/themes/seriousblogger/images/blockquote.gif) top left no-repeat; color: #3b3b38; font-size:13px; font-style: italic; font-family:Georgia, "Times New Roman", Times, serif; }
+blockquote  { margin-bottom: 1.7em; padding:0 0 0 40px; background:url(../images/blockquote.gif) top left no-repeat; color: #3b3b38; font-size:13px; font-style: italic; font-family:Georgia, "Times New Roman", Times, serif; }
 strong      { font-weight: bold; }
 em,dfn      { font-style: italic; }
 dfn         { font-weight: bold; }
