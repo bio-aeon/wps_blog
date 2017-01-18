@@ -1381,6 +1381,10 @@ img.alignright   { float:right;margin:4px 0 4px 10px; }
     text-decoration: none;
     font-family: Arial;
 }
+.btn.narrow {
+    line-height: 16px;
+    height: 24px;
+}
 .btn:hover {
     -moz-transition: background-position 0.1s linear 0s;
     background-color: #E6E6E6;
