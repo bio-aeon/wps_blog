@@ -1,9 +1,0 @@
-{% extends "posts/list.html" %}
-{% block title %}Поиск | Web and programming solutions{% endblock title %}
-{% block meta-title %}Поиск | Web and programming solutions{% endblock meta-title %}
-{% block list-title %}
-	<div class="search-title">Вы искали: "{{ search_text }}"</div>
-	{% if not posts %}
-		<div class="post_content">Ничего не найдено</div>
-	{% endif %}
-{% endblock list-title %}

@@ -1,5 +1,0 @@
-<ul class="top-posts">
-	{% for post in posts %}
-        <li><a href="{% url 'posts-view' post.id %}">{{ post.name }}</a></li>
-	{% endfor %}
-</ul>
