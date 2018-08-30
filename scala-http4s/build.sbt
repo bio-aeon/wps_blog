@@ -1,6 +1,4 @@
-val Http4sVersion = "0.18.16"
-val Specs2Version = "4.3.4"
-val LogbackVersion = "1.2.3"
+import Dependencies._
 
 lazy val root = (project in file("."))
   .settings(
@@ -18,10 +16,14 @@ lazy val root = (project in file("."))
       "-Ypartial-unification"
     ),
     libraryDependencies ++= Seq(
-      "org.http4s"      %% "http4s-blaze-server" % Http4sVersion,
-      "org.http4s"      %% "http4s-circe"        % Http4sVersion,
-      "org.http4s"      %% "http4s-dsl"          % Http4sVersion,
-      "org.specs2"     %% "specs2-core"          % Specs2Version % "test",
-      "ch.qos.logback"  %  "logback-classic"     % LogbackVersion
+      http4sBlazeServer,
+      http4sCirce,
+      http4sDsl,
+      circeParser,
+      circeOptics,
+      logbackClassic,
+      sangria,
+      sangriaCirce,
+      specs2 % "test"
     )
   )
