@@ -1,43 +1,34 @@
 import path from 'path';
-import WebpackCleanupPlugin from 'webpack-cleanup-plugin';
+import Config from 'webpack-config';
+import PATHS from './webpack/paths';
 
-export default {
-  entry: {
-    app: './index.js'
-  },
-  output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: '[name].[chunkhash].js'
-  },
-  module: {
-    rules: [
-      {
-        test: /\.jsx?$/,
-        loader: 'babel-loader',
-        query: {
-          // Ignore the .babelrc at the root of our project-- that's only
-          // used to compile our webpack settings, NOT for bundling
-          babelrc: false,
-          presets: [
-            ['env', {
-              // Enable tree-shaking by disabling commonJS transformation
-              modules: false,
-              // Exclude default regenerator-- we want to enable async/await
-              // so we'll do that with a dedicated plugin
-              exclude: ['transform-regenerator'],
-            }],
-            // Transpile JSX code
-            'react',
-          ]
-        },
-      }
-    ]
-  },
-  plugins: [
-    new WebpackCleanupPlugin()
-  ],
-  stats: {
-    colors: true
-  },
-  devtool: 'source-map'
+const load = file => {
+  // Resolve the config file
+  let wp;
+
+  try {
+    wp = require(path.resolve(PATHS.webpack, file)).default;
+  } catch (e) {
+    console.error(`Error: ${file}.js not found or has errors:`);
+    console.error(e);
+    process.exit();
+  }
+
+  // If the config isn't already an array, add it to a new one, map over each
+  // `webpack-config`, and create a 'regular' Webpack-compatible object
+  return (Array.isArray(wp) ? wp : [wp]).map(config => (
+    new Config().merge(config).toObject()
+  ));
 };
+
+const toExport = [];
+
+toExport.push(...load('browser'));
+toExport.push(...load('server'));
+
+if (!toExport.length) {
+  console.error('Error: WEBPACK_CONFIG files not given');
+  process.exit();
+}
+
+export default toExport;
