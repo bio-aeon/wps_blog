@@ -24,6 +24,7 @@ lazy val root = (project in file("."))
       logbackClassic,
       sangria,
       sangriaCirce,
+      pgMigrationsScala,
       specs2 % "test"
     )
   )

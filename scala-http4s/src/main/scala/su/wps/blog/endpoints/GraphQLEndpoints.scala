@@ -13,7 +13,7 @@ import sangria.execution._
 import sangria.marshalling.circe._
 import sangria.parser.{QueryParser, SyntaxError}
 import sangria.schema.{ObjectType, Schema, _}
-import su.wps.blog.data.TaglessFuture
+import su.wps.blog.data.LiftFuture
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.control.NonFatal
@@ -29,7 +29,7 @@ object SchemaDefinition {
   def createSchema() = Schema(Query)
 }
 
-class GraphQLEndpoints[F[_]: Effect: TaglessFuture] extends Http4sDsl[F] {
+class GraphQLEndpoints[F[_]: Effect: LiftFuture] extends Http4sDsl[F] {
   def endpoints: HttpService[F] = {
     HttpService[F] {
       case request @ POST -> Root / "graphql" =>
@@ -63,7 +63,7 @@ class GraphQLEndpoints[F[_]: Effect: TaglessFuture] extends Http4sDsl[F] {
   private def executeGraphQL(query: Document,
                              operationName: Option[String],
                              variables: Json): F[Response[F]] = {
-    implicitly[TaglessFuture[F]].apply {
+    implicitly[LiftFuture[F]].apply {
       Executor
         .execute(
           SchemaDefinition.createSchema(),

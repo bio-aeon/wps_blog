@@ -6,6 +6,6 @@ import scala.concurrent.Future
 
 package object blog {
   object data {
-    type TaglessFuture[F[_]] = Future ~> F
+    type LiftFuture[F[_]] = Future ~> F
   }
 }
