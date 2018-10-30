@@ -16,7 +16,7 @@ class Migrate_20180913213456_CreatePosts extends Migration {
       t.varchar("meta_title", Limit(255), NotNull)
       t.varchar("meta_keywords", Limit(255), NotNull)
       t.varchar("meta_description", Limit(255), NotNull)
-      t.boolean("hidden", NotNull)
+      t.boolean("is_hidden", NotNull)
       t.timestamp("created_at", NotNull, Default("current_timestamp"))
     }
   }
