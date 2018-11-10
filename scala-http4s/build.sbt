@@ -1,4 +1,7 @@
+import java.net.URLClassLoader
+
 import Dependencies._
+import sbt.complete.Parsers.spaceDelimited
 
 lazy val root = (project in file("."))
   .settings(
@@ -24,7 +27,24 @@ lazy val root = (project in file("."))
       logbackClassic,
       sangria,
       sangriaCirce,
+      typesafeConfig,
       pgMigrationsScala,
       specs2 % "test"
     )
   )
+  .settings(registerMigrateTask("su.wps.blog.tasks.MigrateTask"))
+
+def registerMigrateTask[T](taskClass: String) = {
+  val migrate = inputKey[Unit]("Migration task.")
+  migrate := {
+    val args: Seq[String] = spaceDelimited("<arg>").parsed
+
+    val deps = (dependencyClasspath in Runtime).value
+    val classLoader = new URLClassLoader(deps.map(_.data.toURI.toURL).toArray, null)
+    val classType = classLoader.loadClass(taskClass)
+    val task = classType.getConstructors.head
+      .newInstance(args.mkString(" "))
+      .asInstanceOf[Runnable]
+    task.run()
+  }
+}
