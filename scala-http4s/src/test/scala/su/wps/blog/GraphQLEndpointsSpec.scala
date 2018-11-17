@@ -2,6 +2,7 @@ package su.wps.blog
 
 import cats.effect.IO
 import cats.~>
+import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import io.circe.syntax._
 import org.http4s._
 import org.http4s.circe._
@@ -36,7 +37,12 @@ class GraphQLEndpointsSpec extends org.specs2.mutable.Specification {
     val getHW = Request[IO](Method.POST, Uri.uri("/graphql"))
       .withBody(jsn)
       .unsafeRunSync()
-    new GraphQLEndpoints[IO].endpoints.orNotFound(getHW).unsafeRunSync()
+    val action = for {
+      logger <- Slf4jLogger.create[IO]
+      result <- new GraphQLEndpoints[IO].endpoints(logger).orNotFound(getHW)
+    } yield result
+
+    action.unsafeRunSync()
   }
 
   private[this] def uriReturns200(): MatchResult[Status] =

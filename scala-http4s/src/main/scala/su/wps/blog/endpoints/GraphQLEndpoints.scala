@@ -2,6 +2,7 @@ package su.wps.blog.endpoints
 
 import cats.effect.Effect
 import cats.implicits._
+import io.chrisdavenport.log4cats.Logger
 import io.circe.Json
 import io.circe.optics.JsonPath._
 import io.circe.parser._
@@ -30,7 +31,7 @@ object SchemaDefinition {
 }
 
 class GraphQLEndpoints[F[_]: Effect: LiftFuture] extends Http4sDsl[F] {
-  def endpoints: HttpService[F] = {
+  def endpoints(logger: Logger[F]): HttpService[F] = {
     HttpService[F] {
       case request @ POST -> Root / "graphql" =>
         request.as[Json].flatMap { body =>
@@ -55,7 +56,10 @@ class GraphQLEndpoints[F[_]: Effect: LiftFuture] extends Http4sDsl[F] {
             case None                 => BadRequest(formatStringError("No query to execute"))
           }
 
-          execute
+          for {
+            _ <- logger.info("Execution of graphql started.")
+            res <- execute
+          } yield res
         }
     }
   }

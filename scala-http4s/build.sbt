@@ -28,6 +28,8 @@ lazy val root = (project in file("."))
       sangria,
       sangriaCirce,
       typesafeConfig,
+      log4cats,
+      log4catsSlf4j,
       pgMigrationsScala,
       specs2 % "test"
     )
