@@ -8,6 +8,7 @@ object Dependencies {
   val SangriaVersion = "1.4.2"
   val SangriaCirceVersion = "1.2.1"
   val TypesafeConfigVersion = "1.3.3"
+  val DoobieVersion = "0.5.3"
   val Log4catsVersion = "0.2.0"
   val PgMigrationsScalaVersion = "0.1.0-SNAPSHOT"
 
@@ -16,6 +17,9 @@ object Dependencies {
   lazy val http4sDsl = "org.http4s" %% "http4s-dsl" % Http4sVersion
   lazy val circeParser = "io.circe" %% "circe-parser" % CirceVersion
   lazy val circeOptics = "io.circe" %% "circe-optics" % CirceVersion
+  lazy val doobieCore = "org.tpolecat" %% "doobie-core" % DoobieVersion
+  lazy val doobiePostgres = "org.tpolecat" %% "doobie-postgres" % DoobieVersion
+  lazy val doobieHikari = "org.tpolecat" %% "doobie-hikari" % DoobieVersion
   lazy val logbackClassic = "ch.qos.logback" % "logback-classic" % LogbackVersion
   lazy val sangria = "org.sangria-graphql" %% "sangria" % SangriaVersion
   lazy val sangriaCirce = "org.sangria-graphql" %% "sangria-circe" % SangriaCirceVersion
