@@ -13,7 +13,7 @@ class MigrateTask(argStr: String) extends Task(argStr) with Runnable with Migrat
     (getClass.getPackage.getName.split("\\.").dropRight(1) :+ "migrations").mkString(".")
   ) // hack
 
-  def run() {
+  def run(): Unit = {
     val (method, params) = resolve
     method match {
       case "migrate" => migrate()
@@ -25,13 +25,13 @@ class MigrateTask(argStr: String) extends Task(argStr) with Runnable with Migrat
     }
   }
 
-  private def migrate() {
+  private def migrate(): Unit = {
     val migrator = createMigrator()
     migrator.migrate(InstallAllMigrations, packages, searchSubPackages = false)
     log.info("Migrated up successfully.")
   }
 
-  private def migrateToVersion(version: String) {
+  private def migrateToVersion(version: String): Unit = {
     val migrator = createMigrator()
     migrator.migrate(MigrateToVersion(version.toLong), packages, searchSubPackages = false)
     log.info(s"Migrated to version $version successfully.")

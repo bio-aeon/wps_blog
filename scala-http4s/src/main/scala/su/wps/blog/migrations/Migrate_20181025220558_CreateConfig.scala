@@ -5,7 +5,7 @@ import su.wps.pgmigrations._
 class Migrate_20181025220558_CreateConfig extends Migration {
   val tableName = "config"
 
-  def up(): Unit = {
+  def up(): Unit =
     createTable(tableName) { t =>
       t.integer("id", PrimaryKey, AutoIncrement)
       t.varchar("name", Limit(255), Unique, NotNull)
@@ -13,9 +13,7 @@ class Migrate_20181025220558_CreateConfig extends Migration {
       t.varchar("comment", Limit(1000), NotNull)
       t.timestamp("created_at", NotNull, Default("current_timestamp"))
     }
-  }
 
-  def down(): Unit = {
+  def down(): Unit =
     dropTable(tableName)
-  }
 }

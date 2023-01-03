@@ -5,7 +5,7 @@ import su.wps.pgmigrations._
 class Migrate_20180914224057_CreateComments extends Migration {
   val tableName = "comments"
 
-  def up(): Unit = {
+  def up(): Unit =
     createTable(tableName) { t =>
       t.integer("id", PrimaryKey, AutoIncrement)
       t.varchar("text", Limit(1000), NotNull)
@@ -20,9 +20,7 @@ class Migrate_20180914224057_CreateComments extends Migration {
       t.integer("rating", NotNull)
       t.timestamp("created_at", NotNull, Default("current_timestamp"))
     }
-  }
 
-  def down(): Unit = {
+  def down(): Unit =
     dropTable(tableName)
-  }
 }

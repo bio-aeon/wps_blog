@@ -1,31 +1,29 @@
 import sbt._
 
 object Dependencies {
-  val Http4sVersion = "0.18.21"
-  val Specs2Version = "4.3.4"
-  val LogbackVersion = "1.2.3"
-  val CirceVersion = "0.9.3"
-  val SangriaVersion = "1.4.2"
-  val SangriaCirceVersion = "1.2.1"
-  val TypesafeConfigVersion = "1.3.3"
-  val DoobieVersion = "0.5.3"
-  val Log4catsVersion = "0.2.0"
-  val PgMigrationsScalaVersion = "0.1.0-SNAPSHOT"
 
-  lazy val http4sBlazeServer = "org.http4s" %% "http4s-blaze-server" % Http4sVersion
-  lazy val http4sCirce = "org.http4s" %% "http4s-circe" % Http4sVersion
-  lazy val http4sDsl = "org.http4s" %% "http4s-dsl" % Http4sVersion
-  lazy val circeParser = "io.circe" %% "circe-parser" % CirceVersion
-  lazy val circeOptics = "io.circe" %% "circe-optics" % CirceVersion
-  lazy val doobieCore = "org.tpolecat" %% "doobie-core" % DoobieVersion
-  lazy val doobiePostgres = "org.tpolecat" %% "doobie-postgres" % DoobieVersion
-  lazy val doobieHikari = "org.tpolecat" %% "doobie-hikari" % DoobieVersion
-  lazy val logbackClassic = "ch.qos.logback" % "logback-classic" % LogbackVersion
-  lazy val sangria = "org.sangria-graphql" %% "sangria" % SangriaVersion
-  lazy val sangriaCirce = "org.sangria-graphql" %% "sangria-circe" % SangriaCirceVersion
-  lazy val typesafeConfig = "com.typesafe" % "config" % TypesafeConfigVersion
-  lazy val log4cats = "io.chrisdavenport" %% "log4cats-core" % Log4catsVersion
-  lazy val log4catsSlf4j = "io.chrisdavenport" %% "log4cats-slf4j" % Log4catsVersion
-  lazy val pgMigrationsScala = "su.wps" %% "pg-migrations-scala" % PgMigrationsScalaVersion
-  lazy val specs2 = "org.specs2" %% "specs2-core" % Specs2Version
+  object Versions {
+    val http4s = "0.23.16"
+    val specs2 = "4.19.0"
+    val logback = "1.4.5"
+    val circe = "0.14.3"
+    val typesafeConfig = "1.4.2"
+    val doobie = "1.0.0-RC2"
+    val log4cats = "2.5.0"
+    val pgMigrationsScala = "0.1.1-SNAPSHOT"
+  }
+
+  val http4sBlazeServer = "org.http4s" %% "http4s-ember-server" % Versions.http4s
+  val http4sCirce = "org.http4s" %% "http4s-circe" % Versions.http4s
+  val http4sDsl = "org.http4s" %% "http4s-dsl" % Versions.http4s
+  val circeParser = "io.circe" %% "circe-parser" % Versions.circe
+  val doobieCore = "org.tpolecat" %% "doobie-core" % Versions.doobie
+  val doobiePostgres = "org.tpolecat" %% "doobie-postgres" % Versions.doobie
+  val doobieHikari = "org.tpolecat" %% "doobie-hikari" % Versions.doobie
+  val logbackClassic = "ch.qos.logback" % "logback-classic" % Versions.logback
+  val typesafeConfig = "com.typesafe" % "config" % Versions.typesafeConfig
+  val log4cats = "org.typelevel" %% "log4cats-core" % Versions.log4cats
+  val log4catsSlf4j = "org.typelevel" %% "log4cats-slf4j" % Versions.log4cats
+  val pgMigrationsScala = "su.wps" %% "pg-migrations-scala" % Versions.pgMigrationsScala
+  val specs2 = "org.specs2" %% "specs2-core" % Versions.specs2
 }

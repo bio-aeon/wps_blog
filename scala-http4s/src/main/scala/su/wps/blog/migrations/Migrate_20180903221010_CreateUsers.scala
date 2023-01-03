@@ -5,7 +5,7 @@ import su.wps.pgmigrations._
 class Migrate_20180903221010_CreateUsers extends Migration {
   val tableName = "users"
 
-  def up(): Unit = {
+  def up(): Unit =
     createTable(tableName) { t =>
       t.integer("id", PrimaryKey, AutoIncrement)
       t.varchar("username", Limit(255), NotNull, Unique)
@@ -15,9 +15,7 @@ class Migrate_20180903221010_CreateUsers extends Migration {
       t.boolean("is_admin", NotNull, Default("false"))
       t.timestamp("created_at", NotNull, Default("current_timestamp"))
     }
-  }
 
-  def down(): Unit = {
+  def down(): Unit =
     dropTable(tableName)
-  }
 }

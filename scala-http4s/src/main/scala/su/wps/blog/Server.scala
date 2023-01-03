@@ -1,34 +1,24 @@
 package su.wps.blog
 
-import cats.effect.{Effect, IO}
-import cats.~>
-import fs2.{Stream, StreamApp}
-import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
-import org.http4s.server.blaze.BlazeBuilder
-import su.wps.blog.data.LiftFuture
-import su.wps.blog.endpoints.GraphQLEndpoints
+import cats.effect._
+import com.comcast.ip4s.{Ipv4Address, Port}
+import org.http4s.HttpRoutes
+import org.http4s.ember.server.EmberServerBuilder
+import org.http4s.server.Server
+import su.wps.blog.endpoints.Routes
 
-import scala.concurrent.{ExecutionContext, Future}
+object Server extends IOApp {
 
-object Server extends StreamApp[IO] {
-  import scala.concurrent.ExecutionContext.Implicits.global
-
-  implicit lazy val ioLiftFuture: LiftFuture[IO] = new (Future ~> IO) {
-    def apply[T](fa: Future[T]): IO[T] = IO.fromFuture(IO(fa))
+  override def run(args: List[String]): IO[ExitCode] = {
+    val routes = Routes.create[IO]
+    mkHttpServer[IO](routes.routes).use(_ => IO.never).as(ExitCode.Success)
   }
 
-  def stream(args: List[String], requestShutdown: IO[Unit]) =
-    ServerStream.stream[IO]
-}
-
-object ServerStream {
-
-  def stream[F[_]: Effect: LiftFuture](implicit ec: ExecutionContext) =
-    for {
-      logger <- Stream.eval(Slf4jLogger.create[F])
-      exitCode <- BlazeBuilder[F]
-        .bindHttp(8080, "0.0.0.0")
-        .mountService(new GraphQLEndpoints[F].endpoints(logger), "/")
-        .serve
-    } yield exitCode
+  private def mkHttpServer[F[_]: Async](routes: HttpRoutes[F]): Resource[F, Server] =
+    EmberServerBuilder
+      .default[F]
+      .withHost(Ipv4Address.fromString("0.0.0.0").getOrElse(throw new Exception("Incorrect host.")))
+      .withPort(Port.fromInt(8080).getOrElse(throw new Exception("Incorrect port.")))
+      .withHttpApp(routes.orNotFound)
+      .build
 }
