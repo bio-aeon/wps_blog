@@ -28,6 +28,8 @@ lazy val root = (project in file("."))
       doobieCore,
       doobiePostgres,
       doobieHikari,
+      tofuDerivation,
+      tofuDoobie,
       logbackClassic,
       typesafeConfig,
       log4cats,

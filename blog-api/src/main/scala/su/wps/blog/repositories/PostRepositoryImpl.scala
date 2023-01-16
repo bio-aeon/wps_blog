@@ -1,18 +1,25 @@
 package su.wps.blog.repositories
 
+import cats.Functor
+import cats.effect.Sync
+import cats.syntax.functor._
 import doobie._
-import doobie.implicits._
-import doobie.implicits.javatimedrivernative._
 import su.wps.blog.models.Post
+import su.wps.blog.repositories.sql.{PostSql, PostSqlImpl}
+import tofu.doobie.LiftConnectionIO
 
-class PostRepositoryImpl extends DoobieRepository with PostRepository[ConnectionIO] {
+class PostRepositoryImpl[DB[_]](sql: PostSql[DB]) extends PostRepository[DB] {
   val tableName: Fragment = Fragment.const("auth_users")
 
-  def findAllWithLimitAndOffset(limit: Int, offset: Int): ConnectionIO[List[Post]] =
-    (fr"select name, short_text, text, author_id, views, meta_title, " ++
-      fr"meta_keywords, meta_description, is_hidden, created_at, id from" ++ tableName ++
-      fr"order by created_at desc limit $limit offset $offset")
-      .query[Post]
-      .to[List]
+  def findAllWithLimitAndOffset(limit: Int, offset: Int): DB[List[Post]] =
+    sql.findAllWithLimitAndOffset(limit, offset)
 
+}
+
+object PostRepositoryImpl {
+
+  def create[I[_]: Sync, DB[_]: LiftConnectionIO: Functor]: I[PostRepositoryImpl[DB]] =
+    PostSqlImpl.create[I, DB].map { sql =>
+      new PostRepositoryImpl[DB](sql)
+    }
 }

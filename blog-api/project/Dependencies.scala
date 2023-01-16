@@ -7,6 +7,7 @@ object Dependencies {
     val specs2 = "4.19.0"
     val logback = "1.4.5"
     val circe = "0.14.3"
+    val tofu = "0.11.1"
     val typesafeConfig = "1.4.2"
     val doobie = "1.0.0-RC2"
     val log4cats = "2.5.0"
@@ -20,6 +21,8 @@ object Dependencies {
   val doobieCore = "org.tpolecat" %% "doobie-core" % Versions.doobie
   val doobiePostgres = "org.tpolecat" %% "doobie-postgres" % Versions.doobie
   val doobieHikari = "org.tpolecat" %% "doobie-hikari" % Versions.doobie
+  val tofuDerivation = "tf.tofu" %% "tofu-derivation" % Versions.tofu
+  val tofuDoobie = "tf.tofu" %% "tofu-doobie-ce3" % Versions.tofu
   val logbackClassic = "ch.qos.logback" % "logback-classic" % Versions.logback
   val typesafeConfig = "com.typesafe" % "config" % Versions.typesafeConfig
   val log4cats = "org.typelevel" %% "log4cats-core" % Versions.log4cats
