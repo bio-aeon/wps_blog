@@ -10,7 +10,7 @@ import tofu.doobie.LiftConnectionIO
 import su.wps.blog.models.Post
 
 final class PostSqlImpl private (implicit lh: LogHandler) extends PostSql[ConnectionIO] {
-  val tableName: Fragment = Fragment.const("auth_users")
+  val tableName: Fragment = Fragment.const("posts")
 
   def findAllWithLimitAndOffset(limit: Int, offset: Int): ConnectionIO[List[Post]] =
     (fr"select name, short_text, text, author_id, views, meta_title, " ++
