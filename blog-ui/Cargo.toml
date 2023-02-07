@@ -1,0 +1,7 @@
+[workspace]
+members = [
+  "crates/server",
+  "crates/browser",
+  "crates/shared"
+]
+default-members = ["crates/server"]
