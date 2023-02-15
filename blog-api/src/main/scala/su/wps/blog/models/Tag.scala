@@ -1,5 +1,5 @@
 package su.wps.blog.models
 
-case class Tag(name: String, slug: String, id: Option[TagId] = None)
+final case class Tag(name: String, slug: String, id: Option[TagId] = None)
 
-case class TagId(value: Int) extends AnyVal
+final case class TagId(value: Int) extends AnyVal

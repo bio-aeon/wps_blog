@@ -13,10 +13,6 @@ class Migrate_20180914224057_CreateComments extends Migration {
       t.varchar("email", Limit(75), NotNull)
       t.integer("post_id", NotNull)
       t.integer("parent_id")
-      t.integer("left", Unsigned, NotNull)
-      t.integer("right", Unsigned, NotNull)
-      t.integer("tree_id", Unsigned, NotNull)
-      t.integer("level", Unsigned, NotNull)
       t.integer("rating", NotNull)
       t.timestamp("created_at", NotNull, Default("current_timestamp"))
     }

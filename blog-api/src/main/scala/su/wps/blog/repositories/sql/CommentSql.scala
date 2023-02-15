@@ -6,5 +6,7 @@ import tofu.higherKind.derived.representableK
 
 @derive(representableK)
 trait CommentSql[DB[_]] {
+  def insert(comment: Comment): DB[Comment]
+
   def findCommentsByPostId(postId: PostId): DB[List[Comment]]
 }

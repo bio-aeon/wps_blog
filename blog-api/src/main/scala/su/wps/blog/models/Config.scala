@@ -2,7 +2,7 @@ package su.wps.blog.models
 
 import java.time.ZonedDateTime
 
-case class Config(
+final case class Config(
   name: String,
   value: String,
   comment: String,
@@ -10,4 +10,4 @@ case class Config(
   id: Option[ConfigId] = None
 )
 
-case class ConfigId(value: Int) extends AnyVal
+final case class ConfigId(value: Int) extends AnyVal

@@ -8,7 +8,6 @@ import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 object Slf4jDoobieLogHandler {
-
   def create[F[_]](implicit F: Sync[F]): F[LogHandler] =
     for {
       logger <- F.delay(Slf4jLogger.getLogger[SyncIO])

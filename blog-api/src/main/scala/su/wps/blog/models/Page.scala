@@ -2,7 +2,7 @@ package su.wps.blog.models
 
 import java.time.ZonedDateTime
 
-case class Page(
+final case class Page(
   url: String,
   title: String,
   content: String,
@@ -10,4 +10,4 @@ case class Page(
   id: Option[PageId] = None
 )
 
-case class PageId(value: Int) extends AnyVal
+final case class PageId(value: Int) extends AnyVal
