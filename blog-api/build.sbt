@@ -35,7 +35,10 @@ lazy val root = (project in file("."))
       log4cats,
       log4catsSlf4j,
       pgMigrationsScala,
-      specs2 % "test"
+      scalacheckShapeless % Test,
+      testcontainersScala % Test,
+      testcontainersPostgresql % Test,
+      specs2 % Test
     )
   )
   .settings(registerMigrateTask("su.wps.blog.tasks.MigrateTask"))

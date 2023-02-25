@@ -12,6 +12,9 @@ object Dependencies {
     val doobie = "1.0.0-RC2"
     val log4cats = "2.5.0"
     val pgMigrationsScala = "0.1.1-SNAPSHOT"
+    val scalacheckShapeless = "1.3.0"
+    val testcontainersScala = "0.40.12"
+    val testcontainersPostgresql = "1.17.6"
   }
 
   val http4sBlazeServer = "org.http4s" %% "http4s-ember-server" % Versions.http4s
@@ -28,5 +31,8 @@ object Dependencies {
   val log4cats = "org.typelevel" %% "log4cats-core" % Versions.log4cats
   val log4catsSlf4j = "org.typelevel" %% "log4cats-slf4j" % Versions.log4cats
   val pgMigrationsScala = "su.wps" %% "pg-migrations-scala" % Versions.pgMigrationsScala
+  val scalacheckShapeless = "com.github.alexarchambault" %% "scalacheck-shapeless_1.15" % Versions.scalacheckShapeless
+  val testcontainersScala = "com.dimafeng" %% "testcontainers-scala" % Versions.testcontainersScala
+  val testcontainersPostgresql = "org.testcontainers" % "postgresql" % Versions.testcontainersPostgresql
   val specs2 = "org.specs2" %% "specs2-core" % Versions.specs2
 }

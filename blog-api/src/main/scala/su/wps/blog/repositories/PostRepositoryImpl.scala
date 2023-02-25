@@ -3,13 +3,19 @@ package su.wps.blog.repositories
 import cats.Functor
 import cats.effect.Sync
 import cats.syntax.functor._
-import su.wps.blog.models.Post
+import su.wps.blog.models.{Post, PostId}
 import su.wps.blog.repositories.sql.{PostSql, PostSqlImpl}
 import tofu.doobie.LiftConnectionIO
 
 final class PostRepositoryImpl[DB[_]] private (sql: PostSql[DB]) extends PostRepository[DB] {
   def findAllWithLimitAndOffset(limit: Int, offset: Int): DB[List[Post]] =
     sql.findAllWithLimitAndOffset(limit, offset)
+
+  def findCount: DB[Int] =
+    sql.findCount
+
+  def findById(id: PostId): DB[Option[Post]] =
+    sql.findById(id)
 
 }
 

@@ -6,7 +6,7 @@ import cats.syntax.option._
 import cats.tagless.syntax.functorK._
 import doobie._
 import doobie.implicits._
-import doobie.implicits.javatimedrivernative._
+import doobie.postgres.implicits._
 import su.wps.blog.models.{Comment, CommentId, PostId}
 import tofu.doobie.LiftConnectionIO
 
