@@ -8,7 +8,7 @@ import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 import org.scalacheck.ScalacheckShapeless._
 import org.specs2.mutable.Specification
-import su.wps.blog.models.PostId
+import su.wps.blog.models.domain.PostId
 import su.wps.blog.tools.DbTest
 import su.wps.blog.tools.scalacheck._
 import su.wps.blog.tools.syntax._

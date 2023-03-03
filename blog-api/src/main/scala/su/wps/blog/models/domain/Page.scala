@@ -1,4 +1,4 @@
-package su.wps.blog.models
+package su.wps.blog.models.domain
 
 import java.time.ZonedDateTime
 

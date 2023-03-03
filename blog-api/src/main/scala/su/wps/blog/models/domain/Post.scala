@@ -1,4 +1,4 @@
-package su.wps.blog.models
+package su.wps.blog.models.domain
 
 import java.time.ZonedDateTime
 
@@ -14,6 +14,8 @@ final case class Post(
   isHidden: Boolean = true,
   created_at: ZonedDateTime,
   id: Option[PostId] = None
-)
+) {
+  def nonEmptyId: PostId = id.getOrElse(throw new IllegalStateException("Empty post id"))
+}
 
 final case class PostId(value: Int) extends AnyVal

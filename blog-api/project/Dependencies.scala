@@ -11,6 +11,8 @@ object Dependencies {
     val typesafeConfig = "1.4.2"
     val doobie = "1.0.0-RC2"
     val log4cats = "2.5.0"
+    val mouse = "1.2.1"
+    val chimney = "0.7.0"
     val pgMigrationsScala = "0.1.1-SNAPSHOT"
     val scalacheckShapeless = "1.3.0"
     val testcontainersScala = "0.40.12"
@@ -30,6 +32,8 @@ object Dependencies {
   val typesafeConfig = "com.typesafe" % "config" % Versions.typesafeConfig
   val log4cats = "org.typelevel" %% "log4cats-core" % Versions.log4cats
   val log4catsSlf4j = "org.typelevel" %% "log4cats-slf4j" % Versions.log4cats
+  val mouse = "org.typelevel" %% "mouse" % Versions.mouse
+  val chimney = "io.scalaland" %% "chimney" % Versions.chimney
   val pgMigrationsScala = "su.wps" %% "pg-migrations-scala" % Versions.pgMigrationsScala
   val scalacheckShapeless = "com.github.alexarchambault" %% "scalacheck-shapeless_1.15" % Versions.scalacheckShapeless
   val testcontainersScala = "com.dimafeng" %% "testcontainers-scala" % Versions.testcontainersScala

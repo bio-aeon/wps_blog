@@ -1,7 +1,7 @@
 package su.wps.blog.repositories.sql
 
 import derevo.derive
-import su.wps.blog.models.{Post, PostId}
+import su.wps.blog.models.domain.{Post, PostId}
 import tofu.higherKind.derived.representableK
 
 @derive(representableK)

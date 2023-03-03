@@ -7,7 +7,7 @@ import cats.tagless.syntax.functorK._
 import doobie._
 import doobie.implicits._
 import doobie.postgres.implicits._
-import su.wps.blog.models.{Comment, CommentId, PostId}
+import su.wps.blog.models.domain.{Comment, CommentId, PostId}
 import tofu.doobie.LiftConnectionIO
 
 final class CommentSqlImpl private (implicit lh: LogHandler) extends CommentSql[ConnectionIO] {

@@ -7,7 +7,7 @@ import doobie._
 import doobie.implicits._
 import doobie.postgres.implicits._
 import tofu.doobie.LiftConnectionIO
-import su.wps.blog.models.{Post, PostId}
+import su.wps.blog.models.domain.{Post, PostId}
 
 final class PostSqlImpl private (implicit lh: LogHandler) extends PostSql[ConnectionIO] {
   val tableName: Fragment = Fragment.const("posts")

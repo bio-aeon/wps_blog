@@ -34,12 +34,16 @@ lazy val root = (project in file("."))
       typesafeConfig,
       log4cats,
       log4catsSlf4j,
+      mouse,
+      chimney,
       pgMigrationsScala,
       scalacheckShapeless % Test,
       testcontainersScala % Test,
       testcontainersPostgresql % Test,
       specs2 % Test
-    )
+    ),
+    addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.13.2" cross CrossVersion.patch),
+    addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
   )
   .settings(registerMigrateTask("su.wps.blog.tasks.MigrateTask"))
 

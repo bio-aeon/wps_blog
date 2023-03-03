@@ -1,4 +1,4 @@
-package su.wps.blog.models
+package su.wps.blog.models.domain
 
 final case class Tag(name: String, slug: String, id: Option[TagId] = None)
 

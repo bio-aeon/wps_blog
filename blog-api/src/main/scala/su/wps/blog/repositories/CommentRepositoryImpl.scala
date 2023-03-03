@@ -2,7 +2,7 @@ package su.wps.blog.repositories
 
 import cats.effect.Sync
 import cats.syntax.functor._
-import su.wps.blog.models.{Comment, PostId}
+import su.wps.blog.models.domain.{Comment, PostId}
 import su.wps.blog.repositories.sql.{CommentSql, CommentSqlImpl}
 import tofu.doobie.LiftConnectionIO
 
