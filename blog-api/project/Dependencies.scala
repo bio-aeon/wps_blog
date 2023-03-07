@@ -3,10 +3,10 @@ import sbt._
 object Dependencies {
 
   object Versions {
-    val http4s = "0.23.16"
-    val specs2 = "4.19.0"
+    val http4s = "0.23.18"
+    val specs2 = "4.19.2"
     val logback = "1.4.5"
-    val circe = "0.14.3"
+    val circe = "0.14.5"
     val tofu = "0.11.1"
     val typesafeConfig = "1.4.2"
     val doobie = "1.0.0-RC2"
@@ -19,7 +19,7 @@ object Dependencies {
     val testcontainersPostgresql = "1.17.6"
   }
 
-  val http4sBlazeServer = "org.http4s" %% "http4s-ember-server" % Versions.http4s
+  val http4sEmberServer = "org.http4s" %% "http4s-ember-server" % Versions.http4s
   val http4sCirce = "org.http4s" %% "http4s-circe" % Versions.http4s
   val http4sDsl = "org.http4s" %% "http4s-dsl" % Versions.http4s
   val circeParser = "io.circe" %% "circe-parser" % Versions.circe

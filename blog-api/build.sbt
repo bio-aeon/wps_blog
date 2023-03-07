@@ -21,7 +21,7 @@ lazy val root = (project in file("."))
       "-Ymacro-annotations"
     ),
     libraryDependencies ++= Seq(
-      http4sBlazeServer,
+      http4sEmberServer,
       http4sCirce,
       http4sDsl,
       circeParser,
