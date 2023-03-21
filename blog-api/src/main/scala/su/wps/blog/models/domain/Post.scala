@@ -12,7 +12,7 @@ final case class Post(
   metaKeywords: String,
   metaDescription: String,
   isHidden: Boolean = true,
-  created_at: ZonedDateTime,
+  createdAt: ZonedDateTime,
   id: Option[PostId] = None
 ) {
   def nonEmptyId: PostId = id.getOrElse(throw new IllegalStateException("Empty post id"))

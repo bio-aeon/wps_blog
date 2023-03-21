@@ -8,5 +8,5 @@ final case class ListPostResult(
   id: PostId,
   name: String,
   shortText: String,
-  created_at: ZonedDateTime
+  createdAt: ZonedDateTime
 )
