@@ -23,7 +23,7 @@ object User {
     def insert(user: User): ConnectionIO[Unit] = {
       val sql =
         """
-          |insert into users (
+          |INSERT INTO users (
           | id,
           | username,
           | email,
@@ -31,7 +31,7 @@ object User {
           | is_active,
           | is_admin,
           | created_at
-          |) values (?, ?, ?, ?, ?, ?, ?)
+          |) VALUES (?, ?, ?, ?, ?, ?, ?)
           |""".stripMargin
       Update[User](sql).run(user).void
     }

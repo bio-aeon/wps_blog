@@ -15,7 +15,7 @@ final class CommentSqlImpl private (implicit lh: LogHandler) extends CommentSql[
 
   def insert(comment: Comment): ConnectionIO[Comment] =
     (fr"""
-      insert into""" ++ tableName ++ fr"""(
+      INSERT INTO""" ++ tableName ++ fr"""(
         text,
         name,
         email,
@@ -24,7 +24,7 @@ final class CommentSqlImpl private (implicit lh: LogHandler) extends CommentSql[
         rating,
         created_at
       )
-      values (
+      VALUES (
         ${comment.text},
         ${comment.name},
         ${comment.email},
@@ -36,9 +36,9 @@ final class CommentSqlImpl private (implicit lh: LogHandler) extends CommentSql[
     """).update.withUniqueGeneratedKeys[CommentId]("id").map(id => comment.copy(id = id.some))
 
   def findCommentsByPostId(postId: PostId): ConnectionIO[List[Comment]] =
-    (fr"select text, name, email, post_id, left, right, " ++
-      fr"tree_id, level, rating, created_at, parent_id, id from" ++ tableName ++
-      fr"where post_id = $postId order by created_at desc")
+    (fr"SELECT text, name, email, post_id, left, right, " ++
+      fr"tree_id, level, rating, created_at, parent_id, id FROM" ++ tableName ++
+      fr"WHERE post_id = $postId ORDER BY created_at DESC")
       .query[Comment]
       .to[List]
 }

@@ -13,7 +13,7 @@ object Dependencies {
     val log4cats = "2.6.0"
     val mouse = "1.2.1"
     val chimney = "0.7.5"
-    val pgMigrationsScala = "0.1.1-SNAPSHOT"
+    val fly4s = "0.0.18"
     val scalacheckShapeless = "1.3.0"
     val testcontainersScala = "0.40.15"
     val testcontainersPostgresql = "1.18.1"
@@ -34,7 +34,7 @@ object Dependencies {
   val log4catsSlf4j = "org.typelevel" %% "log4cats-slf4j" % Versions.log4cats
   val mouse = "org.typelevel" %% "mouse" % Versions.mouse
   val chimney = "io.scalaland" %% "chimney" % Versions.chimney
-  val pgMigrationsScala = "su.wps" %% "pg-migrations-scala" % Versions.pgMigrationsScala
+  val fly4sCore = "com.github.geirolz" %% "fly4s-core" % Versions.fly4s
   val scalacheckShapeless = "com.github.alexarchambault" %% "scalacheck-shapeless_1.15" % Versions.scalacheckShapeless
   val testcontainersScala = "com.dimafeng" %% "testcontainers-scala" % Versions.testcontainersScala
   val testcontainersPostgresql = "org.testcontainers" % "postgresql" % Versions.testcontainersPostgresql

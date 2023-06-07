@@ -27,7 +27,7 @@ object Post {
     def insert(post: Post): ConnectionIO[Unit] = {
       val sql =
         """
-          |insert into posts (
+          |INSERT INTO posts (
           | id,
           | name,
           | short_text,
@@ -39,7 +39,7 @@ object Post {
           | meta_description,
           | is_hidden,
           | created_at
-          |) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          |) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           |""".stripMargin
       Update[Post](sql).run(post).void
     }

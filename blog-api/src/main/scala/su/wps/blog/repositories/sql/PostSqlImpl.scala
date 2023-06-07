@@ -13,19 +13,19 @@ final class PostSqlImpl private (implicit lh: LogHandler) extends PostSql[Connec
   val tableName: Fragment = Fragment.const("posts")
 
   def findAllWithLimitAndOffset(limit: Int, offset: Int): ConnectionIO[List[Post]] =
-    (fr"select name, short_text, text, author_id, views, meta_title, " ++
-      fr"meta_keywords, meta_description, is_hidden, created_at, id from" ++ tableName ++
-      fr"order by created_at desc limit $limit offset $offset")
+    (fr"SELECT name, short_text, text, author_id, views, meta_title, " ++
+      fr"meta_keywords, meta_description, is_hidden, created_at, id FROM" ++ tableName ++
+      fr"ORDER BY created_at DESC LIMIT $limit OFFSET $offset")
       .query[Post]
       .to[List]
 
   def findCount: ConnectionIO[Int] =
-    (fr"select count(*) from" ++ tableName).query[Int].unique
+    (fr"SELECT COUNT(*) FROM" ++ tableName).query[Int].unique
 
   def findById(id: PostId): ConnectionIO[Option[Post]] =
-    (fr"select name, short_text, text, author_id, views, meta_title, " ++
-      fr"meta_keywords, meta_description, is_hidden, created_at, id from" ++ tableName ++
-      fr"where id = $id")
+    (fr"SELECT name, short_text, text, author_id, views, meta_title, " ++
+      fr"meta_keywords, meta_description, is_hidden, created_at, id FROM" ++ tableName ++
+      fr"WHERE id = $id")
       .query[Post]
       .option
 }

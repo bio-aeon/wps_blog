@@ -1,30 +1,19 @@
 package su.wps.blog.tools
 
-import cats.effect.IO
+import cats.effect.unsafe.implicits.global
+import cats.effect.{IO, Resource}
 import com.dimafeng.testcontainers.PostgreSQLContainer
-import com.typesafe.config.{Config, ConfigFactory}
 import doobie.Transactor
+import fly4s.core._
+import fly4s.core.data._
 import org.specs2.specification.{BeforeAfterAll, BeforeAfterEach}
-import su.wps.blog.utils.MigrationUtils
-import su.wps.pgmigrations.{InstallAllMigrations, Migrator, RemoveAllMigrations}
+import org.testcontainers.utility.DockerImageName
 
-import scala.jdk.CollectionConverters._
+trait DbTest extends BeforeAfterEach with BeforeAfterAll {
 
-trait DbTest extends BeforeAfterEach with BeforeAfterAll with MigrationUtils {
-
-  private lazy val container: PostgreSQLContainer = PostgreSQLContainer()
-
-  protected lazy val config: Config =
-    ConfigFactory.parseMap(
-      Map(
-        "db" -> Map(
-          "driver" -> container.driverClassName,
-          "url" -> container.jdbcUrl,
-          "username" -> container.username,
-          "password" -> container.password
-        ).asJava
-      ).asJava
-    )
+  private lazy val container: PostgreSQLContainer = PostgreSQLContainer(
+    DockerImageName.parse("postgres:15.3")
+  )
 
   implicit lazy val xa: Transactor[IO] = {
     Transactor.fromDriverManager[IO](
@@ -35,11 +24,13 @@ trait DbTest extends BeforeAfterEach with BeforeAfterAll with MigrationUtils {
     )
   }
 
-  private lazy val migrator: Migrator = createMigrator()
-
-  private val migrationPackages = Seq(
-    (getClass.getPackage.getName.split("\\.").dropRight(1) :+ "migrations").mkString(".")
-  )
+  private lazy val fly4s: Resource[IO, Fly4s[IO]] = Fly4s
+    .make[IO](
+      container.jdbcUrl,
+      Some(container.username),
+      Some(container.password.toCharArray),
+      Fly4sConfig(defaultSchemaName = Some(container.databaseName), cleanDisabled = false)
+    )
 
   def beforeAll(): Unit =
     container.start()
@@ -48,8 +39,10 @@ trait DbTest extends BeforeAfterEach with BeforeAfterAll with MigrationUtils {
     container.stop()
 
   override def before: Any =
-    migrator.migrate(InstallAllMigrations, migrationPackages, searchSubPackages = false)
+    fly4s
+      .use(_.migrate)
+      .unsafeRunSync()
 
   override protected def after: Any =
-    migrator.migrate(RemoveAllMigrations, migrationPackages, searchSubPackages = false)
+    fly4s.use(_.clean).unsafeRunSync()
 }
