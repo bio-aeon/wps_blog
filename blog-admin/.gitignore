@@ -1,0 +1,8 @@
+*.pyc
+venv/*
+.idea/*
+.vscode/*
+.python-eggs/*
+logs/*
+pids/*
+blog_admin/blog_admin/settings/env.py
