@@ -3,7 +3,7 @@ package su.wps.blog.services
 import cats.data.OptionT
 import cats.{Applicative, Monad}
 import cats.syntax.functor._
-import cats.syntax.semigroupal._
+import cats.syntax.apply._
 import mouse.anyf._
 import su.wps.blog.models.api.{ListItemsResult, ListPostResult, PostResult}
 import su.wps.blog.models.domain.{AppErr, PostId}
@@ -19,9 +19,11 @@ final class PostServiceImpl[F[_]: Monad, DB[_]: Applicative] private (
 )(implicit R: Raise[F, AppErr])
     extends PostService[F] {
   def allPosts(limit: Int, offset: Int): F[ListItemsResult[ListPostResult]] =
-    postRepo
-      .findAllWithLimitAndOffset(limit, offset)
-      .product(postRepo.findCount)
+    (
+      postRepo
+        .findAllWithLimitAndOffset(limit, offset),
+      postRepo.findCount
+    ).mapN((_, _))
       .thrushK(xa.trans)
       .map {
         case (posts, total) =>

@@ -6,9 +6,10 @@ object Dependencies {
     val http4s = "0.23.22"
     val specs2 = "4.20.0"
     val logback = "1.4.8"
-    val circe = "0.14.5"
+    val circe = "0.14.3"
     val tofu = "0.12.0.1"
     val typesafeConfig = "1.4.2"
+    val pureconfig = "0.17.4"
     val doobie = "1.0.0-RC2"
     val log4cats = "2.6.0"
     val mouse = "1.2.1"
@@ -23,6 +24,8 @@ object Dependencies {
   val http4sCirce = "org.http4s" %% "http4s-circe" % Versions.http4s
   val http4sDsl = "org.http4s" %% "http4s-dsl" % Versions.http4s
   val circeParser = "io.circe" %% "circe-parser" % Versions.circe
+  val circeGeneric = "io.circe" %% "circe-generic" % Versions.circe
+  val circeExtras = "io.circe" %% "circe-generic-extras" % Versions.circe
   val doobieCore = "org.tpolecat" %% "doobie-core" % Versions.doobie
   val doobiePostgres = "org.tpolecat" %% "doobie-postgres" % Versions.doobie
   val doobieHikari = "org.tpolecat" %% "doobie-hikari" % Versions.doobie
@@ -30,6 +33,7 @@ object Dependencies {
   val tofuDoobie = "tf.tofu" %% "tofu-doobie-ce3" % Versions.tofu
   val logbackClassic = "ch.qos.logback" % "logback-classic" % Versions.logback
   val typesafeConfig = "com.typesafe" % "config" % Versions.typesafeConfig
+  val pureconfig = "com.github.pureconfig" %% "pureconfig" % Versions.pureconfig
   val log4cats = "org.typelevel" %% "log4cats-core" % Versions.log4cats
   val log4catsSlf4j = "org.typelevel" %% "log4cats-slf4j" % Versions.log4cats
   val mouse = "org.typelevel" %% "mouse" % Versions.mouse
