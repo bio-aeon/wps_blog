@@ -1,6 +1,6 @@
 package su.wps.blog
 
-import cats.effect._
+import cats.effect.*
 
 object App extends IOApp {
 

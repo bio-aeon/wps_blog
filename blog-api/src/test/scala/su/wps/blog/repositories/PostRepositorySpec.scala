@@ -2,16 +2,16 @@ package su.wps.blog.repositories
 
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
-import cats.syntax.traverse._
+import cats.syntax.traverse.*
 import doobie.ConnectionIO
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
-import org.scalacheck.ScalacheckShapeless._
+import org.scalacheck.ScalacheckShapeless.*
 import org.specs2.mutable.Specification
 import su.wps.blog.models.domain.PostId
 import su.wps.blog.tools.DbTest
-import su.wps.blog.tools.scalacheck._
-import su.wps.blog.tools.syntax._
+import su.wps.blog.tools.scalacheck.*
+import su.wps.blog.tools.syntax.*
 import su.wps.blog.tools.types.PosInt
 
 class PostRepositorySpec extends Specification with DbTest {

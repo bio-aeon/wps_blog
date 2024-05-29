@@ -1,11 +1,11 @@
 package su.wps.blog.endpoints
 
 import cats.Monad
-import cats.syntax.flatMap._
-import cats.syntax.functor._
-import io.circe.syntax._
+import cats.syntax.flatMap.*
+import cats.syntax.functor.*
+import io.circe.syntax.*
 import org.http4s.HttpRoutes
-import org.http4s.circe._
+import org.http4s.circe.*
 import org.http4s.dsl.Http4sDsl
 import su.wps.blog.models.domain.PostId
 import su.wps.blog.services.PostService

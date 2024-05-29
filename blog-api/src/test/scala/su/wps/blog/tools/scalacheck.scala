@@ -4,7 +4,7 @@ import org.scalacheck.rng.Seed
 import org.scalacheck.{Arbitrary, Gen}
 
 import java.time.{Instant, ZoneId, ZonedDateTime}
-import scala.reflect.runtime.universe._
+import scala.reflect.runtime.universe.*
 import scala.util.{Success, Try}
 
 object scalacheck {
@@ -28,7 +28,7 @@ object scalacheck {
     }
   }
 
-  private def raise[T: WeakTypeTag] = {
+  private def raise[T: WeakTypeTag]: Nothing = {
     val tpe = implicitly[WeakTypeTag[T]].tpe
     val msg = s"Could not generate a random value for $tpe."
     throw RandomDataException(msg)

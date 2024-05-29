@@ -12,13 +12,13 @@ final case class DbConfig(driver: String, url: String, username: String, passwor
 final case class HttpServerConfig(interface: Ipv4Address, port: Port)
 
 object AppConfig {
-  implicit val ipv4AddressReader: ConfigReader[Ipv4Address] = ConfigReader[String].emap(
-    x => Ipv4Address.fromString(x).toRight(CannotConvert(x, "Ipv4Address", "Incorrect interface"))
+  implicit val ipv4AddressReader: ConfigReader[Ipv4Address] = ConfigReader[String].emap(x =>
+    Ipv4Address.fromString(x).toRight(CannotConvert(x, "Ipv4Address", "Incorrect interface"))
   )
 
   implicit val portReader: ConfigReader[Port] =
-    ConfigReader[Int].emap(
-      x => Port.fromInt(x).toRight(CannotConvert(x.toString, "Port", "Incorrect port"))
+    ConfigReader[Int].emap(x =>
+      Port.fromInt(x).toRight(CannotConvert(x.toString, "Port", "Incorrect port"))
     )
 
   implicit val reader: ConfigReader[AppConfig] = exportReader[AppConfig].instance

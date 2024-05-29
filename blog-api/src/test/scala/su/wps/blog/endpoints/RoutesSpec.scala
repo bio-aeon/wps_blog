@@ -3,8 +3,8 @@ package su.wps.blog.endpoints
 import cats.Monad
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
-import org.http4s._
-import org.http4s.implicits._
+import org.http4s.*
+import org.http4s.implicits.*
 import org.specs2.mutable.Specification
 import su.wps.blog.endpoints.mocks.PostServiceMock
 import su.wps.blog.models.api.{ListPostResult, PostResult}

@@ -1,11 +1,11 @@
-import Dependencies._
+import Dependencies.*
 
 lazy val root = (project in file("."))
   .settings(
     organization := "su.wps",
     name := "wps-blog",
     version := "0.1.0-SNAPSHOT",
-    scalaVersion := "2.13.11",
+    scalaVersion := "2.13.14",
     scalacOptions ++= Seq(
       "-deprecation",
       "-encoding",
@@ -15,7 +15,8 @@ lazy val root = (project in file("."))
       "-language:postfixOps",
       "-feature",
       "-Xfatal-warnings",
-      "-Ymacro-annotations"
+      "-Ymacro-annotations",
+      "-Xsource:3"
     ),
     libraryDependencies ++= Seq(
       http4sEmberServer,
@@ -42,6 +43,6 @@ lazy val root = (project in file("."))
       testcontainersPostgresql % Test,
       specs2 % Test
     ),
-    addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.13.2" cross CrossVersion.patch),
+    addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.13.3" cross CrossVersion.patch),
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
   )

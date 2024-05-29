@@ -1,9 +1,9 @@
 package su.wps.blog.repositories.models
 
-import cats.syntax.functor._
-import doobie._
-import doobie.postgres.implicits._
-import su.wps.blog.tools.types._
+import cats.syntax.functor.*
+import doobie.*
+import doobie.postgres.implicits.*
+import su.wps.blog.tools.types.*
 
 import java.time.ZonedDateTime
 

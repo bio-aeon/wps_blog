@@ -1,10 +1,10 @@
 package su.wps.blog
 
 import cats.ApplicativeError
-import cats.effect.syntax.resource._
+import cats.effect.syntax.resource.*
 import cats.effect.{Async, Resource}
-import cats.syntax.applicativeError._
-import cats.syntax.apply._
+import cats.syntax.applicativeError.*
+import cats.syntax.apply.*
 import com.typesafe.config.ConfigFactory
 import doobie.hikari.HikariTransactor
 import doobie.util.ExecutionContexts
@@ -35,9 +35,8 @@ object Program {
         _ <- mkHttpServer[F](appConfig.httpServer, routes.routes)
         _ <- Resource.make(F.unit)(_ => logger.info("Releasing application resources"))
       } yield ()
-      _ <- appResource.onError {
-        case err =>
-          logger.error(err)(s"Failed to start application: ${err.getMessage}").toResource
+      _ <- appResource.onError { case err =>
+        logger.error(err)(s"Failed to start application: ${err.getMessage}").toResource
       }
     } yield ()
 

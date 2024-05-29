@@ -1,7 +1,7 @@
 package su.wps.blog.models.api
 
 import io.circe.Encoder
-import io.circe.generic.extras._
+import io.circe.generic.extras.*
 import io.circe.generic.extras.semiauto.deriveConfiguredEncoder
 import su.wps.blog.models.domain.PostId
 

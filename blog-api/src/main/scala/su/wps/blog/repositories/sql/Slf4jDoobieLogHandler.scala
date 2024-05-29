@@ -1,7 +1,7 @@
 package su.wps.blog.repositories.sql
 
 import cats.effect.{Sync, SyncIO}
-import cats.syntax.functor._
+import cats.syntax.functor.*
 import doobie.LogHandler
 import doobie.util.log.{ExecFailure, LogEvent, ProcessingFailure, Success}
 import org.typelevel.log4cats.Logger

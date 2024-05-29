@@ -1,6 +1,6 @@
 package su.wps.blog.services.mocks
 
-import cats.syntax.applicative._
+import cats.syntax.applicative.*
 import cats.{Applicative, Id, ~>}
 import fs2.Stream
 import tofu.doobie.transactor.Txr

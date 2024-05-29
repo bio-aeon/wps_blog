@@ -1,4 +1,4 @@
-import sbt._
+import sbt.*
 
 object Dependencies {
 
@@ -39,8 +39,10 @@ object Dependencies {
   val mouse = "org.typelevel" %% "mouse" % Versions.mouse
   val chimney = "io.scalaland" %% "chimney" % Versions.chimney
   val fly4sCore = "com.github.geirolz" %% "fly4s-core" % Versions.fly4s
-  val scalacheckShapeless = "com.github.alexarchambault" %% "scalacheck-shapeless_1.15" % Versions.scalacheckShapeless
+  val scalacheckShapeless =
+    "com.github.alexarchambault" %% "scalacheck-shapeless_1.15" % Versions.scalacheckShapeless
   val testcontainersScala = "com.dimafeng" %% "testcontainers-scala" % Versions.testcontainersScala
-  val testcontainersPostgresql = "org.testcontainers" % "postgresql" % Versions.testcontainersPostgresql
+  val testcontainersPostgresql =
+    "org.testcontainers" % "postgresql" % Versions.testcontainersPostgresql
   val specs2 = "org.specs2" %% "specs2-core" % Versions.specs2
 }

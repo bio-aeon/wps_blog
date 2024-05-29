@@ -1,7 +1,7 @@
 package su.wps.blog.endpoints.mocks
 
 import cats.Applicative
-import cats.syntax.applicative._
+import cats.syntax.applicative.*
 import su.wps.blog.models.api.{ListItemsResult, ListPostResult, PostResult}
 import su.wps.blog.models.domain.AppErr.PostNotFound
 import su.wps.blog.models.domain.{AppErr, PostId}

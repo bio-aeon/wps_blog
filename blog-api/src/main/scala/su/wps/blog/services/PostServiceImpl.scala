@@ -2,13 +2,13 @@ package su.wps.blog.services
 
 import cats.data.OptionT
 import cats.{Applicative, Monad}
-import cats.syntax.functor._
-import cats.syntax.apply._
-import mouse.anyf._
+import cats.syntax.functor.*
+import cats.syntax.apply.*
+import mouse.anyf.*
 import su.wps.blog.models.api.{ListItemsResult, ListPostResult, PostResult}
 import su.wps.blog.models.domain.{AppErr, PostId}
 import su.wps.blog.repositories.PostRepository
-import io.scalaland.chimney.dsl._
+import io.scalaland.chimney.dsl.*
 import su.wps.blog.models.domain.AppErr.PostNotFound
 import tofu.Raise
 import tofu.doobie.transactor.Txr
@@ -25,12 +25,11 @@ final class PostServiceImpl[F[_]: Monad, DB[_]: Applicative] private (
       postRepo.findCount
     ).mapN((_, _))
       .thrushK(xa.trans)
-      .map {
-        case (posts, total) =>
-          ListItemsResult(
-            posts.map(x => x.into[ListPostResult].withFieldComputed(_.id, _.nonEmptyId).transform),
-            total
-          )
+      .map { case (posts, total) =>
+        ListItemsResult(
+          posts.map(x => x.into[ListPostResult].withFieldComputed(_.id, _.nonEmptyId).transform),
+          total
+        )
       }
 
   def postById(id: PostId): F[PostResult] =

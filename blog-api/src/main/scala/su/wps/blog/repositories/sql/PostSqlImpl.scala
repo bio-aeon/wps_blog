@@ -1,11 +1,11 @@
 package su.wps.blog.repositories.sql
 
 import cats.effect.Sync
-import cats.syntax.functor._
-import cats.tagless.syntax.functorK._
-import doobie._
-import doobie.implicits._
-import doobie.postgres.implicits._
+import cats.syntax.functor.*
+import cats.tagless.syntax.functorK.*
+import doobie.*
+import doobie.implicits.*
+import doobie.postgres.implicits.*
 import tofu.doobie.LiftConnectionIO
 import su.wps.blog.models.domain.{Post, PostId}
 

@@ -3,12 +3,12 @@ package su.wps.blog.services
 import cats.Id
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
-import org.scalacheck.ScalacheckShapeless._
+import org.scalacheck.ScalacheckShapeless.*
 import org.specs2.mutable.Specification
 import su.wps.blog.models.domain.AppErr.PostNotFound
 import su.wps.blog.models.domain.{Post, PostId}
 import su.wps.blog.services.mocks.{PostRepositoryMock, TxrMock}
-import su.wps.blog.tools.scalacheck._
+import su.wps.blog.tools.scalacheck.*
 import tofu.doobie.transactor.Txr
 
 class PostServiceSpec extends Specification {
