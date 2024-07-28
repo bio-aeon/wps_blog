@@ -3,7 +3,7 @@ package su.wps.blog.repositories.models
 import cats.syntax.functor.*
 import doobie.*
 import su.wps.blog.tools.types.*
-import doobie.postgres.implicits.*
+import su.wps.blog.instances.time.*
 
 import java.time.ZonedDateTime
 

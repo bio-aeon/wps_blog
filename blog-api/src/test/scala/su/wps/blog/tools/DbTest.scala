@@ -4,15 +4,15 @@ import cats.effect.unsafe.implicits.global
 import cats.effect.{IO, Resource}
 import com.dimafeng.testcontainers.PostgreSQLContainer
 import doobie.Transactor
-import fly4s.core.*
-import fly4s.core.data.*
+import fly4s.*
+import fly4s.data.*
 import org.specs2.specification.{BeforeAfterAll, BeforeAfterEach}
 import org.testcontainers.utility.DockerImageName
 
 trait DbTest extends BeforeAfterEach with BeforeAfterAll {
 
   private lazy val container: PostgreSQLContainer = PostgreSQLContainer(
-    DockerImageName.parse("postgres:16.2")
+    DockerImageName.parse("postgres:16.3")
   )
 
   implicit lazy val xa: Transactor[IO] =
@@ -20,7 +20,8 @@ trait DbTest extends BeforeAfterEach with BeforeAfterAll {
       container.driverClassName,
       container.jdbcUrl,
       container.username,
-      container.password
+      container.password,
+      None
     )
 
   private lazy val fly4s: Resource[IO, Fly4s[IO]] = Fly4s

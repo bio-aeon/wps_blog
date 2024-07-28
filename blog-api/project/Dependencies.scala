@@ -3,21 +3,22 @@ import sbt.*
 object Dependencies {
 
   object Versions {
-    val http4s = "0.23.24"
-    val specs2 = "4.20.3"
-    val logback = "1.4.14"
-    val circe = "0.14.3"
-    val tofu = "0.12.1"
+    val http4s = "0.23.27"
+    val specs2 = "4.20.8"
+    val logback = "1.5.6"
+    val circe = "0.14.9"
+    val tofu = "0.13.2"
     val typesafeConfig = "1.4.3"
-    val pureconfig = "0.17.4"
-    val doobie = "1.0.0-RC2"
-    val log4cats = "2.6.0"
-    val mouse = "1.2.2"
-    val chimney = "0.8.3"
-    val fly4s = "0.0.19"
+    val pureconfig = "0.17.7"
+    val doobie = "1.0.0-RC5"
+    val log4cats = "2.7.0"
+    val mouse = "1.3.1"
+    val chimney = "1.3.0"
+    val fly4s = "1.0.7"
+    val flyway = "10.15.2"
     val scalacheckShapeless = "1.3.0"
-    val testcontainersScala = "0.41.0"
-    val testcontainersPostgresql = "1.19.3"
+    val testcontainersScala = "0.41.4"
+    val testcontainersPostgresql = "1.20.0"
   }
 
   val http4sEmberServer = "org.http4s" %% "http4s-ember-server" % Versions.http4s
@@ -25,7 +26,6 @@ object Dependencies {
   val http4sDsl = "org.http4s" %% "http4s-dsl" % Versions.http4s
   val circeParser = "io.circe" %% "circe-parser" % Versions.circe
   val circeGeneric = "io.circe" %% "circe-generic" % Versions.circe
-  val circeExtras = "io.circe" %% "circe-generic-extras" % Versions.circe
   val doobieCore = "org.tpolecat" %% "doobie-core" % Versions.doobie
   val doobiePostgres = "org.tpolecat" %% "doobie-postgres" % Versions.doobie
   val doobieHikari = "org.tpolecat" %% "doobie-hikari" % Versions.doobie
@@ -38,7 +38,8 @@ object Dependencies {
   val log4catsSlf4j = "org.typelevel" %% "log4cats-slf4j" % Versions.log4cats
   val mouse = "org.typelevel" %% "mouse" % Versions.mouse
   val chimney = "io.scalaland" %% "chimney" % Versions.chimney
-  val fly4sCore = "com.github.geirolz" %% "fly4s-core" % Versions.fly4s
+  val fly4s = "com.github.geirolz" %% "fly4s" % Versions.fly4s
+  val flywayPostgresql = "org.flywaydb" % "flyway-database-postgresql" % Versions.flyway
   val scalacheckShapeless =
     "com.github.alexarchambault" %% "scalacheck-shapeless_1.15" % Versions.scalacheckShapeless
   val testcontainersScala = "com.dimafeng" %% "testcontainers-scala" % Versions.testcontainersScala

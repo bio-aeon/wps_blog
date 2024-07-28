@@ -1,15 +1,13 @@
 package su.wps.blog.repositories.sql
 
-import cats.effect.Sync
-import cats.syntax.functor.*
 import cats.tagless.syntax.functorK.*
 import doobie.*
 import doobie.implicits.*
-import doobie.postgres.implicits.*
 import tofu.doobie.LiftConnectionIO
+import su.wps.blog.instances.time.*
 import su.wps.blog.models.domain.{Post, PostId}
 
-final class PostSqlImpl private (implicit lh: LogHandler) extends PostSql[ConnectionIO] {
+final class PostSqlImpl private extends PostSql[ConnectionIO] {
   val tableName: Fragment = Fragment.const("posts")
 
   def findAllWithLimitAndOffset(limit: Int, offset: Int): ConnectionIO[List[Post]] =
@@ -31,6 +29,6 @@ final class PostSqlImpl private (implicit lh: LogHandler) extends PostSql[Connec
 }
 
 object PostSqlImpl {
-  def create[I[_]: Sync, DB[_]](implicit L: LiftConnectionIO[DB]): I[PostSql[DB]] =
-    Slf4jDoobieLogHandler.create[I].map(implicit logger => new PostSqlImpl().mapK(L.liftF))
+  def create[DB[_]](implicit L: LiftConnectionIO[DB]): PostSql[DB] =
+    new PostSqlImpl().mapK(L.liftF)
 }

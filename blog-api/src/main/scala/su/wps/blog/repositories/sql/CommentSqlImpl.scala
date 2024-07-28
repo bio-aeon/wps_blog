@@ -1,16 +1,14 @@
 package su.wps.blog.repositories.sql
 
-import cats.effect.Sync
-import cats.syntax.functor.*
 import cats.syntax.option.*
 import cats.tagless.syntax.functorK.*
 import doobie.*
 import doobie.implicits.*
-import doobie.postgres.implicits.*
 import su.wps.blog.models.domain.{Comment, CommentId, PostId}
+import su.wps.blog.instances.time.*
 import tofu.doobie.LiftConnectionIO
 
-final class CommentSqlImpl private (implicit lh: LogHandler) extends CommentSql[ConnectionIO] {
+final class CommentSqlImpl private extends CommentSql[ConnectionIO] {
   val tableName: Fragment = Fragment.const("comments")
 
   def insert(comment: Comment): ConnectionIO[Comment] =
@@ -44,6 +42,6 @@ final class CommentSqlImpl private (implicit lh: LogHandler) extends CommentSql[
 }
 
 object CommentSqlImpl {
-  def create[I[_]: Sync, DB[_]](implicit L: LiftConnectionIO[DB]): I[CommentSql[DB]] =
-    Slf4jDoobieLogHandler.create[I].map(implicit logger => new CommentSqlImpl().mapK(L.liftF))
+  def create[DB[_]](implicit L: LiftConnectionIO[DB]): CommentSql[DB] =
+    new CommentSqlImpl().mapK(L.liftF)
 }

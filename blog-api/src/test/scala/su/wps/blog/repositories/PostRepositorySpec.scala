@@ -1,7 +1,5 @@
 package su.wps.blog.repositories
 
-import cats.effect.IO
-import cats.effect.unsafe.implicits.global
 import cats.syntax.traverse.*
 import doobie.ConnectionIO
 import org.scalacheck.Arbitrary.arbitrary
@@ -17,8 +15,7 @@ import su.wps.blog.tools.types.PosInt
 class PostRepositorySpec extends Specification with DbTest {
   sequential
 
-  lazy val repo: PostRepository[ConnectionIO] =
-    PostRepositoryImpl.create[IO, ConnectionIO].unsafeRunSync()
+  lazy val repo: PostRepository[ConnectionIO] = PostRepositoryImpl.create[ConnectionIO]
 
   implicit val genUser: Gen[models.User] = arbitrary[models.User]
   implicit val genPost: Gen[models.Post] = arbitrary[models.Post]

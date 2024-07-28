@@ -17,6 +17,7 @@ import pureconfig.ConfigSource
 import su.wps.blog.config.{AppConfig, DbConfig, HttpServerConfig}
 import su.wps.blog.endpoints.RoutesImpl
 import su.wps.blog.repositories.PostRepositoryImpl
+import su.wps.blog.repositories.sql.Slf4jDoobieLogHandler
 import su.wps.blog.services.PostServiceImpl
 import tofu.doobie.transactor.Txr
 
@@ -29,7 +30,7 @@ object Program {
       appResource: Resource[F, Unit] = for {
         appConfig <- parseAppConfig[F].toResource
         xa <- mkTransactor[F](appConfig.db)
-        postRepo <- PostRepositoryImpl.create[F, xa.DB].toResource
+        postRepo = PostRepositoryImpl.create[xa.DB]
         postService = PostServiceImpl.create[F, xa.DB](postRepo, xa)
         routes = RoutesImpl.create[F](postService)
         _ <- mkHttpServer[F](appConfig.httpServer, routes.routes)
@@ -49,7 +50,14 @@ object Program {
     for {
       ce <- ExecutionContexts.fixedThreadPool[F](32)
       tr <- HikariTransactor
-        .newHikariTransactor[F](config.driver, config.url, config.username, config.password, ce)
+        .newHikariTransactor[F](
+          config.driver,
+          config.url,
+          config.username,
+          config.password,
+          ce,
+          Some(Slf4jDoobieLogHandler.create[F])
+        )
       _ <- tr
         .configure(ds => F.delay(ds.setAutoCommit(false)) *> F.delay(ds.setMaximumPoolSize(32)))
         .toResource
