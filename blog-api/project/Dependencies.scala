@@ -3,22 +3,22 @@ import sbt.*
 object Dependencies {
 
   object Versions {
-    val http4s = "0.23.27"
-    val specs2 = "4.20.8"
-    val logback = "1.5.6"
-    val circe = "0.14.9"
-    val tofu = "0.13.2"
+    val http4s = "0.23.28"
+    val specs2 = "4.20.9"
+    val logback = "1.5.11"
+    val circe = "0.14.10"
+    val tofu = "0.13.6"
     val typesafeConfig = "1.4.3"
     val pureconfig = "0.17.7"
     val doobie = "1.0.0-RC5"
     val log4cats = "2.7.0"
-    val mouse = "1.3.1"
-    val chimney = "1.3.0"
-    val fly4s = "1.0.7"
-    val flyway = "10.15.2"
+    val mouse = "1.3.2"
+    val chimney = "1.5.0"
+    val fly4s = "1.0.9"
+    val flyway = "10.20.0"
     val scalacheckShapeless = "1.3.0"
     val testcontainersScala = "0.41.4"
-    val testcontainersPostgresql = "1.20.0"
+    val testcontainersPostgresql = "1.20.2"
   }
 
   val http4sEmberServer = "org.http4s" %% "http4s-ember-server" % Versions.http4s
