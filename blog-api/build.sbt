@@ -5,7 +5,7 @@ lazy val root = (project in file("."))
     organization := "su.wps",
     name := "wps-blog",
     version := "0.1.0-SNAPSHOT",
-    scalaVersion := "2.13.15",
+    scalaVersion := "2.13.16",
     scalacOptions ++= Seq(
       "-deprecation",
       "-encoding",
