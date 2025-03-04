@@ -12,6 +12,7 @@ import fs2.io.net.Network
 import org.http4s.HttpRoutes
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.server.Server
+import org.http4s.server.middleware.CORS
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 import pureconfig.ConfigSource
 import su.wps.blog.config.{AppConfig, DbConfig, HttpServerConfig}
@@ -71,6 +72,6 @@ object Program {
       .default[F]
       .withHost(serverConfig.interface)
       .withPort(serverConfig.port)
-      .withHttpApp(routes.orNotFound)
+      .withHttpApp(CORS.policy.withAllowOriginAll(routes.orNotFound))
       .build
 }
