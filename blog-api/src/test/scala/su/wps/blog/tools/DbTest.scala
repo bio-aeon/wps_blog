@@ -12,7 +12,7 @@ import org.testcontainers.utility.DockerImageName
 trait DbTest extends BeforeAfterEach with BeforeAfterAll {
 
   private lazy val container: PostgreSQLContainer = PostgreSQLContainer(
-    DockerImageName.parse("postgres:16.4")
+    DockerImageName.parse("postgres:18beta2")
   )
 
   implicit lazy val xa: Transactor[IO] =
