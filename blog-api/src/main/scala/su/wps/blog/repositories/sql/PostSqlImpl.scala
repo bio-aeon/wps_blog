@@ -13,11 +13,21 @@ final class PostSqlImpl private extends PostSql[ConnectionIO] {
   def findAllWithLimitAndOffset(limit: Int, offset: Int): ConnectionIO[List[Post]] =
     (fr"SELECT name, short_text, text, author_id, views, meta_title, " ++
       fr"meta_keywords, meta_description, is_hidden, created_at, id FROM" ++ tableName ++
-      fr"ORDER BY created_at DESC LIMIT $limit OFFSET $offset")
+      fr"WHERE is_hidden = false ORDER BY created_at DESC LIMIT $limit OFFSET $offset")
       .query[Post]
       .to[List]
 
   def findCount: ConnectionIO[Int] =
+    (fr"SELECT COUNT(*) FROM" ++ tableName ++ fr"WHERE is_hidden = false").query[Int].unique
+
+  def findAllWithLimitAndOffsetIncludeHidden(limit: Int, offset: Int): ConnectionIO[List[Post]] =
+    (fr"SELECT name, short_text, text, author_id, views, meta_title, " ++
+      fr"meta_keywords, meta_description, is_hidden, created_at, id FROM" ++ tableName ++
+      fr"ORDER BY created_at DESC LIMIT $limit OFFSET $offset")
+      .query[Post]
+      .to[List]
+
+  def findCountIncludeHidden: ConnectionIO[Int] =
     (fr"SELECT COUNT(*) FROM" ++ tableName).query[Int].unique
 
   def findById(id: PostId): ConnectionIO[Option[Post]] =

@@ -8,7 +8,9 @@ object PostRepositoryMock {
   def create[DB[_]](
     findAllResult: List[Post] = Nil,
     findCountResult: Int = 0,
-    findByIdResult: Option[Post] = None
+    findByIdResult: Option[Post] = None,
+    findAllIncludeHiddenResult: List[Post] = Nil,
+    findCountIncludeHiddenResult: Int = 0
   )(implicit DB: Applicative[DB]): PostRepository[DB] = new PostRepository[DB] {
     def findAllWithLimitAndOffset(limit: Int, offset: Int): DB[List[Post]] =
       DB.pure(findAllResult)
@@ -16,5 +18,10 @@ object PostRepositoryMock {
     def findCount: DB[Int] = DB.pure(findCountResult)
 
     def findById(id: PostId): DB[Option[Post]] = DB.pure(findByIdResult)
+
+    def findAllWithLimitAndOffsetIncludeHidden(limit: Int, offset: Int): DB[List[Post]] =
+      DB.pure(findAllIncludeHiddenResult)
+
+    def findCountIncludeHidden: DB[Int] = DB.pure(findCountIncludeHiddenResult)
   }
 }

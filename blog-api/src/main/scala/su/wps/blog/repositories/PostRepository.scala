@@ -8,4 +8,9 @@ trait PostRepository[DB[_]] {
   def findCount: DB[Int]
 
   def findById(id: PostId): DB[Option[Post]]
+
+  // Admin methods - include hidden posts
+  def findAllWithLimitAndOffsetIncludeHidden(limit: Int, offset: Int): DB[List[Post]]
+
+  def findCountIncludeHidden: DB[Int]
 }

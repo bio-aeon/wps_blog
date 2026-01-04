@@ -14,6 +14,11 @@ final class PostRepositoryImpl[DB[_]] private (sql: PostSql[DB]) extends PostRep
   def findById(id: PostId): DB[Option[Post]] =
     sql.findById(id)
 
+  def findAllWithLimitAndOffsetIncludeHidden(limit: Int, offset: Int): DB[List[Post]] =
+    sql.findAllWithLimitAndOffsetIncludeHidden(limit, offset)
+
+  def findCountIncludeHidden: DB[Int] =
+    sql.findCountIncludeHidden
 }
 
 object PostRepositoryImpl {
