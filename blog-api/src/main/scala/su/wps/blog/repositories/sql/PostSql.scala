@@ -16,4 +16,8 @@ trait PostSql[DB[_]] {
   def findAllWithLimitAndOffsetIncludeHidden(limit: Int, offset: Int): DB[List[Post]]
 
   def findCountIncludeHidden: DB[Int]
+
+  def findByTagSlug(tagSlug: String, limit: Int, offset: Int): DB[List[Post]]
+
+  def findCountByTagSlug(tagSlug: String): DB[Int]
 }

@@ -36,6 +36,28 @@ final class PostSqlImpl private extends PostSql[ConnectionIO] {
       fr"WHERE id = $id")
       .query[Post]
       .option
+
+  def findByTagSlug(tagSlug: String, limit: Int, offset: Int): ConnectionIO[List[Post]] =
+    sql"""
+      SELECT p.name, p.short_text, p.text, p.author_id, p.views,
+             p.meta_title, p.meta_keywords, p.meta_description,
+             p.is_hidden, p.created_at, p.id
+      FROM posts p
+      INNER JOIN posts_tags pt ON p.id = pt.post_id
+      INNER JOIN tags t ON pt.tag_id = t.id
+      WHERE t.slug = $tagSlug AND p.is_hidden = false
+      ORDER BY p.created_at DESC
+      LIMIT $limit OFFSET $offset
+    """.query[Post].to[List]
+
+  def findCountByTagSlug(tagSlug: String): ConnectionIO[Int] =
+    sql"""
+      SELECT COUNT(*)
+      FROM posts p
+      INNER JOIN posts_tags pt ON p.id = pt.post_id
+      INNER JOIN tags t ON pt.tag_id = t.id
+      WHERE t.slug = $tagSlug AND p.is_hidden = false
+    """.query[Int].unique
 }
 
 object PostSqlImpl {

@@ -48,6 +48,30 @@ final class PostServiceImpl[F[_]: Monad, DB[_]: Monad] private (
         )
       }
 
+  def postsByTag(tagSlug: String, limit: Int, offset: Int): F[ListItemsResult[ListPostResult]] =
+    (postRepo.findByTagSlug(tagSlug, limit, offset), postRepo.findCountByTagSlug(tagSlug))
+      .mapN((_, _))
+      .flatMap { case (posts, count) =>
+        val postIds = posts.flatMap(_.id)
+        tagRepo.findByPostIds(postIds).map((posts, count, _))
+      }
+      .thrushK(xa.trans)
+      .map { case (posts, total, tagsByPost) =>
+        val tagsByPostId =
+          tagsByPost.groupBy(_._1).map { case (pid, tags) => pid -> tags.map(_._2) }
+        ListItemsResult(
+          posts.map { post =>
+            val tags = tagsByPostId.get(post.nonEmptyId).toList.flatten
+            post
+              .into[ListPostResult]
+              .withFieldComputed(_.id, _.nonEmptyId)
+              .withFieldConst(_.tags, tagsToTagResults(tags))
+              .transform
+          },
+          total
+        )
+      }
+
   def postById(id: PostId): F[PostResult] =
     (postRepo.findById(id), tagRepo.findByPostId(id))
       .mapN((_, _))

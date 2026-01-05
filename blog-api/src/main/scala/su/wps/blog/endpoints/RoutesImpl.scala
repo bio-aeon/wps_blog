@@ -16,10 +16,17 @@ final class RoutesImpl[F[_]: Monad] private (postService: PostService[F])
 
   private object LimitParamMatcher extends QueryParamDecoderMatcher[Int]("limit")
   private object OffsetParamMatcher extends QueryParamDecoderMatcher[Int]("offset")
+  private object TagParamMatcher extends OptionalQueryParamDecoderMatcher[String]("tag")
 
   val routes: HttpRoutes[F] = HttpRoutes.of[F] {
-    case GET -> Root / "posts" :? LimitParamMatcher(limit) +& OffsetParamMatcher(offset) =>
-      postService.allPosts(limit, offset).map(_.asJson).flatMap(Ok(_))
+    case GET -> Root / "posts" :? LimitParamMatcher(limit) +& OffsetParamMatcher(offset)
+        +& TagParamMatcher(maybeTag) =>
+      maybeTag match {
+        case Some(tagSlug) =>
+          postService.postsByTag(tagSlug, limit, offset).map(_.asJson).flatMap(Ok(_))
+        case None =>
+          postService.allPosts(limit, offset).map(_.asJson).flatMap(Ok(_))
+      }
 
     case GET -> Root / "posts" / IntVar(id) =>
       postService.postById(PostId(id)).map(_.asJson).flatMap(Ok(_))

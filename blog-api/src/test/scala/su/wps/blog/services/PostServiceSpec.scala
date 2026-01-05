@@ -76,6 +76,39 @@ class PostServiceSpec extends Specification {
         r.items.forall(_.tags.isEmpty)
       }
     }
+
+    "return posts filtered by tag with correct pagination" >> {
+      val posts = random[Post](3)
+      val service = mkService(findByTagSlugResult = posts, findCountByTagSlugResult = 10)
+
+      service.postsByTag("scala", 3, 0) must beRight.which { r =>
+        r.items.length == 3 && r.total == 10
+      }
+    }
+
+    "include tags in filtered post results" >> {
+      val posts = random[Post](2)
+      val tag1 = Tag("scala", "scala", Some(TagId(1)))
+      val tag2 = Tag("fp", "fp", Some(TagId(2)))
+      val tagsByPost = posts.flatMap(p => p.id.map(id => List((id, tag1), (id, tag2)))).flatten
+      val service = mkService(
+        findByTagSlugResult = posts,
+        findCountByTagSlugResult = 2,
+        findByPostIdsResult = tagsByPost
+      )
+
+      service.postsByTag("scala", 10, 0) must beRight.which { r =>
+        r.items.forall(_.tags.length == 2) && r.items.forall(_.tags.exists(_.slug == "scala"))
+      }
+    }
+
+    "return empty result for non-existent tag" >> {
+      val service = mkService(findByTagSlugResult = Nil, findCountByTagSlugResult = 0)
+
+      service.postsByTag("nonexistent", 10, 0) must beRight.which { r =>
+        r.items.isEmpty && r.total == 0
+      }
+    }
   }
 
   private def mkService(
@@ -83,9 +116,17 @@ class PostServiceSpec extends Specification {
     findCountResult: Int = 0,
     findByIdResult: Option[Post] = None,
     findByPostIdResult: List[Tag] = Nil,
-    findByPostIdsResult: List[(PostId, Tag)] = Nil
+    findByPostIdsResult: List[(PostId, Tag)] = Nil,
+    findByTagSlugResult: List[Post] = Nil,
+    findCountByTagSlugResult: Int = 0
   ): PostService[RunF] = {
-    val postRepo = PostRepositoryMock.create[Id](findAllResult, findCountResult, findByIdResult)
+    val postRepo = PostRepositoryMock.create[Id](
+      findAllResult,
+      findCountResult,
+      findByIdResult,
+      findByTagSlugResult = findByTagSlugResult,
+      findCountByTagSlugResult = findCountByTagSlugResult
+    )
     val tagRepo = TagRepositoryMock.create[Id](
       findByPostIdResult = findByPostIdResult,
       findByPostIdsResult = findByPostIdsResult

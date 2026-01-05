@@ -1,5 +1,6 @@
 package su.wps.blog.repositories
 
+import cats.syntax.apply.*
 import cats.syntax.traverse.*
 import doobie.ConnectionIO
 import org.scalacheck.Arbitrary.arbitrary
@@ -10,7 +11,7 @@ import su.wps.blog.models.domain.PostId
 import su.wps.blog.tools.DbTest
 import su.wps.blog.tools.scalacheck.*
 import su.wps.blog.tools.syntax.*
-import su.wps.blog.tools.types.PosInt
+import su.wps.blog.tools.types.{PosInt, Varchar, W}
 
 class PostRepositorySpec extends Specification with DbTest {
   sequential
@@ -19,6 +20,7 @@ class PostRepositorySpec extends Specification with DbTest {
 
   implicit val genUser: Gen[models.User] = arbitrary[models.User]
   implicit val genPost: Gen[models.Post] = arbitrary[models.Post]
+  implicit val genTag: Gen[models.Tag] = arbitrary[models.Tag]
 
   "PostRepository should" >> {
     "return only visible posts with limit and offset" >> {
@@ -123,6 +125,114 @@ class PostRepositorySpec extends Specification with DbTest {
       val (r0, r1) = test.runWithIO()
       r0 must beNone
       r1 must beSome
+    }
+
+    "return posts matching the tag slug" >> {
+      val user = random[models.User]
+      val tag = random[models.Tag].copy(id = PosInt(1), slug = Varchar("scala"))
+      val test = for {
+        _ <- models.User.sql.insert(user)
+        _ <- models.Tag.sql.insert(tag)
+        // Create 2 posts tagged with "scala"
+        taggedPost1 = random[models.Post].copy(id = PosInt(1), authorId = user.id, isHidden = false)
+        taggedPost2 = random[models.Post].copy(id = PosInt(2), authorId = user.id, isHidden = false)
+        _ <- models.Post.sql.insert(taggedPost1)
+        _ <- models.Post.sql.insert(taggedPost2)
+        _ <- models.PostTag.sql.insert(models.PostTag(PosInt(1), PosInt(1), taggedPost1.createdAt))
+        _ <- models.PostTag.sql.insert(models.PostTag(PosInt(2), PosInt(1), taggedPost2.createdAt))
+        // Create untagged post
+        untaggedPost = random[models.Post].copy(
+          id = PosInt(3),
+          authorId = user.id,
+          isHidden = false
+        )
+        _ <- models.Post.sql.insert(untaggedPost)
+        result <- repo.findByTagSlug("scala", 10, 0)
+      } yield result
+
+      val result = test.runWithIO()
+      result must haveLength(2)
+      result.map(_.nonEmptyId.value) must contain(exactly(1, 2))
+    }
+
+    "exclude hidden posts even if tagged" >> {
+      val user = random[models.User]
+      val tag = random[models.Tag].copy(id = PosInt(1), slug = Varchar("rust"))
+      val test = for {
+        _ <- models.User.sql.insert(user)
+        _ <- models.Tag.sql.insert(tag)
+        visiblePost = random[models.Post].copy(id = PosInt(1), authorId = user.id, isHidden = false)
+        hiddenPost = random[models.Post].copy(id = PosInt(2), authorId = user.id, isHidden = true)
+        _ <- models.Post.sql.insert(visiblePost)
+        _ <- models.Post.sql.insert(hiddenPost)
+        _ <- models.PostTag.sql.insert(models.PostTag(PosInt(1), PosInt(1), visiblePost.createdAt))
+        _ <- models.PostTag.sql.insert(models.PostTag(PosInt(2), PosInt(1), hiddenPost.createdAt))
+        result <- repo.findByTagSlug("rust", 10, 0)
+      } yield result
+
+      val result = test.runWithIO()
+      result must haveLength(1)
+      result.head.nonEmptyId.value mustEqual 1
+    }
+
+    "return empty list for non-existent tag" >> {
+      val user = random[models.User]
+      val test = for {
+        _ <- models.User.sql.insert(user)
+        post = random[models.Post].copy(id = PosInt(1), authorId = user.id, isHidden = false)
+        _ <- models.Post.sql.insert(post)
+        result <- repo.findByTagSlug("nonexistent", 10, 0)
+      } yield result
+
+      val result = test.runWithIO()
+      result must beEmpty
+    }
+
+    "respect pagination for posts by tag" >> {
+      val user = random[models.User]
+      val tag = random[models.Tag].copy(id = PosInt(1), slug = Varchar("fp"))
+      val test = for {
+        _ <- models.User.sql.insert(user)
+        _ <- models.Tag.sql.insert(tag)
+        // Create 5 posts tagged with "fp"
+        _ <- (1 to 5).toList.traverse { i =>
+          val post = random[models.Post].copy(id = PosInt(i), authorId = user.id, isHidden = false)
+          models.Post.sql.insert(post) *>
+            models.PostTag.sql.insert(models.PostTag(PosInt(i), PosInt(1), post.createdAt))
+        }
+        page1 <- repo.findByTagSlug("fp", 2, 0)
+        page2 <- repo.findByTagSlug("fp", 2, 2)
+        page3 <- repo.findByTagSlug("fp", 2, 4)
+      } yield (page1, page2, page3)
+
+      val (page1, page2, page3) = test.runWithIO()
+      page1 must haveLength(2)
+      page2 must haveLength(2)
+      page3 must haveLength(1)
+    }
+
+    "return correct count for posts by tag slug" >> {
+      val user = random[models.User]
+      val tag = random[models.Tag].copy(id = PosInt(1), slug = Varchar("cats"))
+      val test = for {
+        _ <- models.User.sql.insert(user)
+        _ <- models.Tag.sql.insert(tag)
+        // Create 3 visible and 2 hidden posts tagged with "cats"
+        _ <- (1 to 3).toList.traverse { i =>
+          val post = random[models.Post].copy(id = PosInt(i), authorId = user.id, isHidden = false)
+          models.Post.sql.insert(post) *>
+            models.PostTag.sql.insert(models.PostTag(PosInt(i), PosInt(1), post.createdAt))
+        }
+        _ <- (4 to 5).toList.traverse { i =>
+          val post = random[models.Post].copy(id = PosInt(i), authorId = user.id, isHidden = true)
+          models.Post.sql.insert(post) *>
+            models.PostTag.sql.insert(models.PostTag(PosInt(i), PosInt(1), post.createdAt))
+        }
+        count <- repo.findCountByTagSlug("cats")
+      } yield count
+
+      val count = test.runWithIO()
+      count mustEqual 3
     }
   }
 }

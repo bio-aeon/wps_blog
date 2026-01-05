@@ -19,6 +19,12 @@ final class PostRepositoryImpl[DB[_]] private (sql: PostSql[DB]) extends PostRep
 
   def findCountIncludeHidden: DB[Int] =
     sql.findCountIncludeHidden
+
+  def findByTagSlug(tagSlug: String, limit: Int, offset: Int): DB[List[Post]] =
+    sql.findByTagSlug(tagSlug, limit, offset)
+
+  def findCountByTagSlug(tagSlug: String): DB[Int] =
+    sql.findCountByTagSlug(tagSlug)
 }
 
 object PostRepositoryImpl {
