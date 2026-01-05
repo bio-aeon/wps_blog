@@ -7,8 +7,8 @@ import org.http4s.*
 import org.http4s.implicits.*
 import org.specs2.mutable.Specification
 import su.wps.blog.endpoints.mocks.PostServiceMock
-import su.wps.blog.models.api.{ListPostResult, PostResult}
-import su.wps.blog.models.domain.{AppErr, PostId}
+import su.wps.blog.models.api.{ListPostResult, PostResult, TagResult}
+import su.wps.blog.models.domain.{AppErr, PostId, TagId}
 import tofu.Raise
 
 import java.time.ZonedDateTime
@@ -25,7 +25,7 @@ class RoutesSpec extends Specification {
       val respBody = resp.as[String].unsafeRunSync()
 
       resp.status mustEqual Status.Ok
-      respBody mustEqual """{"items":[{"id":1,"name":"name","short_text":"text","created_at":"2001-01-01T09:15:00Z"}],"total":1}"""
+      respBody mustEqual """{"items":[{"id":1,"name":"name","short_text":"text","created_at":"2001-01-01T09:15:00Z","tags":[{"id":1,"name":"scala","slug":"scala"}]}],"total":1}"""
     }
 
     "return correct code and body for post retrieving by id" >> {
@@ -36,14 +36,17 @@ class RoutesSpec extends Specification {
       val respBody = resp.as[String].unsafeRunSync()
 
       resp.status mustEqual Status.Ok
-      respBody mustEqual """{"name":"name","text":"text","created_at":"2001-01-01T09:15:00Z"}"""
+      respBody mustEqual """{"name":"name","text":"text","created_at":"2001-01-01T09:15:00Z","tags":[{"id":1,"name":"scala","slug":"scala"}]}"""
     }
   }
 
   private def mkRoutes[F[_]: Monad: Raise[*[_], AppErr]]: Routes[F] = {
+    val tags = List(TagResult(TagId(1), "scala", "scala"))
     val postService = PostServiceMock.create[F](
-      List(ListPostResult(PostId(1), "name", "text", ZonedDateTime.parse("2001-01-01T09:15:00Z"))),
-      Some(PostResult("name", "text", ZonedDateTime.parse("2001-01-01T09:15:00Z")))
+      List(
+        ListPostResult(PostId(1), "name", "text", ZonedDateTime.parse("2001-01-01T09:15:00Z"), tags)
+      ),
+      Some(PostResult("name", "text", ZonedDateTime.parse("2001-01-01T09:15:00Z"), tags))
     )
 
     RoutesImpl.create[F](postService)

@@ -17,7 +17,7 @@ import org.typelevel.log4cats.slf4j.Slf4jLogger
 import pureconfig.ConfigSource
 import su.wps.blog.config.{AppConfig, DbConfig, HttpServerConfig}
 import su.wps.blog.endpoints.RoutesImpl
-import su.wps.blog.repositories.PostRepositoryImpl
+import su.wps.blog.repositories.{PostRepositoryImpl, TagRepositoryImpl}
 import su.wps.blog.repositories.sql.Slf4jDoobieLogHandler
 import su.wps.blog.services.PostServiceImpl
 import tofu.doobie.transactor.Txr
@@ -32,7 +32,8 @@ object Program {
         appConfig <- parseAppConfig[F].toResource
         xa <- mkTransactor[F](appConfig.db)
         postRepo = PostRepositoryImpl.create[xa.DB]
-        postService = PostServiceImpl.create[F, xa.DB](postRepo, xa)
+        tagRepo = TagRepositoryImpl.create[xa.DB]
+        postService = PostServiceImpl.create[F, xa.DB](postRepo, tagRepo, xa)
         routes = RoutesImpl.create[F](postService)
         _ <- mkHttpServer[F](appConfig.httpServer, routes.routes)
         _ <- Resource.make(F.unit)(_ => logger.info("Releasing application resources"))

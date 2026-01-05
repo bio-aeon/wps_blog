@@ -10,12 +10,15 @@ final case class ListPostResult(
   id: PostId,
   name: String,
   shortText: String,
-  createdAt: ZonedDateTime
+  createdAt: ZonedDateTime,
+  tags: List[TagResult]
 )
 
 object ListPostResult {
   implicit val zonedDtEncoder: Encoder[ZonedDateTime] =
     Encoder[String].contramap(_.format(DateTimeFormatter.ISO_DATE_TIME))
   implicit val encoder: Encoder[ListPostResult] =
-    Encoder.forProduct4("id", "name", "short_text", "created_at")(ListPostResult.unapply(_).get)
+    Encoder.forProduct5("id", "name", "short_text", "created_at", "tags")(
+      ListPostResult.unapply(_).get
+    )
 }

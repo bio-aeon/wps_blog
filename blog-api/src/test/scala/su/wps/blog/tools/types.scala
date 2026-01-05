@@ -8,7 +8,9 @@ object types {
   final case class PosInt(value: Int)
 
   object PosInt {
-    implicit def arb: Arbitrary[PosInt] = Arbitrary(Gen.posNum[Int].map(PosInt.apply))
+    implicit val gen: Gen[PosInt] = Gen.posNum[Int].map(PosInt.apply)
+
+    implicit def arb: Arbitrary[PosInt] = Arbitrary(gen)
 
     implicit val meta: Meta[PosInt] = Meta[Int].imap(PosInt(_))(_.value)
   }
