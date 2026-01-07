@@ -234,5 +234,56 @@ class PostRepositorySpec extends Specification with DbTest {
       val count = test.runWithIO()
       count mustEqual 3
     }
+
+    "increment view count by 1 for visible post" >> {
+      val postId = 1
+      val initialViews = 10
+      val user = random[models.User]
+      val test = for {
+        _ <- models.User.sql.insert(user)
+        post = random[models.Post].copy(
+          id = PosInt(postId),
+          authorId = user.id,
+          isHidden = false,
+          views = PosInt(initialViews)
+        )
+        _ <- models.Post.sql.insert(post)
+        rowsUpdated <- repo.incrementViews(PostId(postId))
+        updated <- repo.findById(PostId(postId))
+      } yield (rowsUpdated, updated)
+
+      val (rowsUpdated, updated) = test.runWithIO()
+      rowsUpdated mustEqual 1
+      updated must beSome.which(p => p.views == initialViews + 1)
+    }
+
+    "not increment views for hidden posts" >> {
+      val postId = 1
+      val initialViews = 10
+      val user = random[models.User]
+      val test = for {
+        _ <- models.User.sql.insert(user)
+        post = random[models.Post].copy(
+          id = PosInt(postId),
+          authorId = user.id,
+          isHidden = true,
+          views = PosInt(initialViews)
+        )
+        _ <- models.Post.sql.insert(post)
+        rowsUpdated <- repo.incrementViews(PostId(postId))
+        unchanged <- repo.findById(PostId(postId))
+      } yield (rowsUpdated, unchanged)
+
+      val (rowsUpdated, unchanged) = test.runWithIO()
+      rowsUpdated mustEqual 0
+      unchanged must beSome.which(p => p.views == initialViews)
+    }
+
+    "return 0 for non-existent post" >> {
+      val test = repo.incrementViews(PostId(99999))
+
+      val rowsUpdated = test.runWithIO()
+      rowsUpdated mustEqual 0
+    }
   }
 }

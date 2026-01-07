@@ -58,6 +58,9 @@ final class PostSqlImpl private extends PostSql[ConnectionIO] {
       INNER JOIN tags t ON pt.tag_id = t.id
       WHERE t.slug = $tagSlug AND p.is_hidden = false
     """.query[Int].unique
+
+  def incrementViews(id: PostId): ConnectionIO[Int] =
+    sql"UPDATE posts SET views = views + 1 WHERE id = $id AND is_hidden = false".update.run
 }
 
 object PostSqlImpl {

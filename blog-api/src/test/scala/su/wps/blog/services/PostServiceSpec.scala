@@ -109,6 +109,18 @@ class PostServiceSpec extends Specification {
         r.items.isEmpty && r.total == 0
       }
     }
+
+    "successfully increment view count for visible post" >> {
+      val service = mkService(incrementViewsResult = 1)
+
+      service.incrementViewCount(PostId(1)) must beRight(())
+    }
+
+    "complete without error for hidden post (no-op)" >> {
+      val service = mkService(incrementViewsResult = 0)
+
+      service.incrementViewCount(PostId(1)) must beRight(())
+    }
   }
 
   private def mkService(
@@ -118,14 +130,16 @@ class PostServiceSpec extends Specification {
     findByPostIdResult: List[Tag] = Nil,
     findByPostIdsResult: List[(PostId, Tag)] = Nil,
     findByTagSlugResult: List[Post] = Nil,
-    findCountByTagSlugResult: Int = 0
+    findCountByTagSlugResult: Int = 0,
+    incrementViewsResult: Int = 1
   ): PostService[RunF] = {
     val postRepo = PostRepositoryMock.create[Id](
       findAllResult,
       findCountResult,
       findByIdResult,
       findByTagSlugResult = findByTagSlugResult,
-      findCountByTagSlugResult = findCountByTagSlugResult
+      findCountByTagSlugResult = findCountByTagSlugResult,
+      incrementViewsResult = incrementViewsResult
     )
     val tagRepo = TagRepositoryMock.create[Id](
       findByPostIdResult = findByPostIdResult,

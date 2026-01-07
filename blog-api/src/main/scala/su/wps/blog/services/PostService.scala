@@ -9,4 +9,6 @@ trait PostService[F[_]] {
   def postsByTag(tagSlug: String, limit: Int, offset: Int): F[ListItemsResult[ListPostResult]]
 
   def postById(id: PostId): F[PostResult]
+
+  def incrementViewCount(id: PostId): F[Unit]
 }

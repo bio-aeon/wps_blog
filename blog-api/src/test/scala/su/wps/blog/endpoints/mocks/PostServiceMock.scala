@@ -12,7 +12,8 @@ object PostServiceMock {
   def create[F[_]: Applicative](
     allPostsResult: List[ListPostResult] = Nil,
     postByIdResult: Option[PostResult] = None,
-    postsByTagResult: List[ListPostResult] = Nil
+    postsByTagResult: List[ListPostResult] = Nil,
+    incrementViewCountSuccess: Boolean = true
   )(implicit R: Raise[F, AppErr]): PostService[F] =
     new PostService[F] {
       def allPosts(limit: Int, offset: Int): F[ListItemsResult[ListPostResult]] =
@@ -23,5 +24,8 @@ object PostServiceMock {
 
       def postById(id: PostId): F[PostResult] =
         postByIdResult.map(_.pure[F]).getOrElse(R.raise(PostNotFound(id)))
+
+      def incrementViewCount(id: PostId): F[Unit] =
+        ().pure[F]
     }
 }

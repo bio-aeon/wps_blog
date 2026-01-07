@@ -74,6 +74,24 @@ class RoutesSpec extends Specification {
       resp.status mustEqual Status.Ok
       respBody must contain("\"total\":1")
     }
+
+    "return 204 No Content on successful view increment" >> {
+      val routes = mkRoutes[IO]
+      val request = Request[IO](Method.POST, uri"posts/1/view")
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+
+      resp.status mustEqual Status.NoContent
+    }
+
+    "return 204 even for non-existent post (idempotent)" >> {
+      val routes = mkRoutes[IO]
+      val request = Request[IO](Method.POST, uri"posts/99999/view")
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+
+      resp.status mustEqual Status.NoContent
+    }
   }
 
   private def mkRoutes[F[_]: Monad: Raise[*[_], AppErr]]: Routes[F] = {

@@ -25,6 +25,9 @@ final class PostRepositoryImpl[DB[_]] private (sql: PostSql[DB]) extends PostRep
 
   def findCountByTagSlug(tagSlug: String): DB[Int] =
     sql.findCountByTagSlug(tagSlug)
+
+  def incrementViews(id: PostId): DB[Int] =
+    sql.incrementViews(id)
 }
 
 object PostRepositoryImpl {

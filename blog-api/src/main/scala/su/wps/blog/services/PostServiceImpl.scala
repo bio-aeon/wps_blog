@@ -88,6 +88,9 @@ final class PostServiceImpl[F[_]: Monad, DB[_]: Monad] private (
             R.raise(PostNotFound(id))
         }
       }
+
+  def incrementViewCount(id: PostId): F[Unit] =
+    postRepo.incrementViews(id).thrushK(xa.trans).void
 }
 
 object PostServiceImpl {

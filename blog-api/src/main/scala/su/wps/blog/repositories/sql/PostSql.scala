@@ -20,4 +20,6 @@ trait PostSql[DB[_]] {
   def findByTagSlug(tagSlug: String, limit: Int, offset: Int): DB[List[Post]]
 
   def findCountByTagSlug(tagSlug: String): DB[Int]
+
+  def incrementViews(id: PostId): DB[Int]
 }

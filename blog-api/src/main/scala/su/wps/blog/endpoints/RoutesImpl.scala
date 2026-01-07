@@ -1,6 +1,7 @@
 package su.wps.blog.endpoints
 
 import cats.Monad
+import cats.syntax.apply.*
 import cats.syntax.flatMap.*
 import cats.syntax.functor.*
 import io.circe.syntax.*
@@ -30,6 +31,9 @@ final class RoutesImpl[F[_]: Monad] private (postService: PostService[F])
 
     case GET -> Root / "posts" / IntVar(id) =>
       postService.postById(PostId(id)).map(_.asJson).flatMap(Ok(_))
+
+    case POST -> Root / "posts" / IntVar(id) / "view" =>
+      postService.incrementViewCount(PostId(id)) *> NoContent()
   }
 }
 
