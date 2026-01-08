@@ -458,5 +458,83 @@ class PostRepositorySpec extends Specification with DbTest {
       page2 must haveLength(2)
       page3 must haveLength(1)
     }
+
+    "return recent visible posts limited by count" >> {
+      val user = random[models.User]
+      val test = for {
+        _ <- models.User.sql.insert(user)
+        _ <- (1 to 10).toList.traverse { i =>
+          val post = random[models.Post].copy(
+            id = PosInt(i),
+            authorId = user.id,
+            isHidden = false
+          )
+          models.Post.sql.insert(post)
+        }
+        result <- repo.findRecent(5)
+      } yield result
+
+      val result = test.runWithIO()
+      result must haveLength(5)
+    }
+
+    "exclude hidden posts from recent results" >> {
+      val user = random[models.User]
+      val test = for {
+        _ <- models.User.sql.insert(user)
+        _ <- (1 to 5).toList.traverse { i =>
+          val post = random[models.Post].copy(
+            id = PosInt(i),
+            authorId = user.id,
+            isHidden = false
+          )
+          models.Post.sql.insert(post)
+        }
+        _ <- (6 to 8).toList.traverse { i =>
+          val post = random[models.Post].copy(
+            id = PosInt(i),
+            authorId = user.id,
+            isHidden = true
+          )
+          models.Post.sql.insert(post)
+        }
+        result <- repo.findRecent(10)
+      } yield result
+
+      val result = test.runWithIO()
+      result must haveLength(5)
+      result.forall(!_.isHidden) must beTrue
+    }
+
+    "return posts ordered by created_at DESC in recent" >> {
+      val user = random[models.User]
+      val test = for {
+        _ <- models.User.sql.insert(user)
+        result <- repo.findRecent(10)
+      } yield result
+
+      val result = test.runWithIO()
+      val dates = result.map(_.createdAt)
+      dates mustEqual dates.sortBy(_.toEpochSecond).reverse
+    }
+
+    "return empty list when no visible posts exist for recent" >> {
+      val user = random[models.User]
+      val test = for {
+        _ <- models.User.sql.insert(user)
+        _ <- (1 to 3).toList.traverse { i =>
+          val post = random[models.Post].copy(
+            id = PosInt(i),
+            authorId = user.id,
+            isHidden = true
+          )
+          models.Post.sql.insert(post)
+        }
+        result <- repo.findRecent(5)
+      } yield result
+
+      val result = test.runWithIO()
+      result must beEmpty
+    }
   }
 }

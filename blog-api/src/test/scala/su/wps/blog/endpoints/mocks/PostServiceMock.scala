@@ -14,7 +14,8 @@ object PostServiceMock {
     postByIdResult: Option[PostResult] = None,
     postsByTagResult: List[ListPostResult] = Nil,
     searchPostsResult: List[ListPostResult] = Nil,
-    incrementViewCountSuccess: Boolean = true
+    incrementViewCountSuccess: Boolean = true,
+    recentPostsResult: List[ListPostResult] = Nil
   )(implicit R: Raise[F, AppErr]): PostService[F] =
     new PostService[F] {
       def allPosts(limit: Int, offset: Int): F[ListItemsResult[ListPostResult]] =
@@ -31,5 +32,8 @@ object PostServiceMock {
 
       def searchPosts(query: String, limit: Int, offset: Int): F[ListItemsResult[ListPostResult]] =
         ListItemsResult(searchPostsResult, searchPostsResult.length).pure[F]
+
+      def recentPosts(count: Int): F[List[ListPostResult]] =
+        recentPostsResult.pure[F]
     }
 }

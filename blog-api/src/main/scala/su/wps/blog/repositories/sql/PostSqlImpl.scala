@@ -82,6 +82,13 @@ final class PostSqlImpl private extends PostSql[ConnectionIO] {
       WHERE is_hidden = false
         AND search_vector @@ plainto_tsquery('english', $query)
     """.query[Int].unique
+
+  def findRecent(count: Int): ConnectionIO[List[Post]] =
+    (fr"SELECT name, short_text, text, author_id, views, meta_title, " ++
+      fr"meta_keywords, meta_description, is_hidden, created_at, id FROM" ++ tableName ++
+      fr"WHERE is_hidden = false ORDER BY created_at DESC LIMIT $count")
+      .query[Post]
+      .to[List]
 }
 
 object PostSqlImpl {

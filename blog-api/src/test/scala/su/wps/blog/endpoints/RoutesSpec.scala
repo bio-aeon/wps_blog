@@ -131,6 +131,44 @@ class RoutesSpec extends Specification {
       resp.status mustEqual Status.Ok
       respBody mustEqual """{"items":[],"total":0}"""
     }
+
+    "return 200 with recent posts for GET /posts/recent" >> {
+      val routes = mkRoutesWithRecentPosts[IO]
+      val request = Request[IO](Method.GET, uri"posts/recent")
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+      resp.status mustEqual Status.Ok
+    }
+
+    "return recent posts with default count when count param is not provided" >> {
+      val routes = mkRoutesWithRecentPosts[IO]
+      val request = Request[IO](Method.GET, uri"posts/recent")
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+      val respBody = resp.as[String].unsafeRunSync()
+
+      resp.status mustEqual Status.Ok
+      respBody must contain("recent-post")
+    }
+
+    "return recent posts with specified count" >> {
+      val routes = mkRoutesWithRecentPosts[IO]
+      val request = Request[IO](Method.GET, uri"posts/recent".withQueryParams(Map("count" -> "3")))
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+      resp.status mustEqual Status.Ok
+    }
+
+    "return empty list when no recent posts exist" >> {
+      val routes = mkRoutesWithEmptyRecentPosts[IO]
+      val request = Request[IO](Method.GET, uri"posts/recent")
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+      val respBody = resp.as[String].unsafeRunSync()
+
+      resp.status mustEqual Status.Ok
+      respBody mustEqual "[]"
+    }
   }
 
   private def mkRoutes[F[_]: Monad: Raise[*[_], AppErr]]: Routes[F] = {
@@ -190,6 +228,35 @@ class RoutesSpec extends Specification {
 
   private def mkRoutesWithEmptySearch[F[_]: Monad: Raise[*[_], AppErr]]: Routes[F] = {
     val postService = PostServiceMock.create[F](searchPostsResult = Nil)
+
+    RoutesImpl.create[F](postService)
+  }
+
+  private def mkRoutesWithRecentPosts[F[_]: Monad: Raise[*[_], AppErr]]: Routes[F] = {
+    val tags = List(TagResult(TagId(1), "scala", "scala"))
+    val recentPosts = List(
+      ListPostResult(
+        PostId(1),
+        "recent-post",
+        "Recent post text",
+        ZonedDateTime.parse("2001-01-01T09:15:00Z"),
+        tags
+      ),
+      ListPostResult(
+        PostId(2),
+        "another-recent",
+        "Another recent post",
+        ZonedDateTime.parse("2001-01-02T09:15:00Z"),
+        tags
+      )
+    )
+    val postService = PostServiceMock.create[F](recentPostsResult = recentPosts)
+
+    RoutesImpl.create[F](postService)
+  }
+
+  private def mkRoutesWithEmptyRecentPosts[F[_]: Monad: Raise[*[_], AppErr]]: Routes[F] = {
+    val postService = PostServiceMock.create[F](recentPostsResult = Nil)
 
     RoutesImpl.create[F](postService)
   }

@@ -154,6 +154,40 @@ class PostServiceSpec extends Specification {
         r.items.isEmpty && r.total == 0
       }
     }
+
+    "return recent posts limited by count" >> {
+      val posts = random[Post](5)
+      val service = mkService(findRecentResult = posts)
+
+      service.recentPosts(5) must beRight.which(_.length == 5)
+    }
+
+    "include tags in recent posts results" >> {
+      val posts = random[Post](2)
+      val tag1 = Tag("scala", "scala", Some(TagId(1)))
+      val tag2 = Tag("fp", "fp", Some(TagId(2)))
+      val tagsByPost = posts.flatMap(p => p.id.map(id => List((id, tag1), (id, tag2)))).flatten
+      val service = mkService(findRecentResult = posts, findByPostIdsResult = tagsByPost)
+
+      service.recentPosts(5) must beRight.which { r =>
+        r.forall(_.tags.length == 2) && r.forall(_.tags.exists(_.name == "scala"))
+      }
+    }
+
+    "return empty list when no recent posts exist" >> {
+      val service = mkService(findRecentResult = Nil)
+
+      service.recentPosts(5) must beRight.which(_.isEmpty)
+    }
+
+    "handle recent posts with no tags" >> {
+      val posts = random[Post](3)
+      val service = mkService(findRecentResult = posts, findByPostIdsResult = Nil)
+
+      service.recentPosts(5) must beRight.which { r =>
+        r.length == 3 && r.forall(_.tags.isEmpty)
+      }
+    }
   }
 
   private def mkService(
@@ -166,7 +200,8 @@ class PostServiceSpec extends Specification {
     findCountByTagSlugResult: Int = 0,
     incrementViewsResult: Int = 1,
     searchPostsResult: List[Post] = Nil,
-    searchPostsCountResult: Int = 0
+    searchPostsCountResult: Int = 0,
+    findRecentResult: List[Post] = Nil
   ): PostService[RunF] = {
     val postRepo = PostRepositoryMock.create[Id](
       findAllResult,
@@ -176,7 +211,8 @@ class PostServiceSpec extends Specification {
       findCountByTagSlugResult = findCountByTagSlugResult,
       incrementViewsResult = incrementViewsResult,
       searchPostsResult = searchPostsResult,
-      searchPostsCountResult = searchPostsCountResult
+      searchPostsCountResult = searchPostsCountResult,
+      findRecentResult = findRecentResult
     )
     val tagRepo = TagRepositoryMock.create[Id](
       findByPostIdResult = findByPostIdResult,

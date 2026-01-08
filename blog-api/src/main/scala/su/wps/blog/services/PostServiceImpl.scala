@@ -115,6 +115,27 @@ final class PostServiceImpl[F[_]: Monad, DB[_]: Monad] private (
           total
         )
       }
+
+  def recentPosts(count: Int): F[List[ListPostResult]] =
+    postRepo
+      .findRecent(count)
+      .flatMap { posts =>
+        val postIds = posts.flatMap(_.id)
+        tagRepo.findByPostIds(postIds).map((posts, _))
+      }
+      .thrushK(xa.trans)
+      .map { case (posts, tagsByPost) =>
+        val tagsByPostId =
+          tagsByPost.groupBy(_._1).map { case (pid, tags) => pid -> tags.map(_._2) }
+        posts.map { post =>
+          val tags = tagsByPostId.get(post.nonEmptyId).toList.flatten
+          post
+            .into[ListPostResult]
+            .withFieldComputed(_.id, _.nonEmptyId)
+            .withFieldConst(_.tags, tagsToTagResults(tags))
+            .transform
+        }
+      }
 }
 
 object PostServiceImpl {

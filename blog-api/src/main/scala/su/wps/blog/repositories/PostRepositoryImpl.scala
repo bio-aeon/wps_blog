@@ -34,6 +34,9 @@ final class PostRepositoryImpl[DB[_]] private (sql: PostSql[DB]) extends PostRep
 
   def searchPostsCount(query: String): DB[Int] =
     sql.searchPostsCount(query)
+
+  def findRecent(count: Int): DB[List[Post]] =
+    sql.findRecent(count)
 }
 
 object PostRepositoryImpl {

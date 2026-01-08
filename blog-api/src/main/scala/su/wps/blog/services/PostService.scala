@@ -13,4 +13,6 @@ trait PostService[F[_]] {
   def incrementViewCount(id: PostId): F[Unit]
 
   def searchPosts(query: String, limit: Int, offset: Int): F[ListItemsResult[ListPostResult]]
+
+  def recentPosts(count: Int): F[List[ListPostResult]]
 }

@@ -14,11 +14,13 @@ import su.wps.blog.services.PostService
 final class RoutesImpl[F[_]: Monad] private (postService: PostService[F])
     extends Http4sDsl[F]
     with Routes[F] {
+  import RoutesImpl._
 
   private object LimitParamMatcher extends QueryParamDecoderMatcher[Int]("limit")
   private object OffsetParamMatcher extends QueryParamDecoderMatcher[Int]("offset")
   private object TagParamMatcher extends OptionalQueryParamDecoderMatcher[String]("tag")
   private object QueryParamMatcher extends QueryParamDecoderMatcher[String]("q")
+  private object CountParamMatcher extends OptionalQueryParamDecoderMatcher[Int]("count")
 
   val routes: HttpRoutes[F] = HttpRoutes.of[F] {
     case GET -> Root / "posts" :? LimitParamMatcher(limit) +& OffsetParamMatcher(offset)
@@ -34,6 +36,13 @@ final class RoutesImpl[F[_]: Monad] private (postService: PostService[F])
         +& OffsetParamMatcher(offset) =>
       postService.searchPosts(query, limit, offset).map(_.asJson).flatMap(Ok(_))
 
+    case GET -> Root / "posts" / "recent" :? CountParamMatcher(maybeCount) =>
+      val count = maybeCount
+        .getOrElse(DefaultRecentPostsCount)
+        .min(MaxRecentPostsCount)
+        .max(MinRecentPostsCount)
+      postService.recentPosts(count).map(_.asJson).flatMap(Ok(_))
+
     case GET -> Root / "posts" / IntVar(id) =>
       postService.postById(PostId(id)).map(_.asJson).flatMap(Ok(_))
 
@@ -43,6 +52,9 @@ final class RoutesImpl[F[_]: Monad] private (postService: PostService[F])
 }
 
 object RoutesImpl {
+  val DefaultRecentPostsCount = 5
+  val MaxRecentPostsCount = 20
+  val MinRecentPostsCount = 1
 
   def create[F[_]: Monad](postService: PostService[F]): RoutesImpl[F] =
     new RoutesImpl[F](postService)
