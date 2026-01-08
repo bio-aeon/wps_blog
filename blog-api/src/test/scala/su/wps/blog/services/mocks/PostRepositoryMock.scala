@@ -13,7 +13,9 @@ object PostRepositoryMock {
     findCountIncludeHiddenResult: Int = 0,
     findByTagSlugResult: List[Post] = Nil,
     findCountByTagSlugResult: Int = 0,
-    incrementViewsResult: Int = 1
+    incrementViewsResult: Int = 1,
+    searchPostsResult: List[Post] = Nil,
+    searchPostsCountResult: Int = 0
   )(implicit DB: Applicative[DB]): PostRepository[DB] = new PostRepository[DB] {
     def findAllWithLimitAndOffset(limit: Int, offset: Int): DB[List[Post]] =
       DB.pure(findAllResult)
@@ -33,5 +35,10 @@ object PostRepositoryMock {
     def findCountByTagSlug(tagSlug: String): DB[Int] = DB.pure(findCountByTagSlugResult)
 
     def incrementViews(id: PostId): DB[Int] = DB.pure(incrementViewsResult)
+
+    def searchPosts(query: String, limit: Int, offset: Int): DB[List[Post]] =
+      DB.pure(searchPostsResult)
+
+    def searchPostsCount(query: String): DB[Int] = DB.pure(searchPostsCountResult)
   }
 }

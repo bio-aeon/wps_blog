@@ -285,5 +285,178 @@ class PostRepositorySpec extends Specification with DbTest {
       val rowsUpdated = test.runWithIO()
       rowsUpdated mustEqual 0
     }
+
+    "search posts by query matching name" >> {
+      val user = random[models.User]
+      val test = for {
+        _ <- models.User.sql.insert(user)
+        // Create posts with specific content for search
+        post1 = random[models.Post].copy(
+          id = PosInt(1),
+          authorId = user.id,
+          isHidden = false,
+          name = Varchar("Introduction to Scala Programming"),
+          shortText = Varchar("Learn basics"),
+          text = Varchar("Full article content")
+        )
+        post2 = random[models.Post].copy(
+          id = PosInt(2),
+          authorId = user.id,
+          isHidden = false,
+          name = Varchar("Python for Beginners"),
+          shortText = Varchar("Python basics"),
+          text = Varchar("Another article")
+        )
+        _ <- models.Post.sql.insert(post1)
+        _ <- models.Post.sql.insert(post2)
+        result <- repo.searchPosts("Scala", 10, 0)
+      } yield result
+
+      val result = test.runWithIO()
+      result must haveLength(1)
+      result.head.name must contain("Scala")
+    }
+
+    "search posts matching short_text content" >> {
+      val user = random[models.User]
+      val test = for {
+        _ <- models.User.sql.insert(user)
+        post1 = random[models.Post].copy(
+          id = PosInt(1),
+          authorId = user.id,
+          isHidden = false,
+          name = Varchar("Post One"),
+          shortText = Varchar("This is about functional programming patterns"),
+          text = Varchar("Some content")
+        )
+        post2 = random[models.Post].copy(
+          id = PosInt(2),
+          authorId = user.id,
+          isHidden = false,
+          name = Varchar("Post Two"),
+          shortText = Varchar("Object oriented design"),
+          text = Varchar("Other content")
+        )
+        _ <- models.Post.sql.insert(post1)
+        _ <- models.Post.sql.insert(post2)
+        result <- repo.searchPosts("functional", 10, 0)
+      } yield result
+
+      val result = test.runWithIO()
+      result must haveLength(1)
+      result.head.shortText must contain("functional")
+    }
+
+    "exclude hidden posts from search results" >> {
+      val user = random[models.User]
+      val test = for {
+        _ <- models.User.sql.insert(user)
+        visiblePost = random[models.Post].copy(
+          id = PosInt(1),
+          authorId = user.id,
+          isHidden = false,
+          name = Varchar("Public Haskell Tutorial"),
+          shortText = Varchar("Haskell basics"),
+          text = Varchar("Content")
+        )
+        hiddenPost = random[models.Post].copy(
+          id = PosInt(2),
+          authorId = user.id,
+          isHidden = true,
+          name = Varchar("Hidden Haskell Advanced"),
+          shortText = Varchar("Advanced Haskell"),
+          text = Varchar("Content")
+        )
+        _ <- models.Post.sql.insert(visiblePost)
+        _ <- models.Post.sql.insert(hiddenPost)
+        result <- repo.searchPosts("Haskell", 10, 0)
+      } yield result
+
+      val result = test.runWithIO()
+      result must haveLength(1)
+      result.head.isHidden must beFalse
+    }
+
+    "return empty list when no posts match search query" >> {
+      val user = random[models.User]
+      val test = for {
+        _ <- models.User.sql.insert(user)
+        post = random[models.Post].copy(
+          id = PosInt(1),
+          authorId = user.id,
+          isHidden = false,
+          name = Varchar("Java Tutorial"),
+          shortText = Varchar("Java basics"),
+          text = Varchar("Content")
+        )
+        _ <- models.Post.sql.insert(post)
+        result <- repo.searchPosts("Nonexistent Language", 10, 0)
+      } yield result
+
+      val result = test.runWithIO()
+      result must beEmpty
+    }
+
+    "return correct count for search results" >> {
+      val user = random[models.User]
+      val test = for {
+        _ <- models.User.sql.insert(user)
+        // Create 3 posts matching "database"
+        _ <- (1 to 3).toList.traverse { i =>
+          val post = random[models.Post].copy(
+            id = PosInt(i),
+            authorId = user.id,
+            isHidden = false,
+            name = Varchar(s"Database Tutorial $i"),
+            shortText = Varchar("Learn database"),
+            text = Varchar("Content")
+          )
+          models.Post.sql.insert(post)
+        }
+        // Create 2 posts not matching
+        _ <- (4 to 5).toList.traverse { i =>
+          val post = random[models.Post].copy(
+            id = PosInt(i),
+            authorId = user.id,
+            isHidden = false,
+            name = Varchar(s"Other Topic $i"),
+            shortText = Varchar("Something else"),
+            text = Varchar("Content")
+          )
+          models.Post.sql.insert(post)
+        }
+        count <- repo.searchPostsCount("database")
+      } yield count
+
+      val count = test.runWithIO()
+      count mustEqual 3
+    }
+
+    "respect pagination in search results" >> {
+      val user = random[models.User]
+      val test = for {
+        _ <- models.User.sql.insert(user)
+        // Create 5 posts matching "programming"
+        _ <- (1 to 5).toList.traverse { i =>
+          val post = random[models.Post].copy(
+            id = PosInt(i),
+            authorId = user.id,
+            isHidden = false,
+            name = Varchar(s"Programming Guide $i"),
+            shortText = Varchar("Learn programming"),
+            text = Varchar("Content")
+          )
+          models.Post.sql.insert(post)
+        }
+        page1 <- repo.searchPosts("programming", 2, 0)
+        page2 <- repo.searchPosts("programming", 2, 2)
+        page3 <- repo.searchPosts("programming", 2, 4)
+      } yield (page1, page2, page3)
+
+      val (page1, page2, page3) = test.runWithIO()
+      page1 must haveLength(2)
+      page2 must haveLength(2)
+      page3 must haveLength(1)
+    }
   }
 }

@@ -13,6 +13,7 @@ object PostServiceMock {
     allPostsResult: List[ListPostResult] = Nil,
     postByIdResult: Option[PostResult] = None,
     postsByTagResult: List[ListPostResult] = Nil,
+    searchPostsResult: List[ListPostResult] = Nil,
     incrementViewCountSuccess: Boolean = true
   )(implicit R: Raise[F, AppErr]): PostService[F] =
     new PostService[F] {
@@ -27,5 +28,8 @@ object PostServiceMock {
 
       def incrementViewCount(id: PostId): F[Unit] =
         ().pure[F]
+
+      def searchPosts(query: String, limit: Int, offset: Int): F[ListItemsResult[ListPostResult]] =
+        ListItemsResult(searchPostsResult, searchPostsResult.length).pure[F]
     }
 }

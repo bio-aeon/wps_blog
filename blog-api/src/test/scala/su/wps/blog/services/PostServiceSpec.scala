@@ -121,6 +121,39 @@ class PostServiceSpec extends Specification {
 
       service.incrementViewCount(PostId(1)) must beRight(())
     }
+
+    "return search results with correct pagination" >> {
+      val posts = random[Post](3)
+      val service = mkService(searchPostsResult = posts, searchPostsCountResult = 10)
+
+      service.searchPosts("scala", 3, 0) must beRight.which { r =>
+        r.items.length == 3 && r.total == 10
+      }
+    }
+
+    "include tags in search results" >> {
+      val posts = random[Post](2)
+      val tag1 = Tag("scala", "scala", Some(TagId(1)))
+      val tag2 = Tag("fp", "fp", Some(TagId(2)))
+      val tagsByPost = posts.flatMap(p => p.id.map(id => List((id, tag1), (id, tag2)))).flatten
+      val service = mkService(
+        searchPostsResult = posts,
+        searchPostsCountResult = 2,
+        findByPostIdsResult = tagsByPost
+      )
+
+      service.searchPosts("scala", 10, 0) must beRight.which { r =>
+        r.items.forall(_.tags.length == 2) && r.items.forall(_.tags.exists(_.name == "scala"))
+      }
+    }
+
+    "return empty result for search with no matches" >> {
+      val service = mkService(searchPostsResult = Nil, searchPostsCountResult = 0)
+
+      service.searchPosts("nonexistent", 10, 0) must beRight.which { r =>
+        r.items.isEmpty && r.total == 0
+      }
+    }
   }
 
   private def mkService(
@@ -131,7 +164,9 @@ class PostServiceSpec extends Specification {
     findByPostIdsResult: List[(PostId, Tag)] = Nil,
     findByTagSlugResult: List[Post] = Nil,
     findCountByTagSlugResult: Int = 0,
-    incrementViewsResult: Int = 1
+    incrementViewsResult: Int = 1,
+    searchPostsResult: List[Post] = Nil,
+    searchPostsCountResult: Int = 0
   ): PostService[RunF] = {
     val postRepo = PostRepositoryMock.create[Id](
       findAllResult,
@@ -139,7 +174,9 @@ class PostServiceSpec extends Specification {
       findByIdResult,
       findByTagSlugResult = findByTagSlugResult,
       findCountByTagSlugResult = findCountByTagSlugResult,
-      incrementViewsResult = incrementViewsResult
+      incrementViewsResult = incrementViewsResult,
+      searchPostsResult = searchPostsResult,
+      searchPostsCountResult = searchPostsCountResult
     )
     val tagRepo = TagRepositoryMock.create[Id](
       findByPostIdResult = findByPostIdResult,

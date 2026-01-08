@@ -61,6 +61,27 @@ final class PostSqlImpl private extends PostSql[ConnectionIO] {
 
   def incrementViews(id: PostId): ConnectionIO[Int] =
     sql"UPDATE posts SET views = views + 1 WHERE id = $id AND is_hidden = false".update.run
+
+  def searchPosts(query: String, limit: Int, offset: Int): ConnectionIO[List[Post]] =
+    sql"""
+      SELECT name, short_text, text, author_id, views,
+             meta_title, meta_keywords, meta_description,
+             is_hidden, created_at, id
+      FROM posts
+      WHERE is_hidden = false
+        AND search_vector @@ plainto_tsquery('english', $query)
+      ORDER BY ts_rank(search_vector, plainto_tsquery('english', $query)) DESC,
+               created_at DESC
+      LIMIT $limit OFFSET $offset
+    """.query[Post].to[List]
+
+  def searchPostsCount(query: String): ConnectionIO[Int] =
+    sql"""
+      SELECT COUNT(*)
+      FROM posts
+      WHERE is_hidden = false
+        AND search_vector @@ plainto_tsquery('english', $query)
+    """.query[Int].unique
 }
 
 object PostSqlImpl {

@@ -92,6 +92,45 @@ class RoutesSpec extends Specification {
 
       resp.status mustEqual Status.NoContent
     }
+
+    "return 200 with search results for GET /posts/search" >> {
+      val routes = mkRoutesWithSearch[IO]
+      val request = Request[IO](
+        Method.GET,
+        uri"posts/search".withQueryParams(Map("q" -> "scala", "limit" -> "10", "offset" -> "0"))
+      )
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+      resp.status mustEqual Status.Ok
+    }
+
+    "return matching posts in search response" >> {
+      val routes = mkRoutesWithSearch[IO]
+      val request = Request[IO](
+        Method.GET,
+        uri"posts/search".withQueryParams(Map("q" -> "scala", "limit" -> "10", "offset" -> "0"))
+      )
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+      val respBody = resp.as[String].unsafeRunSync()
+
+      respBody must contain("scala-tutorial")
+      respBody must contain("\"total\":2")
+    }
+
+    "return empty list when search has no matches" >> {
+      val routes = mkRoutesWithEmptySearch[IO]
+      val request = Request[IO](
+        Method.GET,
+        uri"posts/search".withQueryParams(Map("q" -> "nonexistent", "limit" -> "10", "offset" -> "0"))
+      )
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+      val respBody = resp.as[String].unsafeRunSync()
+
+      resp.status mustEqual Status.Ok
+      respBody mustEqual """{"items":[],"total":0}"""
+    }
   }
 
   private def mkRoutes[F[_]: Monad: Raise[*[_], AppErr]]: Routes[F] = {
@@ -122,6 +161,35 @@ class RoutesSpec extends Specification {
     )
     val postService = PostServiceMock
       .create[F](allPostsResult = allPosts, postByIdResult = None, postsByTagResult = taggedPosts)
+
+    RoutesImpl.create[F](postService)
+  }
+
+  private def mkRoutesWithSearch[F[_]: Monad: Raise[*[_], AppErr]]: Routes[F] = {
+    val tags = List(TagResult(TagId(1), "scala", "scala"))
+    val searchResults = List(
+      ListPostResult(
+        PostId(1),
+        "scala-tutorial",
+        "Learn Scala programming",
+        ZonedDateTime.parse("2001-01-01T09:15:00Z"),
+        tags
+      ),
+      ListPostResult(
+        PostId(2),
+        "scala-advanced",
+        "Advanced Scala topics",
+        ZonedDateTime.parse("2001-01-02T09:15:00Z"),
+        tags
+      )
+    )
+    val postService = PostServiceMock.create[F](searchPostsResult = searchResults)
+
+    RoutesImpl.create[F](postService)
+  }
+
+  private def mkRoutesWithEmptySearch[F[_]: Monad: Raise[*[_], AppErr]]: Routes[F] = {
+    val postService = PostServiceMock.create[F](searchPostsResult = Nil)
 
     RoutesImpl.create[F](postService)
   }

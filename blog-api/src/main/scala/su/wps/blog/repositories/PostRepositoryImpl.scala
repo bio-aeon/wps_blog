@@ -28,6 +28,12 @@ final class PostRepositoryImpl[DB[_]] private (sql: PostSql[DB]) extends PostRep
 
   def incrementViews(id: PostId): DB[Int] =
     sql.incrementViews(id)
+
+  def searchPosts(query: String, limit: Int, offset: Int): DB[List[Post]] =
+    sql.searchPosts(query, limit, offset)
+
+  def searchPostsCount(query: String): DB[Int] =
+    sql.searchPostsCount(query)
 }
 
 object PostRepositoryImpl {
