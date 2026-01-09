@@ -34,9 +34,8 @@ final class CommentSqlImpl private extends CommentSql[ConnectionIO] {
     """).update.withUniqueGeneratedKeys[CommentId]("id").map(id => comment.copy(id = id.some))
 
   def findCommentsByPostId(postId: PostId): ConnectionIO[List[Comment]] =
-    (fr"SELECT text, name, email, post_id, left, right, " ++
-      fr"tree_id, level, rating, created_at, parent_id, id FROM" ++ tableName ++
-      fr"WHERE post_id = $postId ORDER BY created_at DESC")
+    (fr"SELECT text, name, email, post_id, rating, created_at, parent_id, id FROM" ++ tableName ++
+      fr"WHERE post_id = $postId ORDER BY created_at ASC")
       .query[Comment]
       .to[List]
 }

@@ -6,8 +6,9 @@ import cats.effect.unsafe.implicits.global
 import org.http4s.*
 import org.http4s.implicits.*
 import org.specs2.mutable.Specification
-import su.wps.blog.endpoints.mocks.PostServiceMock
-import su.wps.blog.models.api.{ListPostResult, PostResult, TagResult}
+import su.wps.blog.endpoints.mocks.{CommentServiceMock, PostServiceMock}
+import su.wps.blog.models.api.{CommentResult, CommentsListResult, ListPostResult, PostResult, TagResult}
+import su.wps.blog.models.domain.CommentId
 import su.wps.blog.models.domain.{AppErr, PostId, TagId}
 import tofu.Raise
 
@@ -169,6 +170,48 @@ class RoutesSpec extends Specification {
       resp.status mustEqual Status.Ok
       respBody mustEqual "[]"
     }
+
+    "return 200 with threaded comments for GET /posts/{id}/comments" >> {
+      val routes = mkRoutesWithComments[IO]
+      val request = Request[IO](Method.GET, uri"posts/1/comments")
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+
+      resp.status mustEqual Status.Ok
+    }
+
+    "return JSON with comments array and total" >> {
+      val routes = mkRoutesWithComments[IO]
+      val request = Request[IO](Method.GET, uri"posts/1/comments")
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+      val respBody = resp.as[String].unsafeRunSync()
+
+      respBody must contain("\"comments\":")
+      respBody must contain("\"total\":2")
+    }
+
+    "return nested replies structure in comments" >> {
+      val routes = mkRoutesWithComments[IO]
+      val request = Request[IO](Method.GET, uri"posts/1/comments")
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+      val respBody = resp.as[String].unsafeRunSync()
+
+      respBody must contain("\"replies\":")
+      respBody must contain("Reply text")
+    }
+
+    "return empty comments for post with no comments" >> {
+      val routes = mkRoutesWithEmptyComments[IO]
+      val request = Request[IO](Method.GET, uri"posts/99999/comments")
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+      val respBody = resp.as[String].unsafeRunSync()
+
+      resp.status mustEqual Status.Ok
+      respBody mustEqual """{"comments":[],"total":0}"""
+    }
   }
 
   private def mkRoutes[F[_]: Monad: Raise[*[_], AppErr]]: Routes[F] = {
@@ -180,7 +223,8 @@ class RoutesSpec extends Specification {
       Some(PostResult("name", "text", ZonedDateTime.parse("2001-01-01T09:15:00Z"), tags))
     )
 
-    RoutesImpl.create[F](postService)
+    val commentService = CommentServiceMock.create[F]()
+    RoutesImpl.create[F](postService, commentService)
   }
 
   private def mkRoutesWithTagFilter[F[_]: Monad: Raise[*[_], AppErr]]: Routes[F] = {
@@ -199,8 +243,9 @@ class RoutesSpec extends Specification {
     )
     val postService = PostServiceMock
       .create[F](allPostsResult = allPosts, postByIdResult = None, postsByTagResult = taggedPosts)
+    val commentService = CommentServiceMock.create[F]()
 
-    RoutesImpl.create[F](postService)
+    RoutesImpl.create[F](postService, commentService)
   }
 
   private def mkRoutesWithSearch[F[_]: Monad: Raise[*[_], AppErr]]: Routes[F] = {
@@ -222,14 +267,16 @@ class RoutesSpec extends Specification {
       )
     )
     val postService = PostServiceMock.create[F](searchPostsResult = searchResults)
+    val commentService = CommentServiceMock.create[F]()
 
-    RoutesImpl.create[F](postService)
+    RoutesImpl.create[F](postService, commentService)
   }
 
   private def mkRoutesWithEmptySearch[F[_]: Monad: Raise[*[_], AppErr]]: Routes[F] = {
     val postService = PostServiceMock.create[F](searchPostsResult = Nil)
+    val commentService = CommentServiceMock.create[F]()
 
-    RoutesImpl.create[F](postService)
+    RoutesImpl.create[F](postService, commentService)
   }
 
   private def mkRoutesWithRecentPosts[F[_]: Monad: Raise[*[_], AppErr]]: Routes[F] = {
@@ -251,13 +298,47 @@ class RoutesSpec extends Specification {
       )
     )
     val postService = PostServiceMock.create[F](recentPostsResult = recentPosts)
+    val commentService = CommentServiceMock.create[F]()
 
-    RoutesImpl.create[F](postService)
+    RoutesImpl.create[F](postService, commentService)
   }
 
   private def mkRoutesWithEmptyRecentPosts[F[_]: Monad: Raise[*[_], AppErr]]: Routes[F] = {
     val postService = PostServiceMock.create[F](recentPostsResult = Nil)
+    val commentService = CommentServiceMock.create[F]()
 
-    RoutesImpl.create[F](postService)
+    RoutesImpl.create[F](postService, commentService)
+  }
+
+  private def mkRoutesWithComments[F[_]: Monad: Raise[*[_], AppErr]]: Routes[F] = {
+    val postService = PostServiceMock.create[F]()
+    val reply = CommentResult(
+      CommentId(2),
+      "Replier",
+      "Reply text",
+      1,
+      ZonedDateTime.parse("2001-01-01T10:00:00Z"),
+      Nil
+    )
+    val rootComment = CommentResult(
+      CommentId(1),
+      "Author",
+      "Root comment",
+      5,
+      ZonedDateTime.parse("2001-01-01T09:00:00Z"),
+      List(reply)
+    )
+    val commentService = CommentServiceMock.create[F](
+      CommentsListResult(List(rootComment), 2)
+    )
+
+    RoutesImpl.create[F](postService, commentService)
+  }
+
+  private def mkRoutesWithEmptyComments[F[_]: Monad: Raise[*[_], AppErr]]: Routes[F] = {
+    val postService = PostServiceMock.create[F]()
+    val commentService = CommentServiceMock.create[F](CommentsListResult(Nil, 0))
+
+    RoutesImpl.create[F](postService, commentService)
   }
 }

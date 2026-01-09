@@ -9,10 +9,12 @@ import org.http4s.HttpRoutes
 import org.http4s.circe.*
 import org.http4s.dsl.Http4sDsl
 import su.wps.blog.models.domain.PostId
-import su.wps.blog.services.PostService
+import su.wps.blog.services.{CommentService, PostService}
 
-final class RoutesImpl[F[_]: Monad] private (postService: PostService[F])
-    extends Http4sDsl[F]
+final class RoutesImpl[F[_]: Monad] private (
+  postService: PostService[F],
+  commentService: CommentService[F]
+) extends Http4sDsl[F]
     with Routes[F] {
   import RoutesImpl._
 
@@ -48,6 +50,9 @@ final class RoutesImpl[F[_]: Monad] private (postService: PostService[F])
 
     case POST -> Root / "posts" / IntVar(id) / "view" =>
       postService.incrementViewCount(PostId(id)) *> NoContent()
+
+    case GET -> Root / "posts" / IntVar(id) / "comments" =>
+      commentService.getCommentsForPost(PostId(id)).map(_.asJson).flatMap(Ok(_))
   }
 }
 
@@ -56,6 +61,9 @@ object RoutesImpl {
   val MaxRecentPostsCount = 20
   val MinRecentPostsCount = 1
 
-  def create[F[_]: Monad](postService: PostService[F]): RoutesImpl[F] =
-    new RoutesImpl[F](postService)
+  def create[F[_]: Monad](
+    postService: PostService[F],
+    commentService: CommentService[F]
+  ): RoutesImpl[F] =
+    new RoutesImpl[F](postService, commentService)
 }
