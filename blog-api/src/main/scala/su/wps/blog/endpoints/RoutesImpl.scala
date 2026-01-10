@@ -1,17 +1,19 @@
 package su.wps.blog.endpoints
 
-import cats.Monad
+import cats.effect.Concurrent
 import cats.syntax.apply.*
 import cats.syntax.flatMap.*
 import cats.syntax.functor.*
 import io.circe.syntax.*
 import org.http4s.HttpRoutes
 import org.http4s.circe.*
+import org.http4s.circe.CirceEntityDecoder.*
 import org.http4s.dsl.Http4sDsl
+import su.wps.blog.models.api.CreateCommentRequest
 import su.wps.blog.models.domain.PostId
 import su.wps.blog.services.{CommentService, PostService}
 
-final class RoutesImpl[F[_]: Monad] private (
+final class RoutesImpl[F[_]: Concurrent] private (
   postService: PostService[F],
   commentService: CommentService[F]
 ) extends Http4sDsl[F]
@@ -53,6 +55,11 @@ final class RoutesImpl[F[_]: Monad] private (
 
     case GET -> Root / "posts" / IntVar(id) / "comments" =>
       commentService.getCommentsForPost(PostId(id)).map(_.asJson).flatMap(Ok(_))
+
+    case req @ POST -> Root / "posts" / IntVar(id) / "comments" =>
+      req.as[CreateCommentRequest].flatMap { request =>
+        commentService.createComment(PostId(id), request).map(_.asJson).flatMap(Created(_))
+      }
   }
 }
 
@@ -61,7 +68,7 @@ object RoutesImpl {
   val MaxRecentPostsCount = 20
   val MinRecentPostsCount = 1
 
-  def create[F[_]: Monad](
+  def create[F[_]: Concurrent](
     postService: PostService[F],
     commentService: CommentService[F]
   ): RoutesImpl[F] =

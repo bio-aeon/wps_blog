@@ -5,6 +5,7 @@ import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 import org.scalacheck.ScalacheckShapeless.*
 import org.specs2.mutable.Specification
+import su.wps.blog.models.api.CreateCommentRequest
 import su.wps.blog.models.domain.{Comment, CommentId, PostId}
 import su.wps.blog.services.mocks.{CommentRepositoryMock, TxrMock}
 import su.wps.blog.tools.scalacheck.*
@@ -103,6 +104,53 @@ class CommentServiceSpec extends Specification {
         r.comments.isEmpty && r.total == 0
       }
     }
+
+    "create a comment and return CommentResult" >> {
+      val request = CreateCommentRequest("Author", "test@example.com", "Comment text", None)
+      val service = mkServiceForCreate()
+
+      val result = service.createComment(PostId(1), request)
+
+      result must beRight.which { r =>
+        r.name == "Author" && r.text == "Comment text" && r.rating == 0
+      }
+    }
+
+    "create a reply linked to parent comment" >> {
+      val request = CreateCommentRequest("Replier", "reply@example.com", "Reply text", Some(1))
+      val service = mkServiceForCreate()
+
+      val result = service.createComment(PostId(1), request)
+
+      result must beRight.which(_.id.value > 0)
+    }
+
+    "return comment with generated id after creation" >> {
+      val request = CreateCommentRequest("Author", "test@example.com", "Comment text", None)
+      val service = mkServiceForCreate(generatedId = CommentId(42))
+
+      val result = service.createComment(PostId(1), request)
+
+      result must beRight.which(_.id.value == 42)
+    }
+
+    "return comment with zero rating for newly created comment" >> {
+      val request = CreateCommentRequest("Author", "test@example.com", "Comment text", None)
+      val service = mkServiceForCreate()
+
+      val result = service.createComment(PostId(1), request)
+
+      result must beRight.which(_.rating == 0)
+    }
+
+    "return comment with empty replies list for newly created comment" >> {
+      val request = CreateCommentRequest("Author", "test@example.com", "Comment text", None)
+      val service = mkServiceForCreate()
+
+      val result = service.createComment(PostId(1), request)
+
+      result must beRight.which(_.replies.isEmpty)
+    }
   }
 
   private def mkComment(
@@ -123,6 +171,13 @@ class CommentServiceSpec extends Specification {
 
   private def mkService(comments: List[Comment]): CommentService[RunF] = {
     val commentRepo = CommentRepositoryMock.create[Id](comments)
+    CommentServiceImpl.create[RunF, Id](commentRepo, xa)
+  }
+
+  private def mkServiceForCreate(generatedId: CommentId = CommentId(1)): CommentService[RunF] = {
+    val commentRepo = CommentRepositoryMock.create[Id](
+      insertResult = comment => comment.copy(id = Some(generatedId))
+    )
     CommentServiceImpl.create[RunF, Id](commentRepo, xa)
   }
 }
