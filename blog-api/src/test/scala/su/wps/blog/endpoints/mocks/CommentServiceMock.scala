@@ -11,7 +11,8 @@ import java.time.ZonedDateTime
 object CommentServiceMock {
   def create[F[_]: Applicative](
     commentsForPostResult: CommentsListResult = CommentsListResult(Nil, 0),
-    createCommentResult: Option[CommentResult] = None
+    createCommentResult: Option[CommentResult] = None,
+    rateCommentResult: Unit = ()
   ): CommentService[F] =
     new CommentService[F] {
       def getCommentsForPost(postId: PostId): F[CommentsListResult] =
@@ -28,5 +29,8 @@ object CommentServiceMock {
             replies = Nil
           )
         ).pure[F]
+
+      def rateComment(commentId: CommentId, isUpvote: Boolean, ip: String): F[Unit] =
+        rateCommentResult.pure[F]
     }
 }

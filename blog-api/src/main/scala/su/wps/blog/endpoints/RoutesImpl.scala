@@ -5,11 +5,13 @@ import cats.syntax.apply.*
 import cats.syntax.flatMap.*
 import cats.syntax.functor.*
 import io.circe.syntax.*
-import org.http4s.HttpRoutes
+import org.http4s.{HttpRoutes, Request}
 import org.http4s.circe.*
 import org.http4s.circe.CirceEntityDecoder.*
 import org.http4s.dsl.Http4sDsl
-import su.wps.blog.models.api.CreateCommentRequest
+import org.http4s.headers.`X-Forwarded-For`
+import su.wps.blog.models.api.{CreateCommentRequest, RateCommentRequest}
+import su.wps.blog.models.domain.CommentId
 import su.wps.blog.models.domain.PostId
 import su.wps.blog.services.{CommentService, PostService}
 
@@ -60,7 +62,21 @@ final class RoutesImpl[F[_]: Concurrent] private (
       req.as[CreateCommentRequest].flatMap { request =>
         commentService.createComment(PostId(id), request).map(_.asJson).flatMap(Created(_))
       }
+
+    case req @ POST -> Root / "comments" / IntVar(id) / "rate" =>
+      val ip = extractIp(req)
+      req.as[RateCommentRequest].flatMap { request =>
+        commentService.rateComment(CommentId(id), request.isUpvote, ip) *> NoContent()
+      }
   }
+
+  private def extractIp(req: Request[F]): String =
+    req.headers
+      .get[`X-Forwarded-For`]
+      .flatMap(_.values.head)
+      .map(_.toUriString)
+      .orElse(req.remoteAddr.map(_.toUriString))
+      .getOrElse("unknown")
 }
 
 object RoutesImpl {

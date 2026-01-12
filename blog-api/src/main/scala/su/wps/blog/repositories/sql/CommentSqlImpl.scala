@@ -38,6 +38,27 @@ final class CommentSqlImpl private extends CommentSql[ConnectionIO] {
       fr"WHERE post_id = $postId ORDER BY created_at ASC")
       .query[Comment]
       .to[List]
+
+  def hasRated(commentId: CommentId, ip: String): ConnectionIO[Boolean] =
+    sql"""
+      SELECT EXISTS(
+        SELECT 1 FROM comment_raters
+        WHERE comment_id = ${commentId.value} AND ip = $ip
+      )
+    """.query[Boolean].unique
+
+  def insertRater(commentId: CommentId, ip: String): ConnectionIO[Int] =
+    sql"""
+      INSERT INTO comment_raters (comment_id, ip)
+      VALUES (${commentId.value}, $ip)
+    """.update.run
+
+  def updateRating(commentId: CommentId, delta: Int): ConnectionIO[Int] =
+    sql"""
+      UPDATE comments
+      SET rating = rating + $delta
+      WHERE id = ${commentId.value}
+    """.update.run
 }
 
 object CommentSqlImpl {

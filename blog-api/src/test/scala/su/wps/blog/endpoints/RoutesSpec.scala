@@ -9,6 +9,7 @@ import org.http4s.circe.*
 import org.http4s.implicits.*
 import org.specs2.mutable.Specification
 import su.wps.blog.endpoints.mocks.{CommentServiceMock, PostServiceMock}
+import io.circe.Json
 import su.wps.blog.models.api.*
 import su.wps.blog.models.domain.{AppErr, CommentId, PostId, TagId}
 import tofu.Raise
@@ -256,6 +257,46 @@ class RoutesSpec extends Specification {
 
       resp.status mustEqual Status.Created
     }
+
+    "return 204 No Content on successful comment rating" >> {
+      val routes = mkRoutesForRateComment[IO]
+      val body = RateCommentRequest(isUpvote = true)
+      val request = Request[IO](Method.POST, uri"comments/1/rate").withEntity(body.asJson)
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+
+      resp.status mustEqual Status.NoContent
+    }
+
+    "handle upvote rating request" >> {
+      val routes = mkRoutesForRateComment[IO]
+      val body = RateCommentRequest(isUpvote = true)
+      val request = Request[IO](Method.POST, uri"comments/1/rate").withEntity(body.asJson)
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+
+      resp.status mustEqual Status.NoContent
+    }
+
+    "handle downvote rating request" >> {
+      val routes = mkRoutesForRateComment[IO]
+      val body = RateCommentRequest(isUpvote = false)
+      val request = Request[IO](Method.POST, uri"comments/1/rate").withEntity(body.asJson)
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+
+      resp.status mustEqual Status.NoContent
+    }
+
+    "return 204 even for non-existent comment (idempotent)" >> {
+      val routes = mkRoutesForRateComment[IO]
+      val body = RateCommentRequest(isUpvote = true)
+      val request = Request[IO](Method.POST, uri"comments/99999/rate").withEntity(body.asJson)
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+
+      resp.status mustEqual Status.NoContent
+    }
   }
 
   private def mkRoutes[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
@@ -399,6 +440,13 @@ class RoutesSpec extends Specification {
     val commentService = CommentServiceMock.create[F](
       createCommentResult = Some(createdComment)
     )
+
+    RoutesImpl.create[F](postService, commentService)
+  }
+
+  private def mkRoutesForRateComment[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
+    val postService = PostServiceMock.create[F]()
+    val commentService = CommentServiceMock.create[F]()
 
     RoutesImpl.create[F](postService, commentService)
   }

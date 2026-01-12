@@ -1,6 +1,8 @@
 package su.wps.blog.services
 
 import cats.Monad
+import cats.syntax.applicative.*
+import cats.syntax.flatMap.*
 import cats.syntax.functor.*
 import mouse.anyf.*
 import su.wps.blog.models.api.{CommentResult, CommentsListResult, CreateCommentRequest}
@@ -40,6 +42,17 @@ final class CommentServiceImpl[F[_]: Monad, DB[_]: Monad] private (
       .insert(comment)
       .thrushK(xa.trans)
       .map(toCommentResult)
+  }
+
+  def rateComment(commentId: CommentId, isUpvote: Boolean, ip: String): F[Unit] = {
+    val delta = if (isUpvote) 1 else -1
+    val query = for {
+      alreadyRated <- commentRepo.hasRated(commentId, ip)
+      _ <-
+        if (alreadyRated) Monad[DB].unit
+        else commentRepo.insertRater(commentId, ip) >> commentRepo.updateRating(commentId, delta)
+    } yield ()
+    query.thrushK(xa.trans)
   }
 
   private def toCommentResult(comment: Comment): CommentResult =

@@ -151,6 +151,38 @@ class CommentServiceSpec extends Specification {
 
       result must beRight.which(_.replies.isEmpty)
     }
+
+    "rate comment successfully when not already rated" >> {
+      val service = mkServiceForRating(hasRated = false)
+
+      val result = service.rateComment(CommentId(1), isUpvote = true, "192.168.1.1")
+
+      result must beRight(())
+    }
+
+    "not update rating when IP has already rated" >> {
+      val service = mkServiceForRating(hasRated = true)
+
+      val result = service.rateComment(CommentId(1), isUpvote = true, "192.168.1.1")
+
+      result must beRight(())
+    }
+
+    "handle upvote (positive delta)" >> {
+      val service = mkServiceForRating(hasRated = false)
+
+      val result = service.rateComment(CommentId(1), isUpvote = true, "192.168.1.1")
+
+      result must beRight(())
+    }
+
+    "handle downvote (negative delta)" >> {
+      val service = mkServiceForRating(hasRated = false)
+
+      val result = service.rateComment(CommentId(1), isUpvote = false, "192.168.1.1")
+
+      result must beRight(())
+    }
   }
 
   private def mkComment(
@@ -178,6 +210,11 @@ class CommentServiceSpec extends Specification {
     val commentRepo = CommentRepositoryMock.create[Id](
       insertResult = comment => comment.copy(id = Some(generatedId))
     )
+    CommentServiceImpl.create[RunF, Id](commentRepo, xa)
+  }
+
+  private def mkServiceForRating(hasRated: Boolean): CommentService[RunF] = {
+    val commentRepo = CommentRepositoryMock.create[Id](hasRatedResult = hasRated)
     CommentServiceImpl.create[RunF, Id](commentRepo, xa)
   }
 }

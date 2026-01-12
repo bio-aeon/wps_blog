@@ -8,7 +8,10 @@ import su.wps.blog.repositories.CommentRepository
 object CommentRepositoryMock {
   def create[DB[_]: Applicative](
     findCommentsByPostIdResult: List[Comment] = Nil,
-    insertResult: Comment => Comment = identity
+    insertResult: Comment => Comment = identity,
+    hasRatedResult: Boolean = false,
+    insertRaterResult: Int = 1,
+    updateRatingResult: Int = 1
   ): CommentRepository[DB] =
     new CommentRepository[DB] {
       def insert(comment: Comment): DB[Comment] =
@@ -16,6 +19,15 @@ object CommentRepositoryMock {
 
       def findCommentsByPostId(postId: PostId): DB[List[Comment]] =
         findCommentsByPostIdResult.pure[DB]
+
+      def hasRated(commentId: CommentId, ip: String): DB[Boolean] =
+        hasRatedResult.pure[DB]
+
+      def insertRater(commentId: CommentId, ip: String): DB[Int] =
+        insertRaterResult.pure[DB]
+
+      def updateRating(commentId: CommentId, delta: Int): DB[Int] =
+        updateRatingResult.pure[DB]
     }
 
   def createWithAutoId[DB[_]: Applicative](
