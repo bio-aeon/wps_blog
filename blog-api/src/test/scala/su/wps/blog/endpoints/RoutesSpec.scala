@@ -125,7 +125,9 @@ class RoutesSpec extends Specification {
       val routes = mkRoutesWithEmptySearch[IO]
       val request = Request[IO](
         Method.GET,
-        uri"posts/search".withQueryParams(Map("q" -> "nonexistent", "limit" -> "10", "offset" -> "0"))
+        uri"posts/search".withQueryParams(
+          Map("q" -> "nonexistent", "limit" -> "10", "offset" -> "0")
+        )
       )
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
@@ -297,6 +299,24 @@ class RoutesSpec extends Specification {
 
       resp.status mustEqual Status.NoContent
     }
+
+    "return 204 No Content on successful comment deletion" >> {
+      val routes = mkRoutesForCommentModeration[IO]
+      val request = Request[IO](Method.DELETE, uri"admin/comments/1")
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+
+      resp.status mustEqual Status.NoContent
+    }
+
+    "return 204 No Content on successful comment approval" >> {
+      val routes = mkRoutesForCommentModeration[IO]
+      val request = Request[IO](Method.PUT, uri"admin/comments/1/approve")
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+
+      resp.status mustEqual Status.NoContent
+    }
   }
 
   private def mkRoutes[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
@@ -413,9 +433,7 @@ class RoutesSpec extends Specification {
       ZonedDateTime.parse("2001-01-01T09:00:00Z"),
       List(reply)
     )
-    val commentService = CommentServiceMock.create[F](
-      CommentsListResult(List(rootComment), 2)
-    )
+    val commentService = CommentServiceMock.create[F](CommentsListResult(List(rootComment), 2))
 
     RoutesImpl.create[F](postService, commentService)
   }
@@ -437,14 +455,19 @@ class RoutesSpec extends Specification {
       ZonedDateTime.parse("2001-01-01T09:00:00Z"),
       Nil
     )
-    val commentService = CommentServiceMock.create[F](
-      createCommentResult = Some(createdComment)
-    )
+    val commentService = CommentServiceMock.create[F](createCommentResult = Some(createdComment))
 
     RoutesImpl.create[F](postService, commentService)
   }
 
   private def mkRoutesForRateComment[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
+    val postService = PostServiceMock.create[F]()
+    val commentService = CommentServiceMock.create[F]()
+
+    RoutesImpl.create[F](postService, commentService)
+  }
+
+  private def mkRoutesForCommentModeration[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
     val postService = PostServiceMock.create[F]()
     val commentService = CommentServiceMock.create[F]()
 

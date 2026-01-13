@@ -68,6 +68,12 @@ final class RoutesImpl[F[_]: Concurrent] private (
       req.as[RateCommentRequest].flatMap { request =>
         commentService.rateComment(CommentId(id), request.isUpvote, ip) *> NoContent()
       }
+
+    case DELETE -> Root / "admin" / "comments" / IntVar(id) =>
+      commentService.deleteComment(CommentId(id)) *> NoContent()
+
+    case PUT -> Root / "admin" / "comments" / IntVar(id) / "approve" =>
+      commentService.approveComment(CommentId(id)) *> NoContent()
   }
 
   private def extractIp(req: Request[F]): String =

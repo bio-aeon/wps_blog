@@ -26,6 +26,9 @@ class PostServiceSpec extends Specification {
     tag <- arbitrary[Tag].map(_.copy(id = Some(id)))
   } yield tag
 
+  private def postsWithUniqueIds(count: Int): List[Post] =
+    random[Post](count).zipWithIndex.map { case (p, i) => p.copy(id = Some(PostId(i + 1))) }
+
   "PostService should" >> {
     "return posts with total count by limit and offset" >> {
       val service = mkService(random[Post](5), 10)
@@ -34,7 +37,7 @@ class PostServiceSpec extends Specification {
     }
 
     "include tags in post list results" >> {
-      val posts = random[Post](2)
+      val posts = postsWithUniqueIds(2)
       val tag1 = Tag("scala", "scala", Some(TagId(1)))
       val tag2 = Tag("rust", "rust", Some(TagId(2)))
       val tagsByPost = posts.flatMap(p => p.id.map(id => List((id, tag1), (id, tag2)))).flatten
@@ -87,7 +90,7 @@ class PostServiceSpec extends Specification {
     }
 
     "include tags in filtered post results" >> {
-      val posts = random[Post](2)
+      val posts = postsWithUniqueIds(2)
       val tag1 = Tag("scala", "scala", Some(TagId(1)))
       val tag2 = Tag("fp", "fp", Some(TagId(2)))
       val tagsByPost = posts.flatMap(p => p.id.map(id => List((id, tag1), (id, tag2)))).flatten
@@ -132,7 +135,7 @@ class PostServiceSpec extends Specification {
     }
 
     "include tags in search results" >> {
-      val posts = random[Post](2)
+      val posts = postsWithUniqueIds(2)
       val tag1 = Tag("scala", "scala", Some(TagId(1)))
       val tag2 = Tag("fp", "fp", Some(TagId(2)))
       val tagsByPost = posts.flatMap(p => p.id.map(id => List((id, tag1), (id, tag2)))).flatten
@@ -163,7 +166,7 @@ class PostServiceSpec extends Specification {
     }
 
     "include tags in recent posts results" >> {
-      val posts = random[Post](2)
+      val posts = postsWithUniqueIds(2)
       val tag1 = Tag("scala", "scala", Some(TagId(1)))
       val tag2 = Tag("fp", "fp", Some(TagId(2)))
       val tagsByPost = posts.flatMap(p => p.id.map(id => List((id, tag1), (id, tag2)))).flatten

@@ -464,11 +464,7 @@ class PostRepositorySpec extends Specification with DbTest {
       val test = for {
         _ <- models.User.sql.insert(user)
         _ <- (1 to 10).toList.traverse { i =>
-          val post = random[models.Post].copy(
-            id = PosInt(i),
-            authorId = user.id,
-            isHidden = false
-          )
+          val post = random[models.Post].copy(id = PosInt(i), authorId = user.id, isHidden = false)
           models.Post.sql.insert(post)
         }
         result <- repo.findRecent(5)
@@ -483,19 +479,11 @@ class PostRepositorySpec extends Specification with DbTest {
       val test = for {
         _ <- models.User.sql.insert(user)
         _ <- (1 to 5).toList.traverse { i =>
-          val post = random[models.Post].copy(
-            id = PosInt(i),
-            authorId = user.id,
-            isHidden = false
-          )
+          val post = random[models.Post].copy(id = PosInt(i), authorId = user.id, isHidden = false)
           models.Post.sql.insert(post)
         }
         _ <- (6 to 8).toList.traverse { i =>
-          val post = random[models.Post].copy(
-            id = PosInt(i),
-            authorId = user.id,
-            isHidden = true
-          )
+          val post = random[models.Post].copy(id = PosInt(i), authorId = user.id, isHidden = true)
           models.Post.sql.insert(post)
         }
         result <- repo.findRecent(10)
@@ -523,11 +511,7 @@ class PostRepositorySpec extends Specification with DbTest {
       val test = for {
         _ <- models.User.sql.insert(user)
         _ <- (1 to 3).toList.traverse { i =>
-          val post = random[models.Post].copy(
-            id = PosInt(i),
-            authorId = user.id,
-            isHidden = true
-          )
+          val post = random[models.Post].copy(id = PosInt(i), authorId = user.id, isHidden = true)
           models.Post.sql.insert(post)
         }
         result <- repo.findRecent(5)

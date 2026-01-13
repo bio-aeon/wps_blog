@@ -20,6 +20,7 @@ final class CommentSqlImpl private extends CommentSql[ConnectionIO] {
         post_id,
         parent_id,
         rating,
+        is_approved,
         created_at
       )
       VALUES (
@@ -29,12 +30,19 @@ final class CommentSqlImpl private extends CommentSql[ConnectionIO] {
         ${comment.postId},
         ${comment.parentId},
         ${comment.rating},
+        ${comment.isApproved},
         ${comment.createdAt}
       )
     """).update.withUniqueGeneratedKeys[CommentId]("id").map(id => comment.copy(id = id.some))
 
+  def findById(commentId: CommentId): ConnectionIO[Option[Comment]] =
+    (fr"SELECT text, name, email, post_id, rating, created_at, parent_id, is_approved, id FROM" ++ tableName ++
+      fr"WHERE id = $commentId")
+      .query[Comment]
+      .option
+
   def findCommentsByPostId(postId: PostId): ConnectionIO[List[Comment]] =
-    (fr"SELECT text, name, email, post_id, rating, created_at, parent_id, id FROM" ++ tableName ++
+    (fr"SELECT text, name, email, post_id, rating, created_at, parent_id, is_approved, id FROM" ++ tableName ++
       fr"WHERE post_id = $postId ORDER BY created_at ASC")
       .query[Comment]
       .to[List]
@@ -59,6 +67,12 @@ final class CommentSqlImpl private extends CommentSql[ConnectionIO] {
       SET rating = rating + $delta
       WHERE id = ${commentId.value}
     """.update.run
+
+  def delete(commentId: CommentId): ConnectionIO[Int] =
+    sql"DELETE FROM comments WHERE id = ${commentId.value}".update.run
+
+  def approve(commentId: CommentId): ConnectionIO[Int] =
+    sql"UPDATE comments SET is_approved = true WHERE id = ${commentId.value}".update.run
 }
 
 object CommentSqlImpl {

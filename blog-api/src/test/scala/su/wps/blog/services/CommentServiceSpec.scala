@@ -6,9 +6,10 @@ import org.scalacheck.Gen
 import org.scalacheck.ScalacheckShapeless.*
 import org.specs2.mutable.Specification
 import su.wps.blog.models.api.CreateCommentRequest
-import su.wps.blog.models.domain.{Comment, CommentId, PostId}
+import su.wps.blog.models.domain.{AppErr, Comment, CommentId, PostId}
 import su.wps.blog.services.mocks.{CommentRepositoryMock, TxrMock}
 import su.wps.blog.tools.scalacheck.*
+import tofu.Raise
 import tofu.doobie.transactor.Txr
 
 import java.time.ZonedDateTime
@@ -183,6 +184,40 @@ class CommentServiceSpec extends Specification {
 
       result must beRight(())
     }
+
+    "delete comment successfully when comment exists" >> {
+      val comment = mkComment(CommentId(1), None)
+      val service = mkServiceForModeration(findByIdResult = Some(comment))
+
+      val result = service.deleteComment(CommentId(1))
+
+      result must beRight(())
+    }
+
+    "return error when deleting non-existent comment" >> {
+      val service = mkServiceForModeration(findByIdResult = None)
+
+      val result = service.deleteComment(CommentId(999))
+
+      result must beLeft(AppErr.CommentNotFound(CommentId(999)))
+    }
+
+    "approve comment successfully when comment exists" >> {
+      val comment = mkComment(CommentId(1), None)
+      val service = mkServiceForModeration(findByIdResult = Some(comment))
+
+      val result = service.approveComment(CommentId(1))
+
+      result must beRight(())
+    }
+
+    "return error when approving non-existent comment" >> {
+      val service = mkServiceForModeration(findByIdResult = None)
+
+      val result = service.approveComment(CommentId(999))
+
+      result must beLeft(AppErr.CommentNotFound(CommentId(999)))
+    }
   }
 
   private def mkComment(
@@ -207,14 +242,19 @@ class CommentServiceSpec extends Specification {
   }
 
   private def mkServiceForCreate(generatedId: CommentId = CommentId(1)): CommentService[RunF] = {
-    val commentRepo = CommentRepositoryMock.create[Id](
-      insertResult = comment => comment.copy(id = Some(generatedId))
+    val commentRepo = CommentRepositoryMock.create[Id](insertResult =
+      comment => comment.copy(id = Some(generatedId))
     )
     CommentServiceImpl.create[RunF, Id](commentRepo, xa)
   }
 
   private def mkServiceForRating(hasRated: Boolean): CommentService[RunF] = {
     val commentRepo = CommentRepositoryMock.create[Id](hasRatedResult = hasRated)
+    CommentServiceImpl.create[RunF, Id](commentRepo, xa)
+  }
+
+  private def mkServiceForModeration(findByIdResult: Option[Comment]): CommentService[RunF] = {
+    val commentRepo = CommentRepositoryMock.create[Id](findByIdResult = findByIdResult)
     CommentServiceImpl.create[RunF, Id](commentRepo, xa)
   }
 }

@@ -58,10 +58,7 @@ final class PostServiceImpl[F[_]: Monad, DB[_]: Monad] private (
       }
 
   def allPosts(limit: Int, offset: Int): F[ListItemsResult[ListPostResult]] =
-    fetchPostsWithCount(
-      postRepo.findAllWithLimitAndOffset(limit, offset),
-      postRepo.findCount
-    )
+    fetchPostsWithCount(postRepo.findAllWithLimitAndOffset(limit, offset), postRepo.findCount)
 
   def postsByTag(tagSlug: String, limit: Int, offset: Int): F[ListItemsResult[ListPostResult]] =
     fetchPostsWithCount(

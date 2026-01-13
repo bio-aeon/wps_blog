@@ -10,6 +10,7 @@ final case class Comment(
   rating: Int,
   createdAt: ZonedDateTime,
   parentId: Option[Int] = None,
+  isApproved: Boolean = true,
   id: Option[CommentId] = None
 )
 
