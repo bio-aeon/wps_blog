@@ -77,12 +77,65 @@ class TagServiceSpec extends Specification {
     }
   }
 
-  private def mkService(
-    findAllWithPostCountsResult: List[(Tag, Int)] = Nil
-  ): TagService[RunF] = {
-    val tagRepo = TagRepositoryMock.create[Id](
-      findAllWithPostCountsResult = findAllWithPostCountsResult
-    )
+  "TagService.getTagCloud should" >> {
+    "return tag cloud with normalized weights" >> {
+      val tags = List(
+        (Tag("scala", "scala", Some(TagId(1))), 10),
+        (Tag("rust", "rust", Some(TagId(2))), 5),
+        (Tag("fp", "fp", Some(TagId(3))), 2)
+      )
+      val service = mkService(tags)
+
+      service.getTagCloud must beRight.which { r =>
+        r.tags.find(_.slug == "scala").exists(_.weight == 1.0) &&
+        r.tags.find(_.slug == "rust").exists(_.weight == 0.5) &&
+        r.tags.find(_.slug == "fp").exists(_.weight == 0.2)
+      }
+    }
+
+    "return empty tag cloud when no tags exist" >> {
+      val service = mkService(Nil)
+
+      service.getTagCloud must beRight.which { r =>
+        r.tags.isEmpty
+      }
+    }
+
+    "return weight of 1.0 for single tag" >> {
+      val tags = List((Tag("scala", "scala", Some(TagId(1))), 5))
+      val service = mkService(tags)
+
+      service.getTagCloud must beRight.which { r =>
+        r.tags.length == 1 && r.tags.head.weight == 1.0
+      }
+    }
+
+    "return correct counts in tag cloud items" >> {
+      val tags =
+        List((Tag("scala", "scala", Some(TagId(1))), 10), (Tag("rust", "rust", Some(TagId(2))), 5))
+      val service = mkService(tags)
+
+      service.getTagCloud must beRight.which { r =>
+        r.tags.find(_.slug == "scala").exists(_.count == 10) &&
+        r.tags.find(_.slug == "rust").exists(_.count == 5)
+      }
+    }
+
+    "handle tags with zero post count" >> {
+      val tags =
+        List((Tag("scala", "scala", Some(TagId(1))), 10), (Tag("rust", "rust", Some(TagId(2))), 0))
+      val service = mkService(tags)
+
+      service.getTagCloud must beRight.which { r =>
+        r.tags.find(_.slug == "rust").exists(_.weight == 0.0) &&
+        r.tags.find(_.slug == "rust").exists(_.count == 0)
+      }
+    }
+  }
+
+  private def mkService(findAllWithPostCountsResult: List[(Tag, Int)] = Nil): TagService[RunF] = {
+    val tagRepo =
+      TagRepositoryMock.create[Id](findAllWithPostCountsResult = findAllWithPostCountsResult)
     TagServiceImpl.create[RunF, Id](tagRepo, xa)
   }
 }

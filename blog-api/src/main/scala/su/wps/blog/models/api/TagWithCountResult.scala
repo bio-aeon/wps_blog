@@ -7,7 +7,5 @@ final case class TagWithCountResult(id: TagId, name: String, slug: String, postC
 
 object TagWithCountResult {
   implicit val encoder: Encoder[TagWithCountResult] =
-    Encoder.forProduct4("id", "name", "slug", "post_count")(
-      TagWithCountResult.unapply(_).get
-    )
+    Encoder.forProduct4("id", "name", "slug", "post_count")(TagWithCountResult.unapply(_).get)
 }

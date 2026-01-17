@@ -4,7 +4,7 @@ import cats.Monad
 import cats.syntax.functor.*
 import io.scalaland.chimney.dsl.*
 import mouse.anyf.*
-import su.wps.blog.models.api.{ListItemsResult, TagWithCountResult}
+import su.wps.blog.models.api.{ListItemsResult, TagCloudItem, TagCloudResult, TagWithCountResult}
 import su.wps.blog.repositories.TagRepository
 import tofu.doobie.transactor.Txr
 
@@ -25,6 +25,21 @@ final class TagServiceImpl[F[_]: Monad, DB[_]: Monad] private (
             .transform
         }
         ListItemsResult(items, items.length)
+      }
+
+  def getTagCloud: F[TagCloudResult] =
+    tagRepo.findAllWithPostCounts
+      .thrushK(xa.trans)
+      .map { tagsWithCounts =>
+        val maxCount = tagsWithCounts.map(_._2).maxOption.getOrElse(1)
+        val items = tagsWithCounts.map { case (tag, count) =>
+          tag
+            .into[TagCloudItem]
+            .withFieldConst(_.count, count)
+            .withFieldConst(_.weight, count.toDouble / maxCount)
+            .transform
+        }
+        TagCloudResult(items)
       }
 }
 

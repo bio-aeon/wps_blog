@@ -348,6 +348,38 @@ class RoutesSpec extends Specification {
       resp.status mustEqual Status.Ok
       respBody mustEqual """{"items":[],"total":0}"""
     }
+
+    "return 200 with tag cloud for GET /tags/cloud" >> {
+      val routes = mkRoutesWithTagCloud[IO]
+      val request = Request[IO](Method.GET, uri"tags/cloud")
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+
+      resp.status mustEqual Status.Ok
+    }
+
+    "return tag cloud with normalized weights" >> {
+      val routes = mkRoutesWithTagCloud[IO]
+      val request = Request[IO](Method.GET, uri"tags/cloud")
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+      val respBody = resp.as[String].unsafeRunSync()
+
+      respBody must contain("\"weight\":")
+      respBody must contain("\"count\":")
+      respBody must contain("\"tags\":")
+    }
+
+    "return empty tag cloud when no tags exist" >> {
+      val routes = mkRoutesWithEmptyTagCloud[IO]
+      val request = Request[IO](Method.GET, uri"tags/cloud")
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+      val respBody = resp.as[String].unsafeRunSync()
+
+      resp.status mustEqual Status.Ok
+      respBody mustEqual """{"tags":[]}"""
+    }
   }
 
   private def mkRoutes[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
@@ -532,6 +564,25 @@ class RoutesSpec extends Specification {
     val postService = PostServiceMock.create[F]()
     val commentService = CommentServiceMock.create[F]()
     val tagService = TagServiceMock.create[F]()
+
+    RoutesImpl.create[F](postService, commentService, tagService)
+  }
+
+  private def mkRoutesWithTagCloud[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
+    val postService = PostServiceMock.create[F]()
+    val commentService = CommentServiceMock.create[F]()
+    val tagCloud = TagCloudResult(
+      List(TagCloudItem("scala", "scala", 10, 1.0), TagCloudItem("rust", "rust", 5, 0.5))
+    )
+    val tagService = TagServiceMock.create[F](getTagCloudResult = tagCloud)
+
+    RoutesImpl.create[F](postService, commentService, tagService)
+  }
+
+  private def mkRoutesWithEmptyTagCloud[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
+    val postService = PostServiceMock.create[F]()
+    val commentService = CommentServiceMock.create[F]()
+    val tagService = TagServiceMock.create[F](getTagCloudResult = TagCloudResult(Nil))
 
     RoutesImpl.create[F](postService, commentService, tagService)
   }

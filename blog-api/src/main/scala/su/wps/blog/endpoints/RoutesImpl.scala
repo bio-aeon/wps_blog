@@ -76,6 +76,9 @@ final class RoutesImpl[F[_]: Concurrent] private (
     case PUT -> Root / "admin" / "comments" / IntVar(id) / "approve" =>
       commentService.approveComment(CommentId(id)) *> NoContent()
 
+    case GET -> Root / "tags" / "cloud" =>
+      tagService.getTagCloud.map(_.asJson).flatMap(Ok(_))
+
     case GET -> Root / "tags" =>
       tagService.getAllTags.map(_.asJson).flatMap(Ok(_))
   }

@@ -14,7 +14,5 @@ object CreateCommentRequest {
     Decoder.forProduct4("name", "email", "text", "parent_id")(CreateCommentRequest.apply)
 
   implicit val encoder: Encoder[CreateCommentRequest] =
-    Encoder.forProduct4("name", "email", "text", "parent_id")(
-      CreateCommentRequest.unapply(_).get
-    )
+    Encoder.forProduct4("name", "email", "text", "parent_id")(CreateCommentRequest.unapply(_).get)
 }
