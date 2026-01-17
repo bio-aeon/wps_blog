@@ -1,7 +1,6 @@
 package su.wps.blog.models.api
 
 import io.circe.{Decoder, Encoder}
-import io.circe.generic.semiauto.*
 
 final case class CreateCommentRequest(
   name: String,
@@ -11,6 +10,11 @@ final case class CreateCommentRequest(
 )
 
 object CreateCommentRequest {
-  implicit val decoder: Decoder[CreateCommentRequest] = deriveDecoder[CreateCommentRequest]
-  implicit val encoder: Encoder[CreateCommentRequest] = deriveEncoder[CreateCommentRequest]
+  implicit val decoder: Decoder[CreateCommentRequest] =
+    Decoder.forProduct4("name", "email", "text", "parent_id")(CreateCommentRequest.apply)
+
+  implicit val encoder: Encoder[CreateCommentRequest] =
+    Encoder.forProduct4("name", "email", "text", "parent_id")(
+      CreateCommentRequest.unapply(_).get
+    )
 }

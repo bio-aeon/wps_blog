@@ -19,7 +19,7 @@ import su.wps.blog.config.{AppConfig, DbConfig, HttpServerConfig}
 import su.wps.blog.endpoints.RoutesImpl
 import su.wps.blog.repositories.{CommentRepositoryImpl, PostRepositoryImpl, TagRepositoryImpl}
 import su.wps.blog.repositories.sql.Slf4jDoobieLogHandler
-import su.wps.blog.services.{CommentServiceImpl, PostServiceImpl}
+import su.wps.blog.services.{CommentServiceImpl, PostServiceImpl, TagServiceImpl}
 import tofu.doobie.transactor.Txr
 
 object Program {
@@ -36,7 +36,8 @@ object Program {
         commentRepo = CommentRepositoryImpl.create[xa.DB]
         postService = PostServiceImpl.create[F, xa.DB](postRepo, tagRepo, xa)
         commentService = CommentServiceImpl.create[F, xa.DB](commentRepo, xa)
-        routes = RoutesImpl.create[F](postService, commentService)
+        tagService = TagServiceImpl.create[F, xa.DB](tagRepo, xa)
+        routes = RoutesImpl.create[F](postService, commentService, tagService)
         _ <- mkHttpServer[F](appConfig.httpServer, routes.routes)
         _ <- Resource.make(F.unit)(_ => logger.info("Releasing application resources"))
       } yield ()

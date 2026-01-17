@@ -13,11 +13,12 @@ import org.http4s.headers.`X-Forwarded-For`
 import su.wps.blog.models.api.{CreateCommentRequest, RateCommentRequest}
 import su.wps.blog.models.domain.CommentId
 import su.wps.blog.models.domain.PostId
-import su.wps.blog.services.{CommentService, PostService}
+import su.wps.blog.services.{CommentService, PostService, TagService}
 
 final class RoutesImpl[F[_]: Concurrent] private (
   postService: PostService[F],
-  commentService: CommentService[F]
+  commentService: CommentService[F],
+  tagService: TagService[F]
 ) extends Http4sDsl[F]
     with Routes[F] {
   import RoutesImpl._
@@ -74,6 +75,9 @@ final class RoutesImpl[F[_]: Concurrent] private (
 
     case PUT -> Root / "admin" / "comments" / IntVar(id) / "approve" =>
       commentService.approveComment(CommentId(id)) *> NoContent()
+
+    case GET -> Root / "tags" =>
+      tagService.getAllTags.map(_.asJson).flatMap(Ok(_))
   }
 
   private def extractIp(req: Request[F]): String =
@@ -92,7 +96,8 @@ object RoutesImpl {
 
   def create[F[_]: Concurrent](
     postService: PostService[F],
-    commentService: CommentService[F]
+    commentService: CommentService[F],
+    tagService: TagService[F]
   ): RoutesImpl[F] =
-    new RoutesImpl[F](postService, commentService)
+    new RoutesImpl[F](postService, commentService, tagService)
 }

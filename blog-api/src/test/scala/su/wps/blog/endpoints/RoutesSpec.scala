@@ -8,7 +8,7 @@ import org.http4s.*
 import org.http4s.circe.*
 import org.http4s.implicits.*
 import org.specs2.mutable.Specification
-import su.wps.blog.endpoints.mocks.{CommentServiceMock, PostServiceMock}
+import su.wps.blog.endpoints.mocks.{CommentServiceMock, PostServiceMock, TagServiceMock}
 import io.circe.Json
 import su.wps.blog.models.api.*
 import su.wps.blog.models.domain.{AppErr, CommentId, PostId, TagId}
@@ -317,6 +317,37 @@ class RoutesSpec extends Specification {
 
       resp.status mustEqual Status.NoContent
     }
+
+    "return 200 with tags list for GET /tags" >> {
+      val routes = mkRoutesWithTags[IO]
+      val request = Request[IO](Method.GET, uri"tags")
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+
+      resp.status mustEqual Status.Ok
+    }
+
+    "return tags with post counts in response" >> {
+      val routes = mkRoutesWithTags[IO]
+      val request = Request[IO](Method.GET, uri"tags")
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+      val respBody = resp.as[String].unsafeRunSync()
+
+      respBody must contain("\"post_count\":")
+      respBody must contain("\"total\":2")
+    }
+
+    "return empty tags list when no tags exist" >> {
+      val routes = mkRoutesWithEmptyTags[IO]
+      val request = Request[IO](Method.GET, uri"tags")
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+      val respBody = resp.as[String].unsafeRunSync()
+
+      resp.status mustEqual Status.Ok
+      respBody mustEqual """{"items":[],"total":0}"""
+    }
   }
 
   private def mkRoutes[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
@@ -329,7 +360,8 @@ class RoutesSpec extends Specification {
     )
 
     val commentService = CommentServiceMock.create[F]()
-    RoutesImpl.create[F](postService, commentService)
+    val tagService = TagServiceMock.create[F]()
+    RoutesImpl.create[F](postService, commentService, tagService)
   }
 
   private def mkRoutesWithTagFilter[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
@@ -349,8 +381,9 @@ class RoutesSpec extends Specification {
     val postService = PostServiceMock
       .create[F](allPostsResult = allPosts, postByIdResult = None, postsByTagResult = taggedPosts)
     val commentService = CommentServiceMock.create[F]()
+    val tagService = TagServiceMock.create[F]()
 
-    RoutesImpl.create[F](postService, commentService)
+    RoutesImpl.create[F](postService, commentService, tagService)
   }
 
   private def mkRoutesWithSearch[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
@@ -373,15 +406,17 @@ class RoutesSpec extends Specification {
     )
     val postService = PostServiceMock.create[F](searchPostsResult = searchResults)
     val commentService = CommentServiceMock.create[F]()
+    val tagService = TagServiceMock.create[F]()
 
-    RoutesImpl.create[F](postService, commentService)
+    RoutesImpl.create[F](postService, commentService, tagService)
   }
 
   private def mkRoutesWithEmptySearch[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
     val postService = PostServiceMock.create[F](searchPostsResult = Nil)
     val commentService = CommentServiceMock.create[F]()
+    val tagService = TagServiceMock.create[F]()
 
-    RoutesImpl.create[F](postService, commentService)
+    RoutesImpl.create[F](postService, commentService, tagService)
   }
 
   private def mkRoutesWithRecentPosts[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
@@ -404,15 +439,17 @@ class RoutesSpec extends Specification {
     )
     val postService = PostServiceMock.create[F](recentPostsResult = recentPosts)
     val commentService = CommentServiceMock.create[F]()
+    val tagService = TagServiceMock.create[F]()
 
-    RoutesImpl.create[F](postService, commentService)
+    RoutesImpl.create[F](postService, commentService, tagService)
   }
 
   private def mkRoutesWithEmptyRecentPosts[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
     val postService = PostServiceMock.create[F](recentPostsResult = Nil)
     val commentService = CommentServiceMock.create[F]()
+    val tagService = TagServiceMock.create[F]()
 
-    RoutesImpl.create[F](postService, commentService)
+    RoutesImpl.create[F](postService, commentService, tagService)
   }
 
   private def mkRoutesWithComments[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
@@ -434,15 +471,17 @@ class RoutesSpec extends Specification {
       List(reply)
     )
     val commentService = CommentServiceMock.create[F](CommentsListResult(List(rootComment), 2))
+    val tagService = TagServiceMock.create[F]()
 
-    RoutesImpl.create[F](postService, commentService)
+    RoutesImpl.create[F](postService, commentService, tagService)
   }
 
   private def mkRoutesWithEmptyComments[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
     val postService = PostServiceMock.create[F]()
     val commentService = CommentServiceMock.create[F](CommentsListResult(Nil, 0))
+    val tagService = TagServiceMock.create[F]()
 
-    RoutesImpl.create[F](postService, commentService)
+    RoutesImpl.create[F](postService, commentService, tagService)
   }
 
   private def mkRoutesForCreateComment[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
@@ -456,21 +495,44 @@ class RoutesSpec extends Specification {
       Nil
     )
     val commentService = CommentServiceMock.create[F](createCommentResult = Some(createdComment))
+    val tagService = TagServiceMock.create[F]()
 
-    RoutesImpl.create[F](postService, commentService)
+    RoutesImpl.create[F](postService, commentService, tagService)
   }
 
   private def mkRoutesForRateComment[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
     val postService = PostServiceMock.create[F]()
     val commentService = CommentServiceMock.create[F]()
+    val tagService = TagServiceMock.create[F]()
 
-    RoutesImpl.create[F](postService, commentService)
+    RoutesImpl.create[F](postService, commentService, tagService)
   }
 
   private def mkRoutesForCommentModeration[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
     val postService = PostServiceMock.create[F]()
     val commentService = CommentServiceMock.create[F]()
+    val tagService = TagServiceMock.create[F]()
 
-    RoutesImpl.create[F](postService, commentService)
+    RoutesImpl.create[F](postService, commentService, tagService)
+  }
+
+  private def mkRoutesWithTags[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
+    val postService = PostServiceMock.create[F]()
+    val commentService = CommentServiceMock.create[F]()
+    val tagsWithCounts = List(
+      TagWithCountResult(TagId(1), "scala", "scala", 10),
+      TagWithCountResult(TagId(2), "rust", "rust", 5)
+    )
+    val tagService = TagServiceMock.create[F](tagsWithCounts)
+
+    RoutesImpl.create[F](postService, commentService, tagService)
+  }
+
+  private def mkRoutesWithEmptyTags[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
+    val postService = PostServiceMock.create[F]()
+    val commentService = CommentServiceMock.create[F]()
+    val tagService = TagServiceMock.create[F]()
+
+    RoutesImpl.create[F](postService, commentService, tagService)
   }
 }
