@@ -12,4 +12,8 @@ object AppErr {
   final case class CommentNotFound(id: CommentId) extends AppErr {
     override def toString: String = s"Comment with id $id not found"
   }
+
+  final case class PageNotFound(url: String) extends AppErr {
+    override def toString: String = s"Page with url '$url' not found"
+  }
 }

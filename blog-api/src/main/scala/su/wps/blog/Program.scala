@@ -17,9 +17,9 @@ import org.typelevel.log4cats.slf4j.Slf4jLogger
 import pureconfig.ConfigSource
 import su.wps.blog.config.{AppConfig, DbConfig, HttpServerConfig}
 import su.wps.blog.endpoints.RoutesImpl
-import su.wps.blog.repositories.{CommentRepositoryImpl, PostRepositoryImpl, TagRepositoryImpl}
+import su.wps.blog.repositories.{CommentRepositoryImpl, PageRepositoryImpl, PostRepositoryImpl, TagRepositoryImpl}
 import su.wps.blog.repositories.sql.Slf4jDoobieLogHandler
-import su.wps.blog.services.{CommentServiceImpl, PostServiceImpl, TagServiceImpl}
+import su.wps.blog.services.{CommentServiceImpl, PageServiceImpl, PostServiceImpl, TagServiceImpl}
 import tofu.doobie.transactor.Txr
 
 object Program {
@@ -34,10 +34,12 @@ object Program {
         postRepo = PostRepositoryImpl.create[xa.DB]
         tagRepo = TagRepositoryImpl.create[xa.DB]
         commentRepo = CommentRepositoryImpl.create[xa.DB]
+        pageRepo = PageRepositoryImpl.create[xa.DB]
         postService = PostServiceImpl.create[F, xa.DB](postRepo, tagRepo, xa)
         commentService = CommentServiceImpl.create[F, xa.DB](commentRepo, xa)
         tagService = TagServiceImpl.create[F, xa.DB](tagRepo, xa)
-        routes = RoutesImpl.create[F](postService, commentService, tagService)
+        pageService = PageServiceImpl.create[F, xa.DB](pageRepo, xa)
+        routes = RoutesImpl.create[F](postService, commentService, tagService, pageService)
         _ <- mkHttpServer[F](appConfig.httpServer, routes.routes)
         _ <- Resource.make(F.unit)(_ => logger.info("Releasing application resources"))
       } yield ()

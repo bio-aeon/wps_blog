@@ -8,6 +8,8 @@ final case class Page(
   content: String,
   createdAt: ZonedDateTime,
   id: Option[PageId] = None
-)
+) {
+  def nonEmptyId: PageId = id.getOrElse(throw new IllegalStateException("Empty page id"))
+}
 
 final case class PageId(value: Int) extends AnyVal
