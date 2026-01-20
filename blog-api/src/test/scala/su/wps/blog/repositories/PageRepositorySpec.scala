@@ -46,13 +46,45 @@ class PageRepositorySpec extends Specification with DbTest {
       val result = test.runWithIO()
       result must beSome.which(_.url == "contact")
     }
+
+    "findAll returns all pages" >> {
+      val test = for {
+        _ <- insertPage(id = PosInt(1), url = "about")
+        _ <- insertPage(id = PosInt(2), url = "contact")
+        _ <- insertPage(id = PosInt(3), url = "privacy")
+        result <- repo.findAll
+      } yield result
+
+      val result = test.runWithIO()
+      result must have size 3
+    }
+
+    "findAll returns empty list when no pages exist" >> {
+      val test = repo.findAll
+
+      val result = test.runWithIO()
+      result must beEmpty
+    }
+
+    "findAll returns pages ordered by title" >> {
+      val test = for {
+        _ <- insertPage(id = PosInt(1), url = "zebra", title = "Zebra Page")
+        _ <- insertPage(id = PosInt(2), url = "about", title = "About Us")
+        _ <- insertPage(id = PosInt(3), url = "contact", title = "Contact")
+        result <- repo.findAll
+      } yield result
+
+      val result = test.runWithIO()
+      result.map(_.title) mustEqual List("About Us", "Contact", "Zebra Page")
+    }
   }
 
   private def insertPage(
     id: PosInt = random[PosInt],
-    url: String
+    url: String,
+    title: String = "Default Title"
   ): ConnectionIO[models.Page] = {
-    val page = random[models.Page].copy(id = id, url = Varchar(url))
+    val page = random[models.Page].copy(id = id, url = Varchar(url), title = Varchar(title))
     models.Page.sql.insert(page).map(_ => page)
   }
 }

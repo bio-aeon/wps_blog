@@ -7,6 +7,9 @@ import tofu.doobie.LiftConnectionIO
 final class PageRepositoryImpl[DB[_]] private (sql: PageSql[DB]) extends PageRepository[DB] {
   def findByUrl(url: String): DB[Option[Page]] =
     sql.findByUrl(url)
+
+  def findAll: DB[List[Page]] =
+    sql.findAll
 }
 
 object PageRepositoryImpl {

@@ -7,4 +7,5 @@ import tofu.higherKind.derived.representableK
 @derive(representableK)
 trait PageSql[DB[_]] {
   def findByUrl(url: String): DB[Option[Page]]
+  def findAll: DB[List[Page]]
 }

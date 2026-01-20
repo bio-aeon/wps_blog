@@ -6,7 +6,7 @@ import cats.syntax.flatMap.*
 import cats.syntax.functor.*
 import io.scalaland.chimney.dsl.*
 import mouse.anyf.*
-import su.wps.blog.models.api.PageResult
+import su.wps.blog.models.api.{ListItemsResult, ListPageResult, PageResult}
 import su.wps.blog.models.domain.AppErr
 import su.wps.blog.models.domain.AppErr.PageNotFound
 import su.wps.blog.repositories.PageRepository
@@ -33,6 +33,12 @@ final class PageServiceImpl[F[_]: Monad, DB[_]: Monad] private (
         case None =>
           R.raise(PageNotFound(url))
       }
+
+  def getAllPages: F[ListItemsResult[ListPageResult]] =
+    pageRepo.findAll.thrushK(xa.trans).map { pages =>
+      val items = pages.map(_.into[ListPageResult].transform)
+      ListItemsResult(items, items.size)
+    }
 }
 
 object PageServiceImpl {

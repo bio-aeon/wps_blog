@@ -14,6 +14,11 @@ final class PageSqlImpl private extends PageSql[ConnectionIO] {
     (fr"SELECT url, title, content, created_at, id FROM" ++ tableName ++ fr"WHERE url = $url")
       .query[Page]
       .option
+
+  def findAll: ConnectionIO[List[Page]] =
+    (fr"SELECT url, title, content, created_at, id FROM" ++ tableName ++ fr"ORDER BY title")
+      .query[Page]
+      .to[List]
 }
 
 object PageSqlImpl {

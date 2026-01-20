@@ -48,8 +48,50 @@ class PageServiceSpec extends Specification {
     }
   }
 
-  private def mkService(findByUrlResult: Option[Page] = None): PageService[RunF] = {
-    val pageRepo = PageRepositoryMock.create[Id](findByUrlResult = findByUrlResult)
+  "PageService.getAllPages should" >> {
+    "return all pages as ListPageResult items" >> {
+      val pages = List(
+        Page("about", "About Us", "About content", ZonedDateTime.now(), Some(PageId(1))),
+        Page("contact", "Contact", "Contact content", ZonedDateTime.now(), Some(PageId(2)))
+      )
+      val service = mkService(findAllResult = pages)
+
+      service.getAllPages must beRight.which { r =>
+        r.items.size == 2 &&
+        r.total == 2 &&
+        r.items.map(_.url) == List("about", "contact")
+      }
+    }
+
+    "return empty list when no pages exist" >> {
+      val service = mkService(findAllResult = Nil)
+
+      service.getAllPages must beRight.which { r =>
+        r.items.isEmpty && r.total == 0
+      }
+    }
+
+    "transform Page domain to ListPageResult with url and title only" >> {
+      val pages = List(
+        Page("privacy", "Privacy Policy", "Long privacy content", ZonedDateTime.now(), Some(PageId(1)))
+      )
+      val service = mkService(findAllResult = pages)
+
+      service.getAllPages must beRight.which { r =>
+        r.items.head.url == "privacy" &&
+        r.items.head.title == "Privacy Policy"
+      }
+    }
+  }
+
+  private def mkService(
+    findByUrlResult: Option[Page] = None,
+    findAllResult: List[Page] = Nil
+  ): PageService[RunF] = {
+    val pageRepo = PageRepositoryMock.create[Id](
+      findByUrlResult = findByUrlResult,
+      findAllResult = findAllResult
+    )
     PageServiceImpl.create[RunF, Id](pageRepo, xa)
   }
 }

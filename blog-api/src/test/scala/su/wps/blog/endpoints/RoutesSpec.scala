@@ -411,6 +411,38 @@ class RoutesSpec extends Specification {
         case _                      => false
       }
     }
+
+    "return 200 with pages list for GET /pages" >> {
+      val routes = mkRoutesWithPagesList[IO]
+      val request = Request[IO](Method.GET, uri"pages")
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+
+      resp.status mustEqual Status.Ok
+    }
+
+    "return pages with url and title in response" >> {
+      val routes = mkRoutesWithPagesList[IO]
+      val request = Request[IO](Method.GET, uri"pages")
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+      val respBody = resp.as[String].unsafeRunSync()
+
+      respBody must contain("\"url\":\"about\"")
+      respBody must contain("\"title\":\"About Us\"")
+      respBody must contain("\"total\":2")
+    }
+
+    "return empty pages list when no pages exist" >> {
+      val routes = mkRoutesWithEmptyPagesList[IO]
+      val request = Request[IO](Method.GET, uri"pages")
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+      val respBody = resp.as[String].unsafeRunSync()
+
+      resp.status mustEqual Status.Ok
+      respBody mustEqual """{"items":[],"total":0}"""
+    }
   }
 
   private def mkRoutes[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
@@ -648,6 +680,31 @@ class RoutesSpec extends Specification {
     val commentService = CommentServiceMock.create[F]()
     val tagService = TagServiceMock.create[F]()
     val pageService = PageServiceMock.create[F]()
+
+    RoutesImpl.create[F](postService, commentService, tagService, pageService)
+  }
+
+  private def mkRoutesWithPagesList[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
+    val postService = PostServiceMock.create[F]()
+    val commentService = CommentServiceMock.create[F]()
+    val tagService = TagServiceMock.create[F]()
+    val pages = ListItemsResult(
+      List(
+        ListPageResult("about", "About Us"),
+        ListPageResult("contact", "Contact")
+      ),
+      2
+    )
+    val pageService = PageServiceMock.create[F](getAllPagesResult = pages)
+
+    RoutesImpl.create[F](postService, commentService, tagService, pageService)
+  }
+
+  private def mkRoutesWithEmptyPagesList[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
+    val postService = PostServiceMock.create[F]()
+    val commentService = CommentServiceMock.create[F]()
+    val tagService = TagServiceMock.create[F]()
+    val pageService = PageServiceMock.create[F](getAllPagesResult = ListItemsResult(Nil, 0))
 
     RoutesImpl.create[F](postService, commentService, tagService, pageService)
   }

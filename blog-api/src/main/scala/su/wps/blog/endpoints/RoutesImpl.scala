@@ -83,6 +83,9 @@ final class RoutesImpl[F[_]: Concurrent] private (
     case GET -> Root / "tags" =>
       tagService.getAllTags.map(_.asJson).flatMap(Ok(_))
 
+    case GET -> Root / "pages" =>
+      pageService.getAllPages.map(_.asJson).flatMap(Ok(_))
+
     case GET -> Root / "pages" / url =>
       pageService.getPageByUrl(url).map(_.asJson).flatMap(Ok(_))
   }
