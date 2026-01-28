@@ -16,7 +16,7 @@ import org.http4s.server.middleware.CORS
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 import pureconfig.ConfigSource
 import su.wps.blog.config.{AppConfig, DbConfig, HttpServerConfig}
-import su.wps.blog.endpoints.RoutesImpl
+import su.wps.blog.endpoints.{ErrorHandler, RoutesImpl}
 import su.wps.blog.repositories.{CommentRepositoryImpl, PageRepositoryImpl, PostRepositoryImpl, TagRepositoryImpl}
 import su.wps.blog.repositories.sql.Slf4jDoobieLogHandler
 import su.wps.blog.services.{CommentServiceImpl, PageServiceImpl, PostServiceImpl, TagServiceImpl}
@@ -40,7 +40,8 @@ object Program {
         tagService = TagServiceImpl.create[F, xa.DB](tagRepo, xa)
         pageService = PageServiceImpl.create[F, xa.DB](pageRepo, xa)
         routes = RoutesImpl.create[F](postService, commentService, tagService, pageService)
-        _ <- mkHttpServer[F](appConfig.httpServer, routes.routes)
+        routesWithErrorHandling = ErrorHandler(routes.routes)
+        _ <- mkHttpServer[F](appConfig.httpServer, routesWithErrorHandling)
         _ <- Resource.make(F.unit)(_ => logger.info("Releasing application resources"))
       } yield ()
       _ <- appResource.onError { case err =>

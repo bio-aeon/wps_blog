@@ -402,14 +402,17 @@ class RoutesSpec extends Specification {
       respBody must contain("\"content\":\"About page content\"")
     }
 
-    "raise PageNotFound error when page is not found" >> {
+    "return 404 with error response when page is not found" >> {
       val routes = mkRoutesWithNoPage[IO]
       val request = Request[IO](Method.GET, uri"pages/non-existent")
 
-      routes.routes.run(request).value.map(_.get).attempt.unsafeRunSync() must beLeft.which {
-        case _: AppErr.PageNotFound => true
-        case _                      => false
-      }
+      val resp =
+        ErrorHandler(routes.routes).run(request).value.map(_.get).unsafeRunSync()
+
+      resp.status mustEqual Status.NotFound
+      val body = resp.as[String].unsafeRunSync()
+      body must contain("\"code\":\"NOT_FOUND\"")
+      body must contain("Page not found")
     }
 
     "return 200 with pages list for GET /pages" >> {
