@@ -19,7 +19,7 @@ import su.wps.blog.config.{AppConfig, DbConfig, HttpServerConfig}
 import su.wps.blog.endpoints.{ErrorHandler, RoutesImpl}
 import su.wps.blog.repositories.{CommentRepositoryImpl, PageRepositoryImpl, PostRepositoryImpl, TagRepositoryImpl}
 import su.wps.blog.repositories.sql.Slf4jDoobieLogHandler
-import su.wps.blog.services.{CommentServiceImpl, PageServiceImpl, PostServiceImpl, TagServiceImpl}
+import su.wps.blog.services.*
 import tofu.doobie.transactor.Txr
 
 object Program {
@@ -39,7 +39,10 @@ object Program {
         commentService = CommentServiceImpl.create[F, xa.DB](commentRepo, xa)
         tagService = TagServiceImpl.create[F, xa.DB](tagRepo, xa)
         pageService = PageServiceImpl.create[F, xa.DB](pageRepo, xa)
-        routes = RoutesImpl.create[F](postService, commentService, tagService, pageService)
+        dbCheck = xa.trans(doobie.FC.isValid(1))
+          .handleError(_ => false)
+        healthService = HealthServiceImpl.create[F](dbCheck)
+        routes = RoutesImpl.create[F](postService, commentService, tagService, pageService, healthService)
         routesWithErrorHandling = ErrorHandler(routes.routes)
         _ <- mkHttpServer[F](appConfig.httpServer, routesWithErrorHandling)
         _ <- Resource.make(F.unit)(_ => logger.info("Releasing application resources"))

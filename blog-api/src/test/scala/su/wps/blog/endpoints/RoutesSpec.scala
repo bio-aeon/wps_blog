@@ -8,7 +8,7 @@ import org.http4s.*
 import org.http4s.circe.*
 import org.http4s.implicits.*
 import org.specs2.mutable.Specification
-import su.wps.blog.endpoints.mocks.{CommentServiceMock, PageServiceMock, PostServiceMock, TagServiceMock}
+import su.wps.blog.endpoints.mocks.*
 import io.circe.Json
 import su.wps.blog.models.api.*
 import su.wps.blog.models.domain.{AppErr, CommentId, PostId, TagId}
@@ -17,6 +17,8 @@ import tofu.Raise
 import java.time.ZonedDateTime
 
 class RoutesSpec extends Specification {
+
+  private val testTimestamp = ZonedDateTime.parse("2001-01-01T09:15:00Z")
 
   "Api routes should" >> {
     "return correct code and body for posts list retrieving" >> {
@@ -446,6 +448,39 @@ class RoutesSpec extends Specification {
       resp.status mustEqual Status.Ok
       respBody mustEqual """{"items":[],"total":0}"""
     }
+
+    "return 200 with health status for GET /health" >> {
+      val routes = mkRoutesWithHealth[IO]
+      val request = Request[IO](Method.GET, uri"health")
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+
+      resp.status mustEqual Status.Ok
+    }
+
+    "return health response with status, database and timestamp fields" >> {
+      val routes = mkRoutesWithHealth[IO]
+      val request = Request[IO](Method.GET, uri"health")
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+      val respBody = resp.as[String].unsafeRunSync()
+
+      respBody must contain("\"status\":\"healthy\"")
+      respBody must contain("\"database\":\"healthy\"")
+      respBody must contain("\"timestamp\":")
+    }
+
+    "return degraded status when database is unhealthy" >> {
+      val routes = mkRoutesWithUnhealthyDb[IO]
+      val request = Request[IO](Method.GET, uri"health")
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+      val respBody = resp.as[String].unsafeRunSync()
+
+      resp.status mustEqual Status.Ok
+      respBody must contain("\"status\":\"degraded\"")
+      respBody must contain("\"database\":\"unhealthy\"")
+    }
   }
 
   private def mkRoutes[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
@@ -460,7 +495,8 @@ class RoutesSpec extends Specification {
     val commentService = CommentServiceMock.create[F]()
     val tagService = TagServiceMock.create[F]()
     val pageService = PageServiceMock.create[F]()
-    RoutesImpl.create[F](postService, commentService, tagService, pageService)
+    val healthService = HealthServiceMock.create[F](timestamp = testTimestamp)
+    RoutesImpl.create[F](postService, commentService, tagService, pageService, healthService)
   }
 
   private def mkRoutesWithTagFilter[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
@@ -483,7 +519,8 @@ class RoutesSpec extends Specification {
     val tagService = TagServiceMock.create[F]()
     val pageService = PageServiceMock.create[F]()
 
-    RoutesImpl.create[F](postService, commentService, tagService, pageService)
+    val healthService = HealthServiceMock.create[F](timestamp = testTimestamp)
+    RoutesImpl.create[F](postService, commentService, tagService, pageService, healthService)
   }
 
   private def mkRoutesWithSearch[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
@@ -509,7 +546,8 @@ class RoutesSpec extends Specification {
     val tagService = TagServiceMock.create[F]()
     val pageService = PageServiceMock.create[F]()
 
-    RoutesImpl.create[F](postService, commentService, tagService, pageService)
+    val healthService = HealthServiceMock.create[F](timestamp = testTimestamp)
+    RoutesImpl.create[F](postService, commentService, tagService, pageService, healthService)
   }
 
   private def mkRoutesWithEmptySearch[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
@@ -518,7 +556,8 @@ class RoutesSpec extends Specification {
     val tagService = TagServiceMock.create[F]()
     val pageService = PageServiceMock.create[F]()
 
-    RoutesImpl.create[F](postService, commentService, tagService, pageService)
+    val healthService = HealthServiceMock.create[F](timestamp = testTimestamp)
+    RoutesImpl.create[F](postService, commentService, tagService, pageService, healthService)
   }
 
   private def mkRoutesWithRecentPosts[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
@@ -544,7 +583,8 @@ class RoutesSpec extends Specification {
     val tagService = TagServiceMock.create[F]()
     val pageService = PageServiceMock.create[F]()
 
-    RoutesImpl.create[F](postService, commentService, tagService, pageService)
+    val healthService = HealthServiceMock.create[F](timestamp = testTimestamp)
+    RoutesImpl.create[F](postService, commentService, tagService, pageService, healthService)
   }
 
   private def mkRoutesWithEmptyRecentPosts[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
@@ -553,7 +593,8 @@ class RoutesSpec extends Specification {
     val tagService = TagServiceMock.create[F]()
     val pageService = PageServiceMock.create[F]()
 
-    RoutesImpl.create[F](postService, commentService, tagService, pageService)
+    val healthService = HealthServiceMock.create[F](timestamp = testTimestamp)
+    RoutesImpl.create[F](postService, commentService, tagService, pageService, healthService)
   }
 
   private def mkRoutesWithComments[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
@@ -578,7 +619,8 @@ class RoutesSpec extends Specification {
     val tagService = TagServiceMock.create[F]()
     val pageService = PageServiceMock.create[F]()
 
-    RoutesImpl.create[F](postService, commentService, tagService, pageService)
+    val healthService = HealthServiceMock.create[F](timestamp = testTimestamp)
+    RoutesImpl.create[F](postService, commentService, tagService, pageService, healthService)
   }
 
   private def mkRoutesWithEmptyComments[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
@@ -587,7 +629,8 @@ class RoutesSpec extends Specification {
     val tagService = TagServiceMock.create[F]()
     val pageService = PageServiceMock.create[F]()
 
-    RoutesImpl.create[F](postService, commentService, tagService, pageService)
+    val healthService = HealthServiceMock.create[F](timestamp = testTimestamp)
+    RoutesImpl.create[F](postService, commentService, tagService, pageService, healthService)
   }
 
   private def mkRoutesForCreateComment[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
@@ -604,7 +647,8 @@ class RoutesSpec extends Specification {
     val tagService = TagServiceMock.create[F]()
     val pageService = PageServiceMock.create[F]()
 
-    RoutesImpl.create[F](postService, commentService, tagService, pageService)
+    val healthService = HealthServiceMock.create[F](timestamp = testTimestamp)
+    RoutesImpl.create[F](postService, commentService, tagService, pageService, healthService)
   }
 
   private def mkRoutesForRateComment[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
@@ -613,7 +657,8 @@ class RoutesSpec extends Specification {
     val tagService = TagServiceMock.create[F]()
     val pageService = PageServiceMock.create[F]()
 
-    RoutesImpl.create[F](postService, commentService, tagService, pageService)
+    val healthService = HealthServiceMock.create[F](timestamp = testTimestamp)
+    RoutesImpl.create[F](postService, commentService, tagService, pageService, healthService)
   }
 
   private def mkRoutesForCommentModeration[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
@@ -622,7 +667,8 @@ class RoutesSpec extends Specification {
     val tagService = TagServiceMock.create[F]()
     val pageService = PageServiceMock.create[F]()
 
-    RoutesImpl.create[F](postService, commentService, tagService, pageService)
+    val healthService = HealthServiceMock.create[F](timestamp = testTimestamp)
+    RoutesImpl.create[F](postService, commentService, tagService, pageService, healthService)
   }
 
   private def mkRoutesWithTags[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
@@ -635,7 +681,8 @@ class RoutesSpec extends Specification {
     val tagService = TagServiceMock.create[F](tagsWithCounts)
     val pageService = PageServiceMock.create[F]()
 
-    RoutesImpl.create[F](postService, commentService, tagService, pageService)
+    val healthService = HealthServiceMock.create[F](timestamp = testTimestamp)
+    RoutesImpl.create[F](postService, commentService, tagService, pageService, healthService)
   }
 
   private def mkRoutesWithEmptyTags[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
@@ -644,7 +691,8 @@ class RoutesSpec extends Specification {
     val tagService = TagServiceMock.create[F]()
     val pageService = PageServiceMock.create[F]()
 
-    RoutesImpl.create[F](postService, commentService, tagService, pageService)
+    val healthService = HealthServiceMock.create[F](timestamp = testTimestamp)
+    RoutesImpl.create[F](postService, commentService, tagService, pageService, healthService)
   }
 
   private def mkRoutesWithTagCloud[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
@@ -656,7 +704,8 @@ class RoutesSpec extends Specification {
     val tagService = TagServiceMock.create[F](getTagCloudResult = tagCloud)
     val pageService = PageServiceMock.create[F]()
 
-    RoutesImpl.create[F](postService, commentService, tagService, pageService)
+    val healthService = HealthServiceMock.create[F](timestamp = testTimestamp)
+    RoutesImpl.create[F](postService, commentService, tagService, pageService, healthService)
   }
 
   private def mkRoutesWithEmptyTagCloud[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
@@ -665,7 +714,8 @@ class RoutesSpec extends Specification {
     val tagService = TagServiceMock.create[F](getTagCloudResult = TagCloudResult(Nil))
     val pageService = PageServiceMock.create[F]()
 
-    RoutesImpl.create[F](postService, commentService, tagService, pageService)
+    val healthService = HealthServiceMock.create[F](timestamp = testTimestamp)
+    RoutesImpl.create[F](postService, commentService, tagService, pageService, healthService)
   }
 
   private def mkRoutesWithPage[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
@@ -675,7 +725,8 @@ class RoutesSpec extends Specification {
     val page = PageResult(1, "about", "About Us", "About page content", ZonedDateTime.parse("2001-01-01T09:15:00Z"))
     val pageService = PageServiceMock.create[F](Some(page))
 
-    RoutesImpl.create[F](postService, commentService, tagService, pageService)
+    val healthService = HealthServiceMock.create[F](timestamp = testTimestamp)
+    RoutesImpl.create[F](postService, commentService, tagService, pageService, healthService)
   }
 
   private def mkRoutesWithNoPage[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
@@ -684,7 +735,8 @@ class RoutesSpec extends Specification {
     val tagService = TagServiceMock.create[F]()
     val pageService = PageServiceMock.create[F]()
 
-    RoutesImpl.create[F](postService, commentService, tagService, pageService)
+    val healthService = HealthServiceMock.create[F](timestamp = testTimestamp)
+    RoutesImpl.create[F](postService, commentService, tagService, pageService, healthService)
   }
 
   private def mkRoutesWithPagesList[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
@@ -700,7 +752,8 @@ class RoutesSpec extends Specification {
     )
     val pageService = PageServiceMock.create[F](getAllPagesResult = pages)
 
-    RoutesImpl.create[F](postService, commentService, tagService, pageService)
+    val healthService = HealthServiceMock.create[F](timestamp = testTimestamp)
+    RoutesImpl.create[F](postService, commentService, tagService, pageService, healthService)
   }
 
   private def mkRoutesWithEmptyPagesList[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
@@ -709,6 +762,28 @@ class RoutesSpec extends Specification {
     val tagService = TagServiceMock.create[F]()
     val pageService = PageServiceMock.create[F](getAllPagesResult = ListItemsResult(Nil, 0))
 
-    RoutesImpl.create[F](postService, commentService, tagService, pageService)
+    val healthService = HealthServiceMock.create[F](timestamp = testTimestamp)
+    RoutesImpl.create[F](postService, commentService, tagService, pageService, healthService)
+  }
+
+  private def mkRoutesWithHealth[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
+    val postService = PostServiceMock.create[F]()
+    val commentService = CommentServiceMock.create[F]()
+    val tagService = TagServiceMock.create[F]()
+    val pageService = PageServiceMock.create[F]()
+    val healthService = HealthServiceMock.create[F](timestamp = testTimestamp)
+
+    RoutesImpl.create[F](postService, commentService, tagService, pageService, healthService)
+  }
+
+  private def mkRoutesWithUnhealthyDb[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
+    val postService = PostServiceMock.create[F]()
+    val commentService = CommentServiceMock.create[F]()
+    val tagService = TagServiceMock.create[F]()
+    val pageService = PageServiceMock.create[F]()
+    val healthService =
+      HealthServiceMock.create[F](status = "degraded", database = "unhealthy", timestamp = testTimestamp)
+
+    RoutesImpl.create[F](postService, commentService, tagService, pageService, healthService)
   }
 }
