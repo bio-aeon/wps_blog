@@ -92,6 +92,29 @@ class ErrorHandlerSpec extends Specification {
       body must not contain "Database connection failed"
     }
 
+    "return 400 for ValidationFailed error" >> {
+      val errors = Map("limit" -> "Must be between 1 and 100", "offset" -> "Must be non-negative")
+      val routes = mkFailingRoutes(AppErr.ValidationFailed(errors))
+      val request = Request[IO](Method.GET, uri"/test")
+
+      val resp = ErrorHandler(routes).run(request).value.map(_.get).unsafeRunSync()
+
+      resp.status mustEqual Status.BadRequest
+    }
+
+    "include validation error details in response body" >> {
+      val errors = Map("limit" -> "Must be between 1 and 100")
+      val routes = mkFailingRoutes(AppErr.ValidationFailed(errors))
+      val request = Request[IO](Method.GET, uri"/test")
+
+      val resp = ErrorHandler(routes).run(request).value.map(_.get).unsafeRunSync()
+      val body = resp.as[String].unsafeRunSync()
+
+      body must contain("\"code\":\"VALIDATION_ERROR\"")
+      body must contain("\"limit\"")
+      body must contain("Must be between 1 and 100")
+    }
+
     "pass through successful responses unchanged" >> {
       val routes = HttpRoutes.of[IO] { case GET -> Root / "test" =>
         IO.pure(Response[IO](Status.Ok).withEntity("success"))

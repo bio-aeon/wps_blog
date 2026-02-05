@@ -11,9 +11,9 @@ import org.http4s.circe.CirceEntityDecoder.*
 import org.http4s.dsl.Http4sDsl
 import org.http4s.headers.`X-Forwarded-For`
 import su.wps.blog.models.api.{CreateCommentRequest, RateCommentRequest}
-import su.wps.blog.models.domain.CommentId
-import su.wps.blog.models.domain.PostId
+import su.wps.blog.models.domain.{AppErr, CommentId, PostId}
 import su.wps.blog.services.{CommentService, HealthService, PageService, PostService, TagService}
+import su.wps.blog.validation.Validation
 
 final class RoutesImpl[F[_]: Concurrent] private (
   postService: PostService[F],
@@ -34,16 +34,20 @@ final class RoutesImpl[F[_]: Concurrent] private (
   val routes: HttpRoutes[F] = HttpRoutes.of[F] {
     case GET -> Root / "posts" :? LimitParamMatcher(limit) +& OffsetParamMatcher(offset)
         +& TagParamMatcher(maybeTag) =>
-      maybeTag match {
-        case Some(tagSlug) =>
-          postService.postsByTag(tagSlug, limit, offset).map(_.asJson).flatMap(Ok(_))
-        case None =>
-          postService.allPosts(limit, offset).map(_.asJson).flatMap(Ok(_))
+      withValidPagination(limit, offset) { (l, o) =>
+        maybeTag match {
+          case Some(tagSlug) =>
+            postService.postsByTag(tagSlug, l, o).map(_.asJson).flatMap(Ok(_))
+          case None =>
+            postService.allPosts(l, o).map(_.asJson).flatMap(Ok(_))
+        }
       }
 
     case GET -> Root / "posts" / "search" :? QueryParamMatcher(query) +& LimitParamMatcher(limit)
         +& OffsetParamMatcher(offset) =>
-      postService.searchPosts(query, limit, offset).map(_.asJson).flatMap(Ok(_))
+      withValidPagination(limit, offset) { (l, o) =>
+        postService.searchPosts(query, l, o).map(_.asJson).flatMap(Ok(_))
+      }
 
     case GET -> Root / "posts" / "recent" :? CountParamMatcher(maybeCount) =>
       val count = maybeCount
@@ -63,7 +67,9 @@ final class RoutesImpl[F[_]: Concurrent] private (
 
     case req @ POST -> Root / "posts" / IntVar(id) / "comments" =>
       req.as[CreateCommentRequest].flatMap { request =>
-        commentService.createComment(PostId(id), request).map(_.asJson).flatMap(Created(_))
+        withValidComment(request) { validated =>
+          commentService.createComment(PostId(id), validated).map(_.asJson).flatMap(Created(_))
+        }
       }
 
     case req @ POST -> Root / "comments" / IntVar(id) / "rate" =>
@@ -93,6 +99,25 @@ final class RoutesImpl[F[_]: Concurrent] private (
     case GET -> Root / "health" =>
       healthService.check.map(_.asJson).flatMap(Ok(_))
   }
+
+  private def withValidPagination(limit: Int, offset: Int)(
+    f: (Int, Int) => F[org.http4s.Response[F]]
+  ): F[org.http4s.Response[F]] =
+    Validation.validatePagination(limit, offset) match {
+      case cats.data.Validated.Valid((l, o)) => f(l, o)
+      case cats.data.Validated.Invalid(errors) =>
+        Concurrent[F].raiseError(AppErr.ValidationFailed(errors.toNonEmptyList.toList.toMap))
+    }
+
+  private def withValidComment(request: CreateCommentRequest)(
+    f: CreateCommentRequest => F[org.http4s.Response[F]]
+  ): F[org.http4s.Response[F]] =
+    Validation.validateComment(request.name, request.email, request.text) match {
+      case cats.data.Validated.Valid((name, email, text)) =>
+        f(request.copy(name = name, email = email, text = text))
+      case cats.data.Validated.Invalid(errors) =>
+        Concurrent[F].raiseError(AppErr.ValidationFailed(errors.toNonEmptyList.toList.toMap))
+    }
 
   private def extractIp(req: Request[F]): String =
     req.headers

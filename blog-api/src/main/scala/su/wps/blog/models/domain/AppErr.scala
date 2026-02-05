@@ -16,4 +16,9 @@ object AppErr {
   final case class PageNotFound(url: String) extends AppErr {
     override def toString: String = s"Page with url '$url' not found"
   }
+
+  final case class ValidationFailed(errors: Map[String, String]) extends AppErr {
+    override def toString: String =
+      s"Validation failed: ${errors.map { case (k, v) => s"$k: $v" }.mkString(", ")}"
+  }
 }

@@ -481,6 +481,134 @@ class RoutesSpec extends Specification {
       respBody must contain("\"status\":\"degraded\"")
       respBody must contain("\"database\":\"unhealthy\"")
     }
+
+    "return 400 for invalid pagination limit on GET /posts" >> {
+      val routes = mkRoutes[IO]
+      val request = Request[IO](
+        Method.GET,
+        uri"posts".withQueryParams(Map("limit" -> "0", "offset" -> "0"))
+      )
+
+      val resp =
+        ErrorHandler(routes.routes).run(request).value.map(_.get).unsafeRunSync()
+
+      resp.status mustEqual Status.BadRequest
+      val body = resp.as[String].unsafeRunSync()
+      body must contain("\"code\":\"VALIDATION_ERROR\"")
+      body must contain("\"limit\"")
+    }
+
+    "return 400 for negative pagination offset on GET /posts" >> {
+      val routes = mkRoutes[IO]
+      val request = Request[IO](
+        Method.GET,
+        uri"posts".withQueryParams(Map("limit" -> "10", "offset" -> "-1"))
+      )
+
+      val resp =
+        ErrorHandler(routes.routes).run(request).value.map(_.get).unsafeRunSync()
+
+      resp.status mustEqual Status.BadRequest
+      val body = resp.as[String].unsafeRunSync()
+      body must contain("\"code\":\"VALIDATION_ERROR\"")
+      body must contain("\"offset\"")
+    }
+
+    "return 400 for limit exceeding maximum on GET /posts" >> {
+      val routes = mkRoutes[IO]
+      val request = Request[IO](
+        Method.GET,
+        uri"posts".withQueryParams(Map("limit" -> "101", "offset" -> "0"))
+      )
+
+      val resp =
+        ErrorHandler(routes.routes).run(request).value.map(_.get).unsafeRunSync()
+
+      resp.status mustEqual Status.BadRequest
+    }
+
+    "return 400 for invalid pagination on GET /posts/search" >> {
+      val routes = mkRoutesWithSearch[IO]
+      val request = Request[IO](
+        Method.GET,
+        uri"posts/search".withQueryParams(
+          Map("q" -> "scala", "limit" -> "-1", "offset" -> "0")
+        )
+      )
+
+      val resp =
+        ErrorHandler(routes.routes).run(request).value.map(_.get).unsafeRunSync()
+
+      resp.status mustEqual Status.BadRequest
+    }
+
+    "return 400 for empty comment name on POST /posts/{id}/comments" >> {
+      val routes = mkRoutesForCreateComment[IO]
+      val body = CreateCommentRequest("", "test@example.com", "Comment text", None)
+      val request = Request[IO](Method.POST, uri"posts/1/comments").withEntity(body.asJson)
+
+      val resp =
+        ErrorHandler(routes.routes).run(request).value.map(_.get).unsafeRunSync()
+
+      resp.status mustEqual Status.BadRequest
+      val respBody = resp.as[String].unsafeRunSync()
+      respBody must contain("\"code\":\"VALIDATION_ERROR\"")
+      respBody must contain("\"name\"")
+    }
+
+    "return 400 for invalid email on POST /posts/{id}/comments" >> {
+      val routes = mkRoutesForCreateComment[IO]
+      val body = CreateCommentRequest("Author", "not-an-email", "Comment text", None)
+      val request = Request[IO](Method.POST, uri"posts/1/comments").withEntity(body.asJson)
+
+      val resp =
+        ErrorHandler(routes.routes).run(request).value.map(_.get).unsafeRunSync()
+
+      resp.status mustEqual Status.BadRequest
+      val respBody = resp.as[String].unsafeRunSync()
+      respBody must contain("\"email\"")
+    }
+
+    "return 400 for empty comment text on POST /posts/{id}/comments" >> {
+      val routes = mkRoutesForCreateComment[IO]
+      val body = CreateCommentRequest("Author", "test@example.com", "", None)
+      val request = Request[IO](Method.POST, uri"posts/1/comments").withEntity(body.asJson)
+
+      val resp =
+        ErrorHandler(routes.routes).run(request).value.map(_.get).unsafeRunSync()
+
+      resp.status mustEqual Status.BadRequest
+      val respBody = resp.as[String].unsafeRunSync()
+      respBody must contain("\"text\"")
+    }
+
+    "sanitize HTML in comment text on POST /posts/{id}/comments" >> {
+      val routes = mkRoutesForCreateCommentEcho[IO]
+      val body =
+        CreateCommentRequest("Author", "test@example.com", "<script>alert('xss')</script>", None)
+      val request = Request[IO](Method.POST, uri"posts/1/comments").withEntity(body.asJson)
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+
+      resp.status mustEqual Status.Created
+      val respBody = resp.as[String].unsafeRunSync()
+      respBody must not contain "<script>"
+    }
+
+    "accumulate multiple validation errors on POST /posts/{id}/comments" >> {
+      val routes = mkRoutesForCreateComment[IO]
+      val body = CreateCommentRequest("", "invalid", "", None)
+      val request = Request[IO](Method.POST, uri"posts/1/comments").withEntity(body.asJson)
+
+      val resp =
+        ErrorHandler(routes.routes).run(request).value.map(_.get).unsafeRunSync()
+
+      resp.status mustEqual Status.BadRequest
+      val respBody = resp.as[String].unsafeRunSync()
+      respBody must contain("\"name\"")
+      respBody must contain("\"email\"")
+      respBody must contain("\"text\"")
+    }
   }
 
   private def mkRoutes[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
@@ -644,6 +772,16 @@ class RoutesSpec extends Specification {
       Nil
     )
     val commentService = CommentServiceMock.create[F](createCommentResult = Some(createdComment))
+    val tagService = TagServiceMock.create[F]()
+    val pageService = PageServiceMock.create[F]()
+
+    val healthService = HealthServiceMock.create[F](timestamp = testTimestamp)
+    RoutesImpl.create[F](postService, commentService, tagService, pageService, healthService)
+  }
+
+  private def mkRoutesForCreateCommentEcho[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
+    val postService = PostServiceMock.create[F]()
+    val commentService = CommentServiceMock.create[F]()
     val tagService = TagServiceMock.create[F]()
     val pageService = PageServiceMock.create[F]()
 

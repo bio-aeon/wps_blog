@@ -3,7 +3,6 @@ package su.wps.blog.endpoints
 import cats.data.{Kleisli, OptionT}
 import cats.effect.Sync
 import cats.syntax.applicativeError.*
-import cats.syntax.functor.*
 import io.circe.syntax.*
 import org.http4s.*
 import org.http4s.circe.*
@@ -48,6 +47,9 @@ object ErrorHandler {
 
       case AppErr.PageNotFound(url) =>
         NotFound(ErrorResponse.notFound("Page", url).asJson)
+
+      case AppErr.ValidationFailed(errors) =>
+        BadRequest(ErrorResponse.validationError(errors).asJson)
 
       case e: InvalidMessageBodyFailure =>
         BadRequest(ErrorResponse.badRequest(e.getMessage).asJson)
