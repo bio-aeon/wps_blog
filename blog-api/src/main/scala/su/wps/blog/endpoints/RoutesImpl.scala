@@ -10,6 +10,7 @@ import org.http4s.circe.*
 import org.http4s.circe.CirceEntityDecoder.*
 import org.http4s.dsl.Http4sDsl
 import org.http4s.headers.`X-Forwarded-For`
+import org.http4s.server.Router
 import su.wps.blog.models.api.{CreateCommentRequest, RateCommentRequest}
 import su.wps.blog.models.domain.{AppErr, CommentId, PostId}
 import su.wps.blog.services.{CommentService, HealthService, PageService, PostService, TagService}
@@ -31,7 +32,7 @@ final class RoutesImpl[F[_]: Concurrent] private (
   private object QueryParamMatcher extends QueryParamDecoderMatcher[String]("q")
   private object CountParamMatcher extends OptionalQueryParamDecoderMatcher[Int]("count")
 
-  val routes: HttpRoutes[F] = HttpRoutes.of[F] {
+  private val apiRoutes: HttpRoutes[F] = HttpRoutes.of[F] {
     case GET -> Root / "posts" :? LimitParamMatcher(limit) +& OffsetParamMatcher(offset)
         +& TagParamMatcher(maybeTag) =>
       withValidPagination(limit, offset) { (l, o) =>
@@ -95,10 +96,17 @@ final class RoutesImpl[F[_]: Concurrent] private (
 
     case GET -> Root / "pages" / url =>
       pageService.getPageByUrl(url).map(_.asJson).flatMap(Ok(_))
+  }
 
+  private val systemRoutes: HttpRoutes[F] = HttpRoutes.of[F] {
     case GET -> Root / "health" =>
       healthService.check.map(_.asJson).flatMap(Ok(_))
   }
+
+  val routes: HttpRoutes[F] = Router(
+    s"/$ApiVersion" -> apiRoutes,
+    "/" -> systemRoutes
+  )
 
   private def withValidPagination(limit: Int, offset: Int)(
     f: (Int, Int) => F[org.http4s.Response[F]]
@@ -129,6 +137,7 @@ final class RoutesImpl[F[_]: Concurrent] private (
 }
 
 object RoutesImpl {
+  val ApiVersion = "v1"
   val DefaultRecentPostsCount = 5
   val MaxRecentPostsCount = 20
   val MinRecentPostsCount = 1

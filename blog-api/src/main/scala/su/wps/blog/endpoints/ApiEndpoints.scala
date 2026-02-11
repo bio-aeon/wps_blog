@@ -8,6 +8,7 @@ import su.wps.blog.models.api.*
 object ApiEndpoints {
   import TapirSupport.*
 
+  private val v1 = RoutesImpl.ApiVersion
   private val postsTag = "Posts"
   private val commentsTag = "Comments"
   private val tagsTag = "Tags"
@@ -17,7 +18,7 @@ object ApiEndpoints {
 
   val getPosts: AnyEndpoint =
     endpoint.get
-      .in("posts")
+      .in(v1 / "posts")
       .in(query[Int]("limit").description("Number of posts per page"))
       .in(query[Int]("offset").description("Pagination offset"))
       .in(
@@ -34,7 +35,7 @@ object ApiEndpoints {
 
   val searchPosts: AnyEndpoint =
     endpoint.get
-      .in("posts" / "search")
+      .in(v1 / "posts" / "search")
       .in(query[String]("q").description("Full-text search query"))
       .in(query[Int]("limit").description("Number of results per page"))
       .in(query[Int]("offset").description("Pagination offset"))
@@ -46,7 +47,7 @@ object ApiEndpoints {
 
   val recentPosts: AnyEndpoint =
     endpoint.get
-      .in("posts" / "recent")
+      .in(v1 / "posts" / "recent")
       .in(
         query[Option[Int]]("count")
           .description("Number of recent posts to return (default 5, max 20)")
@@ -58,7 +59,7 @@ object ApiEndpoints {
 
   val getPostById: AnyEndpoint =
     endpoint.get
-      .in("posts" / path[Int]("id").description("Post ID"))
+      .in(v1 / "posts" / path[Int]("id").description("Post ID"))
       .out(jsonBody[PostResult])
       .errorOut(jsonBody[ErrorResponse])
       .summary("Get post by ID")
@@ -67,7 +68,7 @@ object ApiEndpoints {
 
   val incrementViewCount: AnyEndpoint =
     endpoint.post
-      .in("posts" / path[Int]("id").description("Post ID") / "view")
+      .in(v1 / "posts" / path[Int]("id").description("Post ID") / "view")
       .out(statusCode(StatusCode.NoContent))
       .summary("Increment view count")
       .description(
@@ -78,7 +79,7 @@ object ApiEndpoints {
 
   val getCommentsForPost: AnyEndpoint =
     endpoint.get
-      .in("posts" / path[Int]("id").description("Post ID") / "comments")
+      .in(v1 / "posts" / path[Int]("id").description("Post ID") / "comments")
       .out(jsonBody[CommentsListResult])
       .summary("List comments for post")
       .description("Get all comments for a post as a threaded tree structure.")
@@ -86,7 +87,7 @@ object ApiEndpoints {
 
   val createComment: AnyEndpoint =
     endpoint.post
-      .in("posts" / path[Int]("id").description("Post ID") / "comments")
+      .in(v1 / "posts" / path[Int]("id").description("Post ID") / "comments")
       .in(jsonBody[CreateCommentRequest])
       .out(statusCode(StatusCode.Created).and(jsonBody[CommentResult]))
       .errorOut(jsonBody[ErrorResponse])
@@ -99,7 +100,7 @@ object ApiEndpoints {
 
   val rateComment: AnyEndpoint =
     endpoint.post
-      .in("comments" / path[Int]("id").description("Comment ID") / "rate")
+      .in(v1 / "comments" / path[Int]("id").description("Comment ID") / "rate")
       .in(jsonBody[RateCommentRequest])
       .out(statusCode(StatusCode.NoContent))
       .summary("Rate comment")
@@ -111,7 +112,7 @@ object ApiEndpoints {
 
   val deleteComment: AnyEndpoint =
     endpoint.delete
-      .in("admin" / "comments" / path[Int]("id").description("Comment ID"))
+      .in(v1 / "admin" / "comments" / path[Int]("id").description("Comment ID"))
       .out(statusCode(StatusCode.NoContent))
       .summary("Delete comment")
       .description("Delete a comment (admin only).")
@@ -120,7 +121,7 @@ object ApiEndpoints {
   val approveComment: AnyEndpoint =
     endpoint.put
       .in(
-        "admin" / "comments" / path[Int]("id")
+        v1 / "admin" / "comments" / path[Int]("id")
           .description("Comment ID") / "approve"
       )
       .out(statusCode(StatusCode.NoContent))
@@ -130,7 +131,7 @@ object ApiEndpoints {
 
   val getAllTags: AnyEndpoint =
     endpoint.get
-      .in("tags")
+      .in(v1 / "tags")
       .out(jsonBody[ListItemsResult[TagWithCountResult]])
       .summary("List all tags")
       .description("Get all tags with their associated post counts.")
@@ -138,7 +139,7 @@ object ApiEndpoints {
 
   val getTagCloud: AnyEndpoint =
     endpoint.get
-      .in("tags" / "cloud")
+      .in(v1 / "tags" / "cloud")
       .out(jsonBody[TagCloudResult])
       .summary("Tag cloud")
       .description(
@@ -148,7 +149,7 @@ object ApiEndpoints {
 
   val getAllPages: AnyEndpoint =
     endpoint.get
-      .in("pages")
+      .in(v1 / "pages")
       .out(jsonBody[ListItemsResult[ListPageResult]])
       .summary("List all pages")
       .description(
@@ -158,7 +159,7 @@ object ApiEndpoints {
 
   val getPageByUrl: AnyEndpoint =
     endpoint.get
-      .in("pages" / path[String]("url").description("Page URL slug"))
+      .in(v1 / "pages" / path[String]("url").description("Page URL slug"))
       .out(jsonBody[PageResult])
       .errorOut(jsonBody[ErrorResponse])
       .summary("Get page by URL")

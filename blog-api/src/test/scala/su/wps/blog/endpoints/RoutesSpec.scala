@@ -7,6 +7,7 @@ import io.circe.syntax.*
 import org.http4s.*
 import org.http4s.circe.*
 import org.http4s.implicits.*
+import org.http4s.Uri
 import org.specs2.mutable.Specification
 import su.wps.blog.endpoints.mocks.*
 import io.circe.Json
@@ -19,12 +20,13 @@ import java.time.ZonedDateTime
 class RoutesSpec extends Specification {
 
   private val testTimestamp = ZonedDateTime.parse("2001-01-01T09:15:00Z")
+  private val v1 = RoutesImpl.ApiVersion
 
   "Api routes should" >> {
     "return correct code and body for posts list retrieving" >> {
       val routes = mkRoutes[IO]
       val request =
-        Request[IO](Method.GET, uri"posts".withQueryParams(Map("limit" -> "10", "offset" -> "0")))
+        Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/posts").withQueryParams(Map("limit" -> "10", "offset" -> "0")))
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
       val respBody = resp.as[String].unsafeRunSync()
@@ -35,7 +37,7 @@ class RoutesSpec extends Specification {
 
     "return correct code and body for post retrieving by id" >> {
       val routes = mkRoutes[IO]
-      val request = Request[IO](Method.GET, uri"posts/1")
+      val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/posts/1"))
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
       val respBody = resp.as[String].unsafeRunSync()
@@ -48,7 +50,7 @@ class RoutesSpec extends Specification {
       val routes = mkRoutesWithTagFilter[IO]
       val request = Request[IO](
         Method.GET,
-        uri"posts".withQueryParams(Map("limit" -> "10", "offset" -> "0", "tag" -> "scala"))
+        Uri.unsafeFromString(s"$v1/posts").withQueryParams(Map("limit" -> "10", "offset" -> "0", "tag" -> "scala"))
       )
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
@@ -59,7 +61,7 @@ class RoutesSpec extends Specification {
       val routes = mkRoutesWithTagFilter[IO]
       val request = Request[IO](
         Method.GET,
-        uri"posts".withQueryParams(Map("limit" -> "10", "offset" -> "0", "tag" -> "scala"))
+        Uri.unsafeFromString(s"$v1/posts").withQueryParams(Map("limit" -> "10", "offset" -> "0", "tag" -> "scala"))
       )
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
@@ -71,7 +73,7 @@ class RoutesSpec extends Specification {
     "return all posts when tag parameter is not provided" >> {
       val routes = mkRoutesWithTagFilter[IO]
       val request =
-        Request[IO](Method.GET, uri"posts".withQueryParams(Map("limit" -> "10", "offset" -> "0")))
+        Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/posts").withQueryParams(Map("limit" -> "10", "offset" -> "0")))
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
       val respBody = resp.as[String].unsafeRunSync()
@@ -82,7 +84,7 @@ class RoutesSpec extends Specification {
 
     "return 204 No Content on successful view increment" >> {
       val routes = mkRoutes[IO]
-      val request = Request[IO](Method.POST, uri"posts/1/view")
+      val request = Request[IO](Method.POST, Uri.unsafeFromString(s"$v1/posts/1/view"))
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
 
@@ -91,7 +93,7 @@ class RoutesSpec extends Specification {
 
     "return 204 even for non-existent post (idempotent)" >> {
       val routes = mkRoutes[IO]
-      val request = Request[IO](Method.POST, uri"posts/99999/view")
+      val request = Request[IO](Method.POST, Uri.unsafeFromString(s"$v1/posts/99999/view"))
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
 
@@ -102,7 +104,7 @@ class RoutesSpec extends Specification {
       val routes = mkRoutesWithSearch[IO]
       val request = Request[IO](
         Method.GET,
-        uri"posts/search".withQueryParams(Map("q" -> "scala", "limit" -> "10", "offset" -> "0"))
+        Uri.unsafeFromString(s"$v1/posts/search").withQueryParams(Map("q" -> "scala", "limit" -> "10", "offset" -> "0"))
       )
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
@@ -113,7 +115,7 @@ class RoutesSpec extends Specification {
       val routes = mkRoutesWithSearch[IO]
       val request = Request[IO](
         Method.GET,
-        uri"posts/search".withQueryParams(Map("q" -> "scala", "limit" -> "10", "offset" -> "0"))
+        Uri.unsafeFromString(s"$v1/posts/search").withQueryParams(Map("q" -> "scala", "limit" -> "10", "offset" -> "0"))
       )
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
@@ -127,7 +129,7 @@ class RoutesSpec extends Specification {
       val routes = mkRoutesWithEmptySearch[IO]
       val request = Request[IO](
         Method.GET,
-        uri"posts/search".withQueryParams(
+        Uri.unsafeFromString(s"$v1/posts/search").withQueryParams(
           Map("q" -> "nonexistent", "limit" -> "10", "offset" -> "0")
         )
       )
@@ -141,7 +143,7 @@ class RoutesSpec extends Specification {
 
     "return 200 with recent posts for GET /posts/recent" >> {
       val routes = mkRoutesWithRecentPosts[IO]
-      val request = Request[IO](Method.GET, uri"posts/recent")
+      val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/posts/recent"))
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
       resp.status mustEqual Status.Ok
@@ -149,7 +151,7 @@ class RoutesSpec extends Specification {
 
     "return recent posts with default count when count param is not provided" >> {
       val routes = mkRoutesWithRecentPosts[IO]
-      val request = Request[IO](Method.GET, uri"posts/recent")
+      val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/posts/recent"))
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
       val respBody = resp.as[String].unsafeRunSync()
@@ -160,7 +162,7 @@ class RoutesSpec extends Specification {
 
     "return recent posts with specified count" >> {
       val routes = mkRoutesWithRecentPosts[IO]
-      val request = Request[IO](Method.GET, uri"posts/recent".withQueryParams(Map("count" -> "3")))
+      val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/posts/recent").withQueryParams(Map("count" -> "3")))
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
       resp.status mustEqual Status.Ok
@@ -168,7 +170,7 @@ class RoutesSpec extends Specification {
 
     "return empty list when no recent posts exist" >> {
       val routes = mkRoutesWithEmptyRecentPosts[IO]
-      val request = Request[IO](Method.GET, uri"posts/recent")
+      val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/posts/recent"))
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
       val respBody = resp.as[String].unsafeRunSync()
@@ -179,7 +181,7 @@ class RoutesSpec extends Specification {
 
     "return 200 with threaded comments for GET /posts/{id}/comments" >> {
       val routes = mkRoutesWithComments[IO]
-      val request = Request[IO](Method.GET, uri"posts/1/comments")
+      val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/posts/1/comments"))
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
 
@@ -188,7 +190,7 @@ class RoutesSpec extends Specification {
 
     "return JSON with comments array and total" >> {
       val routes = mkRoutesWithComments[IO]
-      val request = Request[IO](Method.GET, uri"posts/1/comments")
+      val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/posts/1/comments"))
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
       val respBody = resp.as[String].unsafeRunSync()
@@ -199,7 +201,7 @@ class RoutesSpec extends Specification {
 
     "return nested replies structure in comments" >> {
       val routes = mkRoutesWithComments[IO]
-      val request = Request[IO](Method.GET, uri"posts/1/comments")
+      val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/posts/1/comments"))
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
       val respBody = resp.as[String].unsafeRunSync()
@@ -210,7 +212,7 @@ class RoutesSpec extends Specification {
 
     "return empty comments for post with no comments" >> {
       val routes = mkRoutesWithEmptyComments[IO]
-      val request = Request[IO](Method.GET, uri"posts/99999/comments")
+      val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/posts/99999/comments"))
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
       val respBody = resp.as[String].unsafeRunSync()
@@ -222,7 +224,7 @@ class RoutesSpec extends Specification {
     "return 201 Created when creating a new comment" >> {
       val routes = mkRoutesForCreateComment[IO]
       val body = CreateCommentRequest("Author", "test@example.com", "Comment text", None)
-      val request = Request[IO](Method.POST, uri"posts/1/comments").withEntity(body.asJson)
+      val request = Request[IO](Method.POST, Uri.unsafeFromString(s"$v1/posts/1/comments")).withEntity(body.asJson)
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
 
@@ -232,7 +234,7 @@ class RoutesSpec extends Specification {
     "return created comment in response body" >> {
       val routes = mkRoutesForCreateComment[IO]
       val body = CreateCommentRequest("Author", "test@example.com", "Comment text", None)
-      val request = Request[IO](Method.POST, uri"posts/1/comments").withEntity(body.asJson)
+      val request = Request[IO](Method.POST, Uri.unsafeFromString(s"$v1/posts/1/comments")).withEntity(body.asJson)
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
       val respBody = resp.as[String].unsafeRunSync()
@@ -244,7 +246,7 @@ class RoutesSpec extends Specification {
     "return comment with id in response" >> {
       val routes = mkRoutesForCreateComment[IO]
       val body = CreateCommentRequest("Author", "test@example.com", "Comment text", None)
-      val request = Request[IO](Method.POST, uri"posts/1/comments").withEntity(body.asJson)
+      val request = Request[IO](Method.POST, Uri.unsafeFromString(s"$v1/posts/1/comments")).withEntity(body.asJson)
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
       val respBody = resp.as[String].unsafeRunSync()
@@ -255,7 +257,7 @@ class RoutesSpec extends Specification {
     "create reply comment with parent id" >> {
       val routes = mkRoutesForCreateComment[IO]
       val body = CreateCommentRequest("Replier", "reply@example.com", "Reply text", Some(1))
-      val request = Request[IO](Method.POST, uri"posts/1/comments").withEntity(body.asJson)
+      val request = Request[IO](Method.POST, Uri.unsafeFromString(s"$v1/posts/1/comments")).withEntity(body.asJson)
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
 
@@ -265,7 +267,7 @@ class RoutesSpec extends Specification {
     "return 204 No Content on successful comment rating" >> {
       val routes = mkRoutesForRateComment[IO]
       val body = RateCommentRequest(isUpvote = true)
-      val request = Request[IO](Method.POST, uri"comments/1/rate").withEntity(body.asJson)
+      val request = Request[IO](Method.POST, Uri.unsafeFromString(s"$v1/comments/1/rate")).withEntity(body.asJson)
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
 
@@ -275,7 +277,7 @@ class RoutesSpec extends Specification {
     "handle upvote rating request" >> {
       val routes = mkRoutesForRateComment[IO]
       val body = RateCommentRequest(isUpvote = true)
-      val request = Request[IO](Method.POST, uri"comments/1/rate").withEntity(body.asJson)
+      val request = Request[IO](Method.POST, Uri.unsafeFromString(s"$v1/comments/1/rate")).withEntity(body.asJson)
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
 
@@ -285,7 +287,7 @@ class RoutesSpec extends Specification {
     "handle downvote rating request" >> {
       val routes = mkRoutesForRateComment[IO]
       val body = RateCommentRequest(isUpvote = false)
-      val request = Request[IO](Method.POST, uri"comments/1/rate").withEntity(body.asJson)
+      val request = Request[IO](Method.POST, Uri.unsafeFromString(s"$v1/comments/1/rate")).withEntity(body.asJson)
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
 
@@ -295,7 +297,7 @@ class RoutesSpec extends Specification {
     "return 204 even for non-existent comment (idempotent)" >> {
       val routes = mkRoutesForRateComment[IO]
       val body = RateCommentRequest(isUpvote = true)
-      val request = Request[IO](Method.POST, uri"comments/99999/rate").withEntity(body.asJson)
+      val request = Request[IO](Method.POST, Uri.unsafeFromString(s"$v1/comments/99999/rate")).withEntity(body.asJson)
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
 
@@ -304,7 +306,7 @@ class RoutesSpec extends Specification {
 
     "return 204 No Content on successful comment deletion" >> {
       val routes = mkRoutesForCommentModeration[IO]
-      val request = Request[IO](Method.DELETE, uri"admin/comments/1")
+      val request = Request[IO](Method.DELETE, Uri.unsafeFromString(s"$v1/admin/comments/1"))
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
 
@@ -313,7 +315,7 @@ class RoutesSpec extends Specification {
 
     "return 204 No Content on successful comment approval" >> {
       val routes = mkRoutesForCommentModeration[IO]
-      val request = Request[IO](Method.PUT, uri"admin/comments/1/approve")
+      val request = Request[IO](Method.PUT, Uri.unsafeFromString(s"$v1/admin/comments/1/approve"))
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
 
@@ -322,7 +324,7 @@ class RoutesSpec extends Specification {
 
     "return 200 with tags list for GET /tags" >> {
       val routes = mkRoutesWithTags[IO]
-      val request = Request[IO](Method.GET, uri"tags")
+      val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/tags"))
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
 
@@ -331,7 +333,7 @@ class RoutesSpec extends Specification {
 
     "return tags with post counts in response" >> {
       val routes = mkRoutesWithTags[IO]
-      val request = Request[IO](Method.GET, uri"tags")
+      val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/tags"))
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
       val respBody = resp.as[String].unsafeRunSync()
@@ -342,7 +344,7 @@ class RoutesSpec extends Specification {
 
     "return empty tags list when no tags exist" >> {
       val routes = mkRoutesWithEmptyTags[IO]
-      val request = Request[IO](Method.GET, uri"tags")
+      val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/tags"))
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
       val respBody = resp.as[String].unsafeRunSync()
@@ -353,7 +355,7 @@ class RoutesSpec extends Specification {
 
     "return 200 with tag cloud for GET /tags/cloud" >> {
       val routes = mkRoutesWithTagCloud[IO]
-      val request = Request[IO](Method.GET, uri"tags/cloud")
+      val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/tags/cloud"))
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
 
@@ -362,7 +364,7 @@ class RoutesSpec extends Specification {
 
     "return tag cloud with normalized weights" >> {
       val routes = mkRoutesWithTagCloud[IO]
-      val request = Request[IO](Method.GET, uri"tags/cloud")
+      val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/tags/cloud"))
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
       val respBody = resp.as[String].unsafeRunSync()
@@ -374,7 +376,7 @@ class RoutesSpec extends Specification {
 
     "return empty tag cloud when no tags exist" >> {
       val routes = mkRoutesWithEmptyTagCloud[IO]
-      val request = Request[IO](Method.GET, uri"tags/cloud")
+      val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/tags/cloud"))
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
       val respBody = resp.as[String].unsafeRunSync()
@@ -385,7 +387,7 @@ class RoutesSpec extends Specification {
 
     "return 200 with page content for GET /pages/{url}" >> {
       val routes = mkRoutesWithPage[IO]
-      val request = Request[IO](Method.GET, uri"pages/about")
+      val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/pages/about"))
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
 
@@ -394,7 +396,7 @@ class RoutesSpec extends Specification {
 
     "return page with correct fields in response" >> {
       val routes = mkRoutesWithPage[IO]
-      val request = Request[IO](Method.GET, uri"pages/about")
+      val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/pages/about"))
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
       val respBody = resp.as[String].unsafeRunSync()
@@ -406,7 +408,7 @@ class RoutesSpec extends Specification {
 
     "return 404 with error response when page is not found" >> {
       val routes = mkRoutesWithNoPage[IO]
-      val request = Request[IO](Method.GET, uri"pages/non-existent")
+      val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/pages/non-existent"))
 
       val resp =
         ErrorHandler(routes.routes).run(request).value.map(_.get).unsafeRunSync()
@@ -419,7 +421,7 @@ class RoutesSpec extends Specification {
 
     "return 200 with pages list for GET /pages" >> {
       val routes = mkRoutesWithPagesList[IO]
-      val request = Request[IO](Method.GET, uri"pages")
+      val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/pages"))
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
 
@@ -428,7 +430,7 @@ class RoutesSpec extends Specification {
 
     "return pages with url and title in response" >> {
       val routes = mkRoutesWithPagesList[IO]
-      val request = Request[IO](Method.GET, uri"pages")
+      val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/pages"))
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
       val respBody = resp.as[String].unsafeRunSync()
@@ -440,7 +442,7 @@ class RoutesSpec extends Specification {
 
     "return empty pages list when no pages exist" >> {
       val routes = mkRoutesWithEmptyPagesList[IO]
-      val request = Request[IO](Method.GET, uri"pages")
+      val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/pages"))
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
       val respBody = resp.as[String].unsafeRunSync()
@@ -486,7 +488,7 @@ class RoutesSpec extends Specification {
       val routes = mkRoutes[IO]
       val request = Request[IO](
         Method.GET,
-        uri"posts".withQueryParams(Map("limit" -> "0", "offset" -> "0"))
+        Uri.unsafeFromString(s"$v1/posts").withQueryParams(Map("limit" -> "0", "offset" -> "0"))
       )
 
       val resp =
@@ -502,7 +504,7 @@ class RoutesSpec extends Specification {
       val routes = mkRoutes[IO]
       val request = Request[IO](
         Method.GET,
-        uri"posts".withQueryParams(Map("limit" -> "10", "offset" -> "-1"))
+        Uri.unsafeFromString(s"$v1/posts").withQueryParams(Map("limit" -> "10", "offset" -> "-1"))
       )
 
       val resp =
@@ -518,7 +520,7 @@ class RoutesSpec extends Specification {
       val routes = mkRoutes[IO]
       val request = Request[IO](
         Method.GET,
-        uri"posts".withQueryParams(Map("limit" -> "101", "offset" -> "0"))
+        Uri.unsafeFromString(s"$v1/posts").withQueryParams(Map("limit" -> "101", "offset" -> "0"))
       )
 
       val resp =
@@ -531,7 +533,7 @@ class RoutesSpec extends Specification {
       val routes = mkRoutesWithSearch[IO]
       val request = Request[IO](
         Method.GET,
-        uri"posts/search".withQueryParams(
+        Uri.unsafeFromString(s"$v1/posts/search").withQueryParams(
           Map("q" -> "scala", "limit" -> "-1", "offset" -> "0")
         )
       )
@@ -545,7 +547,7 @@ class RoutesSpec extends Specification {
     "return 400 for empty comment name on POST /posts/{id}/comments" >> {
       val routes = mkRoutesForCreateComment[IO]
       val body = CreateCommentRequest("", "test@example.com", "Comment text", None)
-      val request = Request[IO](Method.POST, uri"posts/1/comments").withEntity(body.asJson)
+      val request = Request[IO](Method.POST, Uri.unsafeFromString(s"$v1/posts/1/comments")).withEntity(body.asJson)
 
       val resp =
         ErrorHandler(routes.routes).run(request).value.map(_.get).unsafeRunSync()
@@ -559,7 +561,7 @@ class RoutesSpec extends Specification {
     "return 400 for invalid email on POST /posts/{id}/comments" >> {
       val routes = mkRoutesForCreateComment[IO]
       val body = CreateCommentRequest("Author", "not-an-email", "Comment text", None)
-      val request = Request[IO](Method.POST, uri"posts/1/comments").withEntity(body.asJson)
+      val request = Request[IO](Method.POST, Uri.unsafeFromString(s"$v1/posts/1/comments")).withEntity(body.asJson)
 
       val resp =
         ErrorHandler(routes.routes).run(request).value.map(_.get).unsafeRunSync()
@@ -572,7 +574,7 @@ class RoutesSpec extends Specification {
     "return 400 for empty comment text on POST /posts/{id}/comments" >> {
       val routes = mkRoutesForCreateComment[IO]
       val body = CreateCommentRequest("Author", "test@example.com", "", None)
-      val request = Request[IO](Method.POST, uri"posts/1/comments").withEntity(body.asJson)
+      val request = Request[IO](Method.POST, Uri.unsafeFromString(s"$v1/posts/1/comments")).withEntity(body.asJson)
 
       val resp =
         ErrorHandler(routes.routes).run(request).value.map(_.get).unsafeRunSync()
@@ -586,7 +588,7 @@ class RoutesSpec extends Specification {
       val routes = mkRoutesForCreateCommentEcho[IO]
       val body =
         CreateCommentRequest("Author", "test@example.com", "<script>alert('xss')</script>", None)
-      val request = Request[IO](Method.POST, uri"posts/1/comments").withEntity(body.asJson)
+      val request = Request[IO](Method.POST, Uri.unsafeFromString(s"$v1/posts/1/comments")).withEntity(body.asJson)
 
       val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
 
@@ -598,7 +600,7 @@ class RoutesSpec extends Specification {
     "accumulate multiple validation errors on POST /posts/{id}/comments" >> {
       val routes = mkRoutesForCreateComment[IO]
       val body = CreateCommentRequest("", "invalid", "", None)
-      val request = Request[IO](Method.POST, uri"posts/1/comments").withEntity(body.asJson)
+      val request = Request[IO](Method.POST, Uri.unsafeFromString(s"$v1/posts/1/comments")).withEntity(body.asJson)
 
       val resp =
         ErrorHandler(routes.routes).run(request).value.map(_.get).unsafeRunSync()
@@ -608,6 +610,41 @@ class RoutesSpec extends Specification {
       respBody must contain("\"name\"")
       respBody must contain("\"email\"")
       respBody must contain("\"text\"")
+    }
+
+    "serve API routes under /v1 prefix" >> {
+      val routes = mkRoutes[IO]
+      val request = Request[IO](
+        Method.GET,
+        Uri.unsafeFromString(s"$v1/posts").withQueryParams(Map("limit" -> "10", "offset" -> "0"))
+      )
+
+      val resp = routes.routes.run(request).value.unsafeRunSync()
+
+      resp must beSome
+      resp.get.status mustEqual Status.Ok
+    }
+
+    "not serve API routes without version prefix" >> {
+      val routes = mkRoutes[IO]
+      val request = Request[IO](
+        Method.GET,
+        uri"posts".withQueryParams(Map("limit" -> "10", "offset" -> "0"))
+      )
+
+      val resp = routes.routes.run(request).value.unsafeRunSync()
+
+      resp must beNone
+    }
+
+    "serve health endpoint without version prefix" >> {
+      val routes = mkRoutesWithHealth[IO]
+      val request = Request[IO](Method.GET, uri"health")
+
+      val resp = routes.routes.run(request).value.unsafeRunSync()
+
+      resp must beSome
+      resp.get.status mustEqual Status.Ok
     }
   }
 
