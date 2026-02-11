@@ -5,6 +5,7 @@ import cats.effect.syntax.resource.*
 import cats.effect.{Async, Resource}
 import cats.syntax.applicativeError.*
 import cats.syntax.apply.*
+import cats.syntax.semigroupk.*
 import com.typesafe.config.ConfigFactory
 import doobie.hikari.HikariTransactor
 import doobie.util.ExecutionContexts
@@ -16,7 +17,7 @@ import org.http4s.server.middleware.CORS
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 import pureconfig.ConfigSource
 import su.wps.blog.config.{AppConfig, DbConfig, HttpServerConfig}
-import su.wps.blog.endpoints.{ErrorHandler, RoutesImpl}
+import su.wps.blog.endpoints.{ErrorHandler, RoutesImpl, SwaggerRoutes}
 import su.wps.blog.repositories.{CommentRepositoryImpl, PageRepositoryImpl, PostRepositoryImpl, TagRepositoryImpl}
 import su.wps.blog.repositories.sql.Slf4jDoobieLogHandler
 import su.wps.blog.services.*
@@ -44,7 +45,9 @@ object Program {
         healthService = HealthServiceImpl.create[F](dbCheck)
         routes = RoutesImpl.create[F](postService, commentService, tagService, pageService, healthService)
         routesWithErrorHandling = ErrorHandler(routes.routes)
-        _ <- mkHttpServer[F](appConfig.httpServer, routesWithErrorHandling)
+        swaggerRoutes = SwaggerRoutes.routes[F]
+        allRoutes = swaggerRoutes <+> routesWithErrorHandling
+        _ <- mkHttpServer[F](appConfig.httpServer, allRoutes)
         _ <- Resource.make(F.unit)(_ => logger.info("Releasing application resources"))
       } yield ()
       _ <- appResource.onError { case err =>

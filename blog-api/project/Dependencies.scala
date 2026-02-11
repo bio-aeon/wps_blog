@@ -19,6 +19,7 @@ object Dependencies {
     val scalacheckShapeless = "1.3.1"
     val testcontainersScala = "0.43.0"
     val testcontainersPostgresql = "1.21.3"
+    val tapir = "1.9.0"
   }
 
   val http4sEmberServer = "org.http4s" %% "http4s-ember-server" % Versions.http4s
@@ -46,4 +47,8 @@ object Dependencies {
   val testcontainersPostgresql =
     "org.testcontainers" % "postgresql" % Versions.testcontainersPostgresql
   val specs2 = "org.specs2" %% "specs2-core" % Versions.specs2
+  val tapirJsonCirce = "com.softwaremill.sttp.tapir" %% "tapir-json-circe" % Versions.tapir
+  val tapirHttp4sServer = "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % Versions.tapir
+  val tapirSwaggerUiBundle =
+    "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % Versions.tapir
 }
