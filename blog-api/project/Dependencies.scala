@@ -17,8 +17,8 @@ object Dependencies {
     val fly4s = "1.1.0"
     val flyway = "11.10.1"
     val scalacheckShapeless = "1.3.1"
-    val testcontainersScala = "0.43.0"
-    val testcontainersPostgresql = "1.21.3"
+    val testcontainersScala = "0.44.1"
+    val testcontainersPostgresql = "2.0.3"
     val tapir = "1.9.0"
   }
 
@@ -45,7 +45,7 @@ object Dependencies {
     "com.github.alexarchambault" %% "scalacheck-shapeless_1.16" % Versions.scalacheckShapeless
   val testcontainersScala = "com.dimafeng" %% "testcontainers-scala" % Versions.testcontainersScala
   val testcontainersPostgresql =
-    "org.testcontainers" % "postgresql" % Versions.testcontainersPostgresql
+    "org.testcontainers" % "testcontainers-postgresql" % Versions.testcontainersPostgresql
   val specs2 = "org.specs2" %% "specs2-core" % Versions.specs2
   val tapirJsonCirce = "com.softwaremill.sttp.tapir" %% "tapir-json-circe" % Versions.tapir
   val tapirHttp4sServer = "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % Versions.tapir

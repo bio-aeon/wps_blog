@@ -1,0 +1,58 @@
+@use "variables" as *;
+
+h1, h2, h3, h4, h5, h6 {
+  line-height: $line-height-tight;
+  font-weight: 700;
+}
+
+h1 { font-size: 2.25rem; }    // 36px
+h2 { font-size: 1.875rem; }   // 30px
+h3 { font-size: 1.5rem; }     // 24px
+h4 { font-size: $font-size-xl; }
+h5 { font-size: $font-size-lg; }
+h6 { font-size: $font-size-base; }
+
+p {
+  margin-bottom: $space-4;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+a {
+  color: $color-primary;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: $color-primary-dark;
+  }
+}
+
+code {
+  font-family: $font-mono;
+  font-size: $font-size-sm;
+  background-color: $color-surface;
+  padding: $space-1 $space-2;
+  border-radius: $border-radius-sm;
+}
+
+pre {
+  font-family: $font-mono;
+  font-size: $font-size-sm;
+  background-color: $color-surface;
+  padding: $space-4;
+  border-radius: $border-radius;
+  overflow-x: auto;
+  margin-bottom: $space-4;
+
+  code {
+    background: none;
+    padding: 0;
+  }
+}
+
+small {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+}

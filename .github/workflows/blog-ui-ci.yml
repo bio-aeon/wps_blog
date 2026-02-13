@@ -1,0 +1,44 @@
+name: Blog UI CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: 1.92.0
+        targets: wasm32-unknown-unknown
+    - name: Cache cargo
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/
+          ~/.cargo/git/
+          blog-ui/target/
+        key: ${{ runner.os }}-cargo-${{ hashFiles('blog-ui/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-
+    - name: Install cargo-leptos
+      run: cargo install cargo-leptos --locked || true
+    - name: Install system dependencies
+      run: sudo apt-get install -y pkg-config libssl-dev
+    - name: Build
+      working-directory: ./blog-ui
+      run: cargo leptos build
+    - name: Run tests
+      working-directory: ./blog-ui
+      run: cargo test
