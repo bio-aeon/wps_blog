@@ -1,0 +1,142 @@
+@use "variables" as *;
+
+.site-header {
+  height: $header-height;
+  background: $color-bg;
+  border-bottom: 1px solid $color-border;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+
+  .container {
+    max-width: $max-page-width;
+    margin: 0 auto;
+    padding: 0 $space-4;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: $space-6;
+  }
+}
+
+.logo {
+  font-size: $font-size-xl;
+  font-weight: 700;
+  color: $color-text;
+  text-decoration: none;
+  flex-shrink: 0;
+
+  &:hover {
+    color: $color-primary;
+  }
+}
+
+.main-nav {
+  display: flex;
+  gap: $space-1;
+  margin-right: auto;
+
+  a {
+    padding: $space-2 $space-3;
+    color: $color-text-muted;
+    text-decoration: none;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-sm;
+    font-weight: 500;
+    transition: color 0.15s, background-color 0.15s;
+
+    &:hover {
+      color: $color-text;
+      background: $color-surface;
+    }
+
+    &.active {
+      color: $color-primary;
+      background: rgba($color-primary, 0.08);
+    }
+  }
+}
+
+.search-trigger {
+  color: $color-text-muted;
+  text-decoration: none;
+  font-size: $font-size-sm;
+  font-weight: 500;
+  padding: $space-2 $space-3;
+  border-radius: $border-radius-sm;
+  transition: color 0.15s, background-color 0.15s;
+
+  &:hover {
+    color: $color-text;
+    background: $color-surface;
+  }
+}
+
+.mobile-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: $space-2;
+
+  .hamburger {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: $color-text;
+    position: relative;
+
+    &::before,
+    &::after {
+      content: "";
+      display: block;
+      width: 20px;
+      height: 2px;
+      background: $color-text;
+      position: absolute;
+      left: 0;
+      transition: transform 0.2s;
+    }
+
+    &::before {
+      top: -6px;
+    }
+
+    &::after {
+      top: 6px;
+    }
+  }
+}
+
+@media (max-width: $bp-md) {
+  .main-nav {
+    display: none;
+    position: absolute;
+    top: $header-height;
+    left: 0;
+    right: 0;
+    background: $color-bg;
+    border-bottom: 1px solid $color-border;
+    flex-direction: column;
+    padding: $space-2 $space-4;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+
+    &.open {
+      display: flex;
+    }
+
+    a {
+      padding: $space-3 $space-4;
+      font-size: $font-size-base;
+    }
+  }
+
+  .search-trigger {
+    display: none;
+  }
+
+  .mobile-menu-toggle {
+    display: block;
+    margin-left: auto;
+  }
+}

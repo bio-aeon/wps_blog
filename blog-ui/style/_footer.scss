@@ -1,0 +1,55 @@
+@use "variables" as *;
+
+.site-footer {
+  border-top: 1px solid $color-border;
+  background: $color-surface;
+  padding: $space-8 0;
+  margin-top: auto;
+
+  .container {
+    max-width: $max-page-width;
+    margin: 0 auto;
+    padding: 0 $space-4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $space-4;
+  }
+}
+
+.footer-links {
+  display: flex;
+  gap: $space-4;
+
+  a {
+    color: $color-text-muted;
+    text-decoration: none;
+    font-size: $font-size-sm;
+
+    &:hover {
+      color: $color-primary;
+    }
+  }
+}
+
+.footer-social {
+  display: flex;
+  gap: $space-4;
+
+  a {
+    color: $color-text-muted;
+    text-decoration: none;
+    font-size: $font-size-sm;
+    font-weight: 500;
+
+    &:hover {
+      color: $color-primary;
+    }
+  }
+}
+
+.copyright {
+  color: $color-text-muted;
+  font-size: $font-size-sm;
+  margin: 0;
+}

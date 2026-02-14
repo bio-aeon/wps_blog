@@ -1,0 +1,27 @@
+@use "variables" as *;
+
+.container {
+  max-width: $max-page-width;
+  margin: 0 auto;
+  padding: 0 $space-4;
+}
+
+.page-layout {
+  display: grid;
+  grid-template-columns: 1fr $sidebar-width;
+  gap: $space-8;
+  padding-top: $space-8;
+  padding-bottom: $space-12;
+
+  @media (max-width: $bp-lg) {
+    grid-template-columns: 1fr;
+
+    .sidebar {
+      order: 2;
+    }
+  }
+}
+
+.content {
+  min-width: 0;
+}

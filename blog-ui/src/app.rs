@@ -1,3 +1,4 @@
+use crate::components::layout::{Footer, Header, Sidebar};
 use leptos::prelude::*;
 use leptos_meta::{provide_meta_context, MetaTags, Stylesheet, Title};
 use leptos_router::{
@@ -31,11 +32,18 @@ pub fn App() -> impl IntoView {
         <Stylesheet id="leptos" href="/pkg/blog-ui.css"/>
         <Title text="WPS Blog"/>
         <Router>
-            <main>
-                <Routes fallback=|| view! { <NotFound/> }.into_any()>
-                    <Route path=StaticSegment("") view=HomePage/>
-                </Routes>
-            </main>
+            <Header/>
+            <div class="page-layout container">
+                <main class="content">
+                    <Routes fallback=|| view! { <NotFound/> }.into_any()>
+                        <Route path=StaticSegment("") view=HomePage/>
+                    </Routes>
+                </main>
+                <aside class="sidebar">
+                    <Sidebar/>
+                </aside>
+            </div>
+            <Footer/>
         </Router>
     }
 }

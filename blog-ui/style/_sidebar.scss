@@ -1,0 +1,107 @@
+@use "variables" as *;
+
+.sidebar-section {
+  margin-bottom: $space-8;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.sidebar-heading {
+  font-size: $font-size-base;
+  font-weight: 700;
+  color: $color-text;
+  margin: 0 0 $space-4;
+  padding-bottom: $space-2;
+  border-bottom: 2px solid $color-primary;
+}
+
+.recent-posts-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    padding: $space-2 0;
+    border-bottom: 1px solid $color-border;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  a {
+    color: $color-text;
+    text-decoration: none;
+    font-size: $font-size-sm;
+    line-height: $line-height-base;
+
+    &:hover {
+      color: $color-primary;
+    }
+  }
+}
+
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-2;
+  align-items: baseline;
+}
+
+.tag-cloud-item {
+  color: $color-text-muted;
+  text-decoration: none;
+  transition: color 0.15s;
+
+  &:hover {
+    color: $color-primary;
+  }
+}
+
+.sidebar-about {
+  color: $color-text-muted;
+  font-size: $font-size-sm;
+  line-height: $line-height-base;
+  margin: 0 0 $space-3;
+}
+
+.sidebar-about-link {
+  color: $color-primary;
+  font-size: $font-size-sm;
+  text-decoration: none;
+  font-weight: 500;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.sidebar-error {
+  color: $color-text-muted;
+  font-size: $font-size-sm;
+  margin: 0;
+}
+
+.sidebar-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.skeleton-line {
+  height: 14px;
+  background: $color-border;
+  border-radius: $border-radius-sm;
+  animation: pulse 1.5s ease-in-out infinite;
+
+  &.short {
+    width: 60%;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
