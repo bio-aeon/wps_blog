@@ -9,6 +9,8 @@ import cats.syntax.semigroupk.*
 import com.typesafe.config.ConfigFactory
 import doobie.hikari.HikariTransactor
 import doobie.util.ExecutionContexts
+import fly4s.*
+import fly4s.data.*
 import fs2.io.net.Network
 import org.http4s.HttpRoutes
 import org.http4s.ember.server.EmberServerBuilder
@@ -31,6 +33,7 @@ object Program {
       _ <- logger.info("Starting application").toResource
       appResource: Resource[F, Unit] = for {
         appConfig <- parseAppConfig[F].toResource
+        _ <- runMigrations[F](appConfig.db)
         xa <- mkTransactor[F](appConfig.db)
         postRepo = PostRepositoryImpl.create[xa.DB]
         tagRepo = TagRepositoryImpl.create[xa.DB]
@@ -57,6 +60,18 @@ object Program {
 
   private def parseAppConfig[F[_]](implicit F: ApplicativeError[F, Throwable]): F[AppConfig] =
     F.catchNonFatal(ConfigSource.fromConfig(ConfigFactory.load()).loadOrThrow[AppConfig])
+
+  private def runMigrations[F[_]](
+    config: DbConfig
+  )(implicit F: Async[F]): Resource[F, MigrateResult] =
+    Fly4s
+      .make[F](
+        config.url,
+        Some(config.username),
+        Some(config.password.toCharArray),
+        Fly4sConfig(defaultSchemaName = Some("public"))
+      )
+      .evalMap(_.migrate)
 
   private def mkTransactor[F[_]](
     config: DbConfig

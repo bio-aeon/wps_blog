@@ -1,0 +1,63 @@
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: wps_blog_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "9876:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d wps_blog_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  blog-api:
+    build:
+      context: ./blog-api
+    environment:
+      DB_URL: "jdbc:postgresql://postgres:5432/wps_blog_db"
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+    ports:
+      - "9000:9000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  db-seed:
+    image: postgres:18
+    depends_on:
+      blog-api:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: postgres
+    volumes:
+      - ./docker/seed-data.sql:/seed-data.sql:ro
+    entrypoint: ["psql", "-h", "postgres", "-U", "postgres", "-d", "wps_blog_db", "-f", "/seed-data.sql"]
+    restart: "no"
+
+  blog-ui:
+    build:
+      context: ./blog-ui
+    environment:
+      BLOG_API_URL: "http://blog-api:9000"
+      LEPTOS_SITE_ROOT: "/app/site"
+      LEPTOS_SITE_ADDR: "0.0.0.0:3000"
+    ports:
+      - "3000:3000"
+    depends_on:
+      blog-api:
+        condition: service_healthy
+
+volumes:
+  pgdata:

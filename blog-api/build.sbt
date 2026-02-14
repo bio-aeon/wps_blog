@@ -1,6 +1,7 @@
 import Dependencies.*
 
 lazy val root = (project in file("."))
+  .enablePlugins(JavaAppPackaging)
   .settings(
     organization := "su.wps",
     name := "wps-blog",
