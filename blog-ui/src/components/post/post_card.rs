@@ -1,14 +1,7 @@
 use crate::api::types::ListPostResult;
 use crate::components::tag::TagBadge;
-use chrono::{DateTime, FixedOffset};
+use super::format_date;
 use leptos::prelude::*;
-
-fn format_date(iso_date: &str) -> String {
-    DateTime::parse_from_rfc3339(iso_date)
-        .or_else(|_| DateTime::parse_from_str(iso_date, "%Y-%m-%dT%H:%M:%S%.f%:z"))
-        .map(|dt: DateTime<FixedOffset>| dt.format("%B %d, %Y").to_string())
-        .unwrap_or_else(|_| iso_date.to_string())
-}
 
 #[component]
 pub fn PostCard(post: ListPostResult) -> impl IntoView {
