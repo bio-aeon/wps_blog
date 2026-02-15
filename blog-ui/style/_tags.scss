@@ -17,3 +17,48 @@
         color: #ffffff;
     }
 }
+
+.tag-list {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+}
+
+.tag-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $space-3 $space-4;
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $border-radius;
+    text-decoration: none;
+    color: $color-text;
+
+    &:hover {
+        border-color: $color-primary;
+        background: #ffffff;
+    }
+
+    .tag-name {
+        font-weight: 500;
+    }
+
+    .tag-count {
+        font-size: $font-size-sm;
+        color: $color-text-muted;
+    }
+}
+
+.tag-list-skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+
+    .skeleton-line.tag-item {
+        height: 3rem;
+        background: $color-surface;
+        border-radius: $border-radius;
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+}
