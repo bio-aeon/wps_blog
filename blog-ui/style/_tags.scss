@@ -1,0 +1,19 @@
+@use "variables" as *;
+
+.tag-badge {
+    display: inline-block;
+    padding: $space-1 $space-2;
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $border-radius-sm;
+    color: $color-text-muted;
+    font-size: $font-size-sm;
+    text-decoration: none;
+    line-height: 1;
+
+    &:hover {
+        background: $color-primary;
+        border-color: $color-primary;
+        color: #ffffff;
+    }
+}

@@ -1,9 +1,10 @@
 use crate::components::layout::{Footer, Header, Sidebar};
+use crate::pages::PostListPage;
 use leptos::prelude::*;
 use leptos_meta::{provide_meta_context, MetaTags, Stylesheet, Title};
 use leptos_router::{
     components::{Route, Router, Routes},
-    StaticSegment,
+    path, StaticSegment,
 };
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
@@ -37,6 +38,7 @@ pub fn App() -> impl IntoView {
                 <main class="content">
                     <Routes fallback=|| view! { <NotFound/> }.into_any()>
                         <Route path=StaticSegment("") view=HomePage/>
+                        <Route path=path!("/posts") view=PostListPage/>
                     </Routes>
                 </main>
                 <aside class="sidebar">
