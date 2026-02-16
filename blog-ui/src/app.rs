@@ -1,5 +1,5 @@
 use crate::components::layout::{Footer, Header, Sidebar};
-use crate::pages::{PostDetailPage, PostListPage, StaticPageView, TagListPage, TagPostsPage};
+use crate::pages::{PostDetailPage, PostListPage, SearchPage, StaticPageView, TagListPage, TagPostsPage};
 use leptos::prelude::*;
 use leptos_meta::{provide_meta_context, MetaTags, Stylesheet, Title};
 use leptos_router::{
@@ -43,6 +43,7 @@ pub fn App() -> impl IntoView {
                         <Route path=path!("/tags") view=TagListPage/>
                         <Route path=path!("/tags/:slug") view=TagPostsPage/>
                         <Route path=path!("/pages/:url") view=StaticPageView/>
+                        <Route path=path!("/search") view=SearchPage/>
                     </Routes>
                 </main>
                 <aside class="sidebar">

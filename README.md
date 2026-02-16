@@ -88,4 +88,4 @@ cd code/blog-admin/blog_admin && python manage.py test
 - [x] API service
 - [x] UI service (SPA + SSR)
 - [ ] Admin service
-- [ ] CI using Github Actions
+- [x] CI using Github Actions
