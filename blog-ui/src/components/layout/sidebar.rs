@@ -1,4 +1,5 @@
 use crate::api::{get_recent_posts, get_tag_cloud};
+use crate::components::tag::TagCloud;
 use leptos::prelude::*;
 
 const RECENT_POSTS_COUNT: i32 = 5;
@@ -43,28 +44,7 @@ pub fn Sidebar() -> impl IntoView {
                 {move || Suspend::new(async move {
                     match tag_cloud.await {
                         Ok(cloud) => {
-                            view! {
-                                <div class="tag-cloud">
-                                    {cloud
-                                        .tags
-                                        .into_iter()
-                                        .map(|tag| {
-                                            let font_size = format!("{}rem", 0.8 + tag.weight * 1.2);
-                                            let href = format!("/tags/{}", tag.slug);
-                                            view! {
-                                                <a
-                                                    href=href
-                                                    class="tag-cloud-item"
-                                                    style:font-size=font_size
-                                                >
-                                                    {tag.name}
-                                                </a>
-                                            }
-                                        })
-                                        .collect_view()}
-                                </div>
-                            }
-                            .into_any()
+                            view! { <TagCloud items=cloud.tags/> }.into_any()
                         }
                         Err(_) => view! { <p class="sidebar-error">"Failed to load tags."</p> }.into_any(),
                     }

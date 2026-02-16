@@ -1,4 +1,5 @@
 use crate::api::{get_post, increment_view};
+use crate::components::comment::CommentThread;
 use crate::components::post::{PostContent, PostMeta};
 use leptos::prelude::*;
 use leptos_meta::Title;
@@ -41,6 +42,7 @@ pub fn PostDetailPage() -> impl IntoView {
                                 <PostMeta created_at=post.created_at.clone() tags=post.tags.clone()/>
                                 <PostContent html_content=post.text.clone()/>
                             </article>
+                            <CommentThread post_id=id()/>
                             <a href="/posts" class="back-link">"← Back to posts"</a>
                         }
                         .into_any()

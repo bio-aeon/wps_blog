@@ -50,6 +50,23 @@
     }
 }
 
+.tag-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: $space-2;
+}
+
+.tag-cloud-item {
+    text-decoration: none;
+    color: $color-text-muted;
+    line-height: $line-height-tight;
+
+    &:hover {
+        color: $color-primary;
+    }
+}
+
 .tag-list-skeleton {
     display: flex;
     flex-direction: column;

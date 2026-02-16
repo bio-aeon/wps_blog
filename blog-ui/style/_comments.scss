@@ -1,0 +1,204 @@
+@use "variables" as *;
+
+.comment-section {
+    margin-top: $space-12;
+    border-top: 1px solid $color-border;
+    padding-top: $space-8;
+}
+
+.comments-heading {
+    font-size: $font-size-xl;
+    margin-bottom: $space-6;
+}
+
+.comments-loading,
+.comments-error {
+    color: $color-text-muted;
+    font-size: $font-size-sm;
+}
+
+.comments-list {
+    margin-top: $space-6;
+}
+
+// Comment item
+.comment-item {
+    padding: $space-4;
+    border: 1px solid $color-border;
+    border-radius: $border-radius;
+    margin-bottom: $space-3;
+    background: $color-bg;
+}
+
+@for $i from 1 through 5 {
+    .comment-depth-#{$i} {
+        margin-left: min($i * 1.5rem, 7.5rem);
+    }
+}
+
+.comment-header {
+    display: flex;
+    align-items: baseline;
+    gap: $space-2;
+    margin-bottom: $space-2;
+}
+
+.comment-author {
+    font-weight: 600;
+    color: $color-text;
+}
+
+.comment-date {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+}
+
+.comment-body {
+    line-height: $line-height-base;
+    margin-bottom: $space-3;
+    white-space: pre-wrap;
+}
+
+.comment-actions {
+    display: flex;
+    align-items: center;
+    gap: $space-4;
+}
+
+.comment-rating {
+    display: flex;
+    align-items: center;
+    gap: $space-1;
+}
+
+.rate-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 1px solid $color-border;
+    border-radius: $border-radius-sm;
+    background: $color-bg;
+    cursor: pointer;
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    line-height: 1;
+
+    &:hover:not(:disabled) {
+        border-color: $color-primary;
+        color: $color-primary;
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: default;
+    }
+}
+
+.rating-value {
+    font-size: $font-size-sm;
+    font-weight: 500;
+    min-width: 1.25rem;
+    text-align: center;
+}
+
+.reply-btn {
+    background: none;
+    border: none;
+    color: $color-text-muted;
+    font-size: $font-size-sm;
+    cursor: pointer;
+    padding: 0;
+
+    &:hover {
+        color: $color-primary;
+    }
+}
+
+.comment-replies {
+    margin-top: $space-3;
+}
+
+// Comment form
+.comment-form {
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $border-radius;
+    padding: $space-4;
+    margin-bottom: $space-4;
+}
+
+.comment-form-error {
+    background: lighten($color-error, 40%);
+    color: $color-error;
+    padding: $space-2 $space-3;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-sm;
+    margin-bottom: $space-3;
+}
+
+.form-group {
+    margin-bottom: $space-3;
+
+    label {
+        display: block;
+        font-size: $font-size-sm;
+        font-weight: 500;
+        margin-bottom: $space-1;
+        color: $color-text;
+    }
+
+    input,
+    textarea {
+        width: 100%;
+        padding: $space-2 $space-3;
+        border: 1px solid $color-border;
+        border-radius: $border-radius-sm;
+        font-family: $font-sans;
+        font-size: $font-size-base;
+        line-height: $line-height-base;
+        background: $color-bg;
+        color: $color-text;
+        box-sizing: border-box;
+
+        &:focus {
+            outline: none;
+            border-color: $color-primary;
+            box-shadow: 0 0 0 2px rgba($color-primary, 0.15);
+        }
+    }
+
+    textarea {
+        resize: vertical;
+        min-height: 5rem;
+    }
+}
+
+.field-error {
+    display: block;
+    color: $color-error;
+    font-size: $font-size-sm;
+    margin-top: $space-1;
+}
+
+.comment-submit {
+    display: inline-block;
+    padding: $space-2 $space-4;
+    background: $color-primary;
+    color: #ffffff;
+    border: none;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-base;
+    font-weight: 500;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+        background: $color-primary-dark;
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: default;
+    }
+}
