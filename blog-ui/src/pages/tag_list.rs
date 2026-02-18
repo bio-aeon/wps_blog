@@ -1,4 +1,5 @@
 use crate::api::get_tags;
+use crate::components::common::{ErrorDisplay, TagListSkeleton};
 use leptos::prelude::*;
 use leptos_meta::Title;
 
@@ -41,29 +42,17 @@ pub fn TagListPage() -> impl IntoView {
                     }
                     Err(e) => {
                         view! {
-                            <div class="error-message">
-                                <p>"Failed to load tags: " {e.to_string()}</p>
-                            </div>
+                            <ErrorDisplay
+                                title="Failed to load tags".to_string()
+                                message=e.to_string()
+                                back_url="/".to_string()
+                                back_label="← Back to Home".to_string()
+                            />
                         }
                         .into_any()
                     }
                 }
             })}
         </Suspense>
-    }
-}
-
-#[component]
-fn TagListSkeleton() -> impl IntoView {
-    view! {
-        <div class="tag-list-skeleton">
-            {(0..5)
-                .map(|_| {
-                    view! {
-                        <div class="skeleton-line tag-item"></div>
-                    }
-                })
-                .collect_view()}
-        </div>
     }
 }

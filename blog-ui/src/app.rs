@@ -1,5 +1,5 @@
 use crate::components::layout::{Footer, Header, Sidebar};
-use crate::pages::{PostDetailPage, PostListPage, SearchPage, StaticPageView, TagListPage, TagPostsPage};
+use crate::pages::*;
 use leptos::prelude::*;
 use leptos_meta::{provide_meta_context, MetaTags, Stylesheet, Title};
 use leptos_router::{
@@ -36,7 +36,7 @@ pub fn App() -> impl IntoView {
             <Header/>
             <div class="page-layout container">
                 <main class="content">
-                    <Routes fallback=|| view! { <NotFound/> }.into_any()>
+                    <Routes fallback=|| view! { <NotFoundPage/> }.into_any()>
                         <Route path=StaticSegment("") view=HomePage/>
                         <Route path=path!("/posts") view=PostListPage/>
                         <Route path=path!("/posts/:id") view=PostDetailPage/>
@@ -60,20 +60,5 @@ fn HomePage() -> impl IntoView {
     view! {
         <h1>"WPS Blog"</h1>
         <p>"Welcome to WPS Blog. Site is under construction."</p>
-    }
-}
-
-#[component]
-fn NotFound() -> impl IntoView {
-    #[cfg(feature = "ssr")]
-    {
-        let resp = expect_context::<leptos_actix::ResponseOptions>();
-        resp.set_status(actix_web::http::StatusCode::NOT_FOUND);
-    }
-
-    view! {
-        <h1>"404 - Page Not Found"</h1>
-        <p>"The page you are looking for does not exist."</p>
-        <a href="/">"Back to Home"</a>
     }
 }

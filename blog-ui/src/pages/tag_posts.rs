@@ -1,5 +1,5 @@
 use crate::api::get_posts;
-use crate::components::common::Pagination;
+use crate::components::common::{ErrorDisplay, Pagination, PostListSkeleton};
 use crate::components::post::PostCard;
 use leptos::prelude::*;
 use leptos_meta::Title;
@@ -32,16 +32,7 @@ pub fn TagPostsPage() -> impl IntoView {
 
     view! {
         <Suspense fallback=move || {
-            view! {
-                <div class="post-list-skeleton">
-                    <div class="skeleton-line title"></div>
-                    <div class="post-card-skeleton">
-                        <div class="skeleton-line title"></div>
-                        <div class="skeleton-line meta"></div>
-                        <div class="skeleton-line"></div>
-                    </div>
-                </div>
-            }
+            view! { <PostListSkeleton/> }
         }>
             {move || {
                 let current_slug = slug();
@@ -74,10 +65,12 @@ pub fn TagPostsPage() -> impl IntoView {
                         }
                         Err(e) => {
                             view! {
-                                <div class="error-message">
-                                    <p>"Failed to load posts: " {e.to_string()}</p>
-                                    <a href="/tags">"← Back to tags"</a>
-                                </div>
+                                <ErrorDisplay
+                                    title="Failed to load posts".to_string()
+                                    message=e.to_string()
+                                    back_url="/tags".to_string()
+                                    back_label="← Back to tags".to_string()
+                                />
                             }
                             .into_any()
                         }

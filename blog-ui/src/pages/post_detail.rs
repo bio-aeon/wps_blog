@@ -1,5 +1,6 @@
 use crate::api::{get_post, increment_view};
 use crate::components::comment::CommentThread;
+use crate::components::common::{ErrorDisplay, PostDetailSkeleton};
 use crate::components::post::{PostContent, PostMeta};
 use leptos::prelude::*;
 use leptos_meta::Title;
@@ -49,32 +50,17 @@ pub fn PostDetailPage() -> impl IntoView {
                     }
                     Err(e) => {
                         view! {
-                            <div class="error-message">
-                                <h1>"Post not found"</h1>
-                                <p>{e.to_string()}</p>
-                                <a href="/posts">"← Back to posts"</a>
-                            </div>
+                            <ErrorDisplay
+                                title="Post not found".to_string()
+                                message=e.to_string()
+                                back_url="/posts".to_string()
+                                back_label="← Back to posts".to_string()
+                            />
                         }
                         .into_any()
                     }
                 }
             })}
         </Suspense>
-    }
-}
-
-#[component]
-fn PostDetailSkeleton() -> impl IntoView {
-    view! {
-        <div class="post-detail-skeleton">
-            <div class="skeleton-line title"></div>
-            <div class="skeleton-line meta"></div>
-            <div class="skeleton-line"></div>
-            <div class="skeleton-line"></div>
-            <div class="skeleton-line short"></div>
-            <div class="skeleton-line"></div>
-            <div class="skeleton-line"></div>
-            <div class="skeleton-line short"></div>
-        </div>
     }
 }

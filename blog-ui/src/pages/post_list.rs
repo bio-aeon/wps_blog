@@ -1,5 +1,5 @@
 use crate::api::get_posts;
-use crate::components::common::Pagination;
+use crate::components::common::{ErrorDisplay, Pagination, PostListSkeleton};
 use crate::components::post::PostCard;
 use leptos::prelude::*;
 use leptos_meta::Title;
@@ -56,34 +56,17 @@ pub fn PostListPage() -> impl IntoView {
                     }
                     Err(e) => {
                         view! {
-                            <div class="error-message">
-                                <p>"Failed to load posts: " {e.to_string()}</p>
-                            </div>
+                            <ErrorDisplay
+                                title="Failed to load posts".to_string()
+                                message=e.to_string()
+                                back_url="/".to_string()
+                                back_label="← Back to Home".to_string()
+                            />
                         }
                         .into_any()
                     }
                 }
             })}
         </Suspense>
-    }
-}
-
-#[component]
-fn PostListSkeleton() -> impl IntoView {
-    view! {
-        <div class="post-list-skeleton">
-            {(0..3)
-                .map(|_| {
-                    view! {
-                        <div class="post-card-skeleton">
-                            <div class="skeleton-line title"></div>
-                            <div class="skeleton-line meta"></div>
-                            <div class="skeleton-line"></div>
-                            <div class="skeleton-line short"></div>
-                        </div>
-                    }
-                })
-                .collect_view()}
-        </div>
     }
 }

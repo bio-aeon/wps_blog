@@ -1,0 +1,76 @@
+@use "variables" as *;
+
+// Error display
+.error-display {
+    text-align: center;
+    padding: $space-8 0;
+}
+
+.error-display-title {
+    font-size: $font-size-xl;
+    margin-bottom: $space-2;
+}
+
+.error-display-message {
+    color: $color-text-muted;
+    margin-bottom: $space-4;
+}
+
+.error-display-actions {
+    display: flex;
+    justify-content: center;
+    gap: $space-4;
+    align-items: center;
+}
+
+.error-retry-btn {
+    padding: $space-2 $space-4;
+    background: $color-primary;
+    color: #ffffff;
+    border: none;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-base;
+    cursor: pointer;
+
+    &:hover {
+        background: $color-primary-dark;
+    }
+}
+
+// 404 page
+.not-found-page {
+    text-align: center;
+    padding: $space-12 0;
+
+    h1 {
+        font-size: 2rem;
+        margin-bottom: $space-4;
+    }
+
+    p {
+        color: $color-text-muted;
+        margin-bottom: $space-6;
+    }
+}
+
+// Skeleton shared styles
+.sidebar-skeleton,
+.static-page-skeleton {
+    .skeleton-line {
+        height: 1rem;
+        background: $color-surface;
+        border-radius: $border-radius-sm;
+        margin-bottom: $space-3;
+        animation: pulse 1.5s ease-in-out infinite;
+
+        &.short {
+            width: 60%;
+        }
+
+        &.title {
+            width: 80%;
+            height: 2rem;
+            margin-bottom: $space-4;
+        }
+    }
+}

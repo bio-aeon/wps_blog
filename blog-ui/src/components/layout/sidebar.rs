@@ -1,4 +1,5 @@
 use crate::api::{get_recent_posts, get_tag_cloud};
+use crate::components::common::SidebarSkeleton;
 use crate::components::tag::TagCloud;
 use leptos::prelude::*;
 
@@ -57,17 +58,6 @@ pub fn Sidebar() -> impl IntoView {
                 "A personal blog about software engineering, technology, and more."
             </p>
             <a href="/pages/about" class="sidebar-about-link">"Read more"</a>
-        </div>
-    }
-}
-
-#[component]
-fn SidebarSkeleton() -> impl IntoView {
-    view! {
-        <div class="sidebar-skeleton">
-            <div class="skeleton-line"></div>
-            <div class="skeleton-line short"></div>
-            <div class="skeleton-line"></div>
         </div>
     }
 }

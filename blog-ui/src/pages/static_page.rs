@@ -1,4 +1,5 @@
 use crate::api::get_page;
+use crate::components::common::{ErrorDisplay, StaticPageSkeleton};
 use leptos::prelude::*;
 use leptos_meta::Title;
 use leptos_router::hooks::use_params_map;
@@ -28,28 +29,17 @@ pub fn StaticPageView() -> impl IntoView {
                     }
                     Err(e) => {
                         view! {
-                            <div class="error-message">
-                                <h1>"Page not found"</h1>
-                                <p>{e.to_string()}</p>
-                                <a href="/">"← Back to Home"</a>
-                            </div>
+                            <ErrorDisplay
+                                title="Page not found".to_string()
+                                message=e.to_string()
+                                back_url="/".to_string()
+                                back_label="← Back to Home".to_string()
+                            />
                         }
                         .into_any()
                     }
                 }
             })}
         </Suspense>
-    }
-}
-
-#[component]
-fn StaticPageSkeleton() -> impl IntoView {
-    view! {
-        <div class="static-page-skeleton">
-            <div class="skeleton-line title"></div>
-            <div class="skeleton-line"></div>
-            <div class="skeleton-line"></div>
-            <div class="skeleton-line short"></div>
-        </div>
     }
 }

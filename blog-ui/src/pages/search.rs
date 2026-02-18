@@ -1,5 +1,5 @@
 use crate::api::search_posts;
-use crate::components::common::Pagination;
+use crate::components::common::{ErrorDisplay, Pagination, PostListSkeleton};
 use crate::components::post::PostCard;
 use crate::components::search::SearchBar;
 use leptos::prelude::*;
@@ -48,7 +48,7 @@ pub fn SearchPage() -> impl IntoView {
         <h1>"Search"</h1>
         <SearchBar initial_query=q() on_search=on_search/>
         <Suspense fallback=move || {
-            view! { <SearchSkeleton/> }
+            view! { <PostListSkeleton/> }
         }>
             {move || {
                 let current_q = q();
@@ -63,10 +63,17 @@ pub fn SearchPage() -> impl IntoView {
                                 }
                                 .into_any()
                             } else {
-                                let base_url = format!("/search?q={}", urlencoding::encode(&current_q));
+                                let base_url = format!(
+                                    "/search?q={}",
+                                    urlencoding::encode(&current_q),
+                                );
                                 view! {
                                     <p class="search-result-count">
-                                        {format!("{} result{} found", result.total, if result.total == 1 { "" } else { "s" })}
+                                        {format!(
+                                            "{} result{} found",
+                                            result.total,
+                                            if result.total == 1 { "" } else { "s" },
+                                        )}
                                     </p>
                                     <div class="post-list">
                                         {result
@@ -93,9 +100,12 @@ pub fn SearchPage() -> impl IntoView {
                         }
                         Err(e) => {
                             view! {
-                                <div class="error-message">
-                                    <p>"Search failed: " {e.to_string()}</p>
-                                </div>
+                                <ErrorDisplay
+                                    title="Search failed".to_string()
+                                    message=e.to_string()
+                                    back_url="/".to_string()
+                                    back_label="← Back to Home".to_string()
+                                />
                             }
                             .into_any()
                         }
@@ -103,25 +113,5 @@ pub fn SearchPage() -> impl IntoView {
                 })
             }}
         </Suspense>
-    }
-}
-
-#[component]
-fn SearchSkeleton() -> impl IntoView {
-    view! {
-        <div class="post-list-skeleton">
-            {(0..3)
-                .map(|_| {
-                    view! {
-                        <div class="post-card-skeleton">
-                            <div class="skeleton-line title"></div>
-                            <div class="skeleton-line meta"></div>
-                            <div class="skeleton-line"></div>
-                            <div class="skeleton-line short"></div>
-                        </div>
-                    }
-                })
-                .collect_view()}
-        </div>
     }
 }
