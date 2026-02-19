@@ -37,6 +37,40 @@
     }
 }
 
+// Home page
+.home-hero {
+    margin-bottom: $space-8;
+
+    h1 {
+        font-size: 2rem;
+        margin-bottom: $space-2;
+    }
+}
+
+.home-subtitle {
+    color: $color-text-muted;
+    font-size: $font-size-lg;
+}
+
+.home-recent {
+    h2 {
+        font-size: $font-size-xl;
+        margin-bottom: $space-4;
+    }
+}
+
+.view-all-link {
+    display: inline-block;
+    margin-top: $space-4;
+    color: $color-primary;
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+        color: $color-primary-dark;
+    }
+}
+
 // 404 page
 .not-found-page {
     text-align: center;

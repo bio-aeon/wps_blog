@@ -54,11 +54,3 @@ pub fn App() -> impl IntoView {
         </Router>
     }
 }
-
-#[component]
-fn HomePage() -> impl IntoView {
-    view! {
-        <h1>"WPS Blog"</h1>
-        <p>"Welcome to WPS Blog. Site is under construction."</p>
-    }
-}
