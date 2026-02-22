@@ -4,8 +4,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: $space-1;
-    padding: $space-8 0;
+    gap: $space-1 + $space-1;
+    padding: $space-6 0;
 }
 
 .pagination-link {
@@ -19,10 +19,10 @@
     border-radius: $border-radius-sm;
     color: $color-text;
     text-decoration: none;
-    font-size: $font-size-sm;
+    font-size: 0.85rem;
+    transition: all $transition-fast;
 
     &:hover:not(.disabled):not(.active) {
-        background: $color-surface;
         border-color: $color-primary;
         color: $color-primary;
     }
@@ -30,12 +30,12 @@
     &.active {
         background: $color-primary;
         border-color: $color-primary;
-        color: #ffffff;
+        color: $color-bg;
+        font-weight: 600;
     }
 
     &.disabled {
         color: $color-text-muted;
-        opacity: 0.5;
         cursor: default;
     }
 }

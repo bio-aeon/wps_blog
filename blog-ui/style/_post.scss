@@ -1,20 +1,25 @@
 @use "variables" as *;
 
 .post-card {
-    padding: $space-6 0;
-    border-bottom: 1px solid $color-border;
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $border-radius;
+    padding: $space-4 + $space-1 $space-6;
+    margin-bottom: $space-4 + $space-1;
+    transition: border-color $transition-fast;
 
-    &:last-child {
-        border-bottom: none;
+    &:hover {
+        border-color: $color-border-light;
     }
 
     h2 {
-        margin: 0 0 $space-2;
-        font-size: $font-size-xl;
+        margin: 0 0 $space-1;
+        font-size: 1.1rem;
+        font-weight: 600;
         line-height: $line-height-tight;
 
         a {
-            color: $color-text;
+            color: $color-text-bright;
             text-decoration: none;
 
             &:hover {
@@ -27,10 +32,11 @@
 .post-meta {
     display: flex;
     align-items: center;
-    gap: $space-3;
-    margin-bottom: $space-3;
-    font-size: $font-size-sm;
+    gap: $space-2;
+    margin-bottom: $space-2;
+    font-size: 0.8rem;
     color: $color-text-muted;
+    flex-wrap: wrap;
 
     time {
         white-space: nowrap;
@@ -40,12 +46,14 @@
 .post-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: $space-1;
+    gap: $space-1 + $space-1;
+    margin-top: $space-3;
 }
 
 .post-excerpt {
-    margin: 0 0 $space-3;
+    margin: 0 0 $space-1;
     color: $color-text;
+    font-size: 0.9rem;
     line-height: $line-height-base;
 }
 
@@ -56,7 +64,7 @@
     font-weight: 500;
 
     &:hover {
-        color: $color-primary-dark;
+        color: $color-primary-hover;
     }
 }
 
@@ -65,12 +73,15 @@
 }
 
 .post-card-skeleton {
-    padding: $space-6 0;
-    border-bottom: 1px solid $color-border;
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $border-radius;
+    padding: $space-4 + $space-1 $space-6;
+    margin-bottom: $space-4 + $space-1;
 
     .skeleton-line {
         height: 1rem;
-        background: $color-surface;
+        background: $color-border;
         border-radius: $border-radius-sm;
         margin-bottom: $space-3;
         animation: pulse 1.5s ease-in-out infinite;
@@ -93,18 +104,20 @@
 
 .post-detail {
     .post-title {
-        margin: 0 0 $space-4;
-        font-size: 2rem;
-        line-height: $line-height-tight;
+        margin: 0 0 $space-2;
+        font-size: 1.7rem;
+        font-weight: 700;
+        color: $color-text-bright;
+        line-height: 1.3;
     }
 }
 
 .post-content {
     margin-top: $space-6;
-    line-height: $line-height-base;
+    line-height: 1.8;
 
     h2, h3, h4 {
-        margin: $space-6 0 $space-3;
+        margin: $space-8 0 $space-3;
         line-height: $line-height-tight;
     }
 
@@ -112,25 +125,48 @@
         margin: 0 0 $space-4;
     }
 
+    a {
+        color: $color-primary;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+
+        &:hover {
+            color: $color-primary-hover;
+        }
+    }
+
     code {
         font-family: $font-mono;
         font-size: $font-size-sm;
-        background: $color-surface;
+        background: $color-bg-alt;
         padding: $space-1 $space-2;
         border-radius: $border-radius-sm;
+        color: $color-green;
     }
 
     pre {
-        background: $color-surface;
-        padding: $space-4;
+        background: $color-bg-alt;
+        border: 1px solid $color-border;
         border-radius: $border-radius;
+        padding: $space-4;
         overflow-x: auto;
         margin: 0 0 $space-4;
+        font-size: 0.84rem;
+        line-height: 1.5;
 
         code {
             background: none;
             padding: 0;
+            color: $color-text;
         }
+    }
+
+    blockquote {
+        border-left: 3px solid $color-purple;
+        padding-left: $space-4;
+        color: $color-text-muted;
+        margin-bottom: $space-4;
+        font-style: italic;
     }
 }
 
@@ -142,14 +178,14 @@
     font-size: $font-size-sm;
 
     &:hover {
-        color: $color-primary-dark;
+        color: $color-primary-hover;
     }
 }
 
 .post-detail-skeleton {
     .skeleton-line {
         height: 1rem;
-        background: $color-surface;
+        background: $color-border;
         border-radius: $border-radius-sm;
         margin-bottom: $space-3;
         animation: pulse 1.5s ease-in-out infinite;
@@ -170,9 +206,4 @@
             width: 60%;
         }
     }
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
 }

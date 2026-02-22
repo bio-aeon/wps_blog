@@ -19,14 +19,18 @@
     border-radius: $border-radius-sm;
     font-family: $font-sans;
     font-size: $font-size-base;
-    background: $color-bg;
+    background: $color-surface;
     color: $color-text;
     box-sizing: border-box;
+    transition: border-color $transition-fast;
+
+    &::placeholder {
+        color: $color-text-muted;
+    }
 
     &:focus {
         outline: none;
         border-color: $color-primary;
-        box-shadow: 0 0 0 2px rgba($color-primary, 0.15);
     }
 }
 
@@ -51,16 +55,17 @@
 .search-submit {
     padding: $space-2 $space-4;
     background: $color-primary;
-    color: #ffffff;
+    color: $color-bg;
     border: none;
     border-radius: $border-radius-sm;
     font-size: $font-size-base;
     font-weight: 500;
     cursor: pointer;
     white-space: nowrap;
+    transition: background-color $transition-fast;
 
     &:hover {
-        background: $color-primary-dark;
+        background: $color-primary-hover;
     }
 }
 

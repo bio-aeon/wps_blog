@@ -17,10 +17,10 @@ pub fn Header() -> impl IntoView {
 
     view! {
         <header class="site-header">
-            <div class="container">
+            <div class="header-inner">
                 <a class="logo" href="/">"WPS Blog"</a>
-                <nav
-                    class="main-nav"
+                <div
+                    class="header-nav"
                     class:open=move || mobile_menu_open.get()
                 >
                     <a
@@ -35,7 +35,7 @@ pub fn Header() -> impl IntoView {
                         class:active=move || pathname().starts_with("/posts")
                         on:click=close_menu
                     >
-                        "Blog"
+                        "Posts"
                     </a>
                     <a
                         href="/tags"
@@ -51,8 +51,10 @@ pub fn Header() -> impl IntoView {
                     >
                         "About"
                     </a>
-                </nav>
-                <a class="search-trigger" href="/search">"Search"</a>
+                    <div class="header-search">
+                        <input type="text" placeholder="Search..." />
+                    </div>
+                </div>
                 <button
                     class="mobile-menu-toggle"
                     aria-label="Toggle menu"

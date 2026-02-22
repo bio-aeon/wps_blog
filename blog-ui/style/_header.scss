@@ -2,73 +2,78 @@
 
 .site-header {
   height: $header-height;
-  background: $color-bg;
+  background: $color-bg-alt;
   border-bottom: 1px solid $color-border;
   position: sticky;
   top: 0;
   z-index: 100;
+  padding: 0 $space-8;
 
-  .container {
+  .header-inner {
     max-width: $max-page-width;
     margin: 0 auto;
-    padding: 0 $space-4;
+    width: 100%;
     height: 100%;
     display: flex;
     align-items: center;
-    gap: $space-6;
+    justify-content: space-between;
   }
 }
 
 .logo {
-  font-size: $font-size-xl;
+  font-size: 1.3rem;
   font-weight: 700;
-  color: $color-text;
+  color: $color-text-bright;
   text-decoration: none;
   flex-shrink: 0;
+  letter-spacing: -0.01em;
 
   &:hover {
     color: $color-primary;
   }
 }
 
-.main-nav {
+.header-nav {
   display: flex;
-  gap: $space-1;
-  margin-right: auto;
+  align-items: center;
+  gap: $space-6;
 
   a {
-    padding: $space-2 $space-3;
-    color: $color-text-muted;
+    color: $color-text;
     text-decoration: none;
-    border-radius: $border-radius-sm;
-    font-size: $font-size-sm;
-    font-weight: 500;
-    transition: color 0.15s, background-color 0.15s;
+    font-size: 0.9rem;
+    transition: color $transition-fast;
 
     &:hover {
-      color: $color-text;
-      background: $color-surface;
+      color: $color-primary;
     }
 
     &.active {
       color: $color-primary;
-      background: rgba($color-primary, 0.08);
     }
   }
 }
 
-.search-trigger {
-  color: $color-text-muted;
-  text-decoration: none;
-  font-size: $font-size-sm;
-  font-weight: 500;
-  padding: $space-2 $space-3;
-  border-radius: $border-radius-sm;
-  transition: color 0.15s, background-color 0.15s;
-
-  &:hover {
-    color: $color-text;
+.header-search {
+  input {
     background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $border-radius-sm;
+    padding: $space-2 $space-3;
+    color: $color-text;
+    font-size: 0.85rem;
+    font-family: $font-sans;
+    width: 180px;
+    transition: border-color $transition-fast;
+
+    &::placeholder {
+      color: $color-text-muted;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+    }
   }
 }
 
@@ -109,17 +114,20 @@
 }
 
 @media (max-width: $bp-md) {
-  .main-nav {
+  .site-header {
+    padding: 0 $space-6;
+  }
+
+  .header-nav {
     display: none;
     position: absolute;
     top: $header-height;
     left: 0;
     right: 0;
-    background: $color-bg;
+    background: $color-bg-alt;
     border-bottom: 1px solid $color-border;
     flex-direction: column;
     padding: $space-2 $space-4;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 
     &.open {
       display: flex;
@@ -131,7 +139,7 @@
     }
   }
 
-  .search-trigger {
+  .header-search {
     display: none;
   }
 

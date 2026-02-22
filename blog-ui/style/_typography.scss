@@ -3,6 +3,7 @@
 h1, h2, h3, h4, h5, h6 {
   line-height: $line-height-tight;
   font-weight: 700;
+  color: $color-text-bright;
 }
 
 h1 { font-size: 2.25rem; }    // 36px
@@ -22,25 +23,27 @@ p {
 
 a {
   color: $color-primary;
-  transition: color 0.15s ease;
+  transition: color $transition-fast;
 
   &:hover {
-    color: $color-primary-dark;
+    color: $color-primary-hover;
   }
 }
 
 code {
   font-family: $font-mono;
   font-size: $font-size-sm;
-  background-color: $color-surface;
+  background-color: $color-bg-alt;
   padding: $space-1 $space-2;
   border-radius: $border-radius-sm;
+  color: $color-green;
 }
 
 pre {
   font-family: $font-mono;
   font-size: $font-size-sm;
-  background-color: $color-surface;
+  background-color: $color-bg-alt;
+  border: 1px solid $color-border;
   padding: $space-4;
   border-radius: $border-radius;
   overflow-x: auto;
@@ -49,6 +52,7 @@ pre {
   code {
     background: none;
     padding: 0;
+    color: $color-text;
   }
 }
 

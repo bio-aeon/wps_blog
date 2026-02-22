@@ -26,14 +26,15 @@
 .error-retry-btn {
     padding: $space-2 $space-4;
     background: $color-primary;
-    color: #ffffff;
+    color: $color-bg;
     border: none;
     border-radius: $border-radius-sm;
     font-size: $font-size-base;
     cursor: pointer;
+    transition: background-color $transition-fast;
 
     &:hover {
-        background: $color-primary-dark;
+        background: $color-primary-hover;
     }
 }
 
@@ -67,7 +68,7 @@
     font-weight: 500;
 
     &:hover {
-        color: $color-primary-dark;
+        color: $color-primary-hover;
     }
 }
 
@@ -92,7 +93,7 @@
 .static-page-skeleton {
     .skeleton-line {
         height: 1rem;
-        background: $color-surface;
+        background: $color-border;
         border-radius: $border-radius-sm;
         margin-bottom: $space-3;
         animation: pulse 1.5s ease-in-out infinite;

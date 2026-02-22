@@ -3,18 +3,19 @@
 .container {
   max-width: $max-page-width;
   margin: 0 auto;
-  padding: 0 $space-4;
+  padding: 0 $space-8;
 }
 
 .page-layout {
   display: grid;
   grid-template-columns: 1fr $sidebar-width;
-  gap: $space-8;
+  gap: $space-8 + $space-2;
   padding-top: $space-8;
   padding-bottom: $space-12;
 
-  @media (max-width: $bp-lg) {
+  @media (max-width: $bp-md) {
     grid-template-columns: 1fr;
+    padding: $space-6 0;
 
     .sidebar {
       order: 2;

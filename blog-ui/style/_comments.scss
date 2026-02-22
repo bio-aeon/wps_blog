@@ -27,7 +27,7 @@
     border: 1px solid $color-border;
     border-radius: $border-radius;
     margin-bottom: $space-3;
-    background: $color-bg;
+    background: $color-surface;
 }
 
 @for $i from 1 through 5 {
@@ -45,7 +45,7 @@
 
 .comment-author {
     font-weight: 600;
-    color: $color-text;
+    color: $color-text-bright;
 }
 
 .comment-date {
@@ -130,7 +130,7 @@
 }
 
 .comment-form-error {
-    background: lighten($color-error, 40%);
+    background: rgba($color-error, 0.1);
     color: $color-error;
     padding: $space-2 $space-3;
     border-radius: $border-radius-sm;
@@ -146,7 +146,7 @@
         font-size: $font-size-sm;
         font-weight: 500;
         margin-bottom: $space-1;
-        color: $color-text;
+        color: $color-text-bright;
     }
 
     input,
@@ -161,11 +161,15 @@
         background: $color-bg;
         color: $color-text;
         box-sizing: border-box;
+        transition: border-color $transition-fast;
+
+        &::placeholder {
+            color: $color-text-muted;
+        }
 
         &:focus {
             outline: none;
             border-color: $color-primary;
-            box-shadow: 0 0 0 2px rgba($color-primary, 0.15);
         }
     }
 
@@ -186,15 +190,16 @@
     display: inline-block;
     padding: $space-2 $space-4;
     background: $color-primary;
-    color: #ffffff;
+    color: $color-bg;
     border: none;
     border-radius: $border-radius-sm;
     font-size: $font-size-base;
     font-weight: 500;
     cursor: pointer;
+    transition: background-color $transition-fast;
 
     &:hover:not(:disabled) {
-        background: $color-primary-dark;
+        background: $color-primary-hover;
     }
 
     &:disabled {
