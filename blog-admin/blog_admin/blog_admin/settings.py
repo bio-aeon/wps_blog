@@ -128,3 +128,5 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'blog_admin.User'
+
+TEST_RUNNER = 'blog_admin.test_runner.UnmanagedModelTestRunner'
