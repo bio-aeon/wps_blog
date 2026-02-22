@@ -1,9 +1,58 @@
 use crate::api::create_comment;
 use leptos::prelude::*;
 
-const MAX_NAME_LEN: usize = 255;
-const MAX_EMAIL_LEN: usize = 255;
-const MAX_TEXT_LEN: usize = 10000;
+pub const MAX_NAME_LEN: usize = 255;
+pub const MAX_EMAIL_LEN: usize = 255;
+pub const MAX_TEXT_LEN: usize = 10000;
+
+/// Per-field validation errors returned by `validate_comment_fields`.
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct CommentValidation {
+    pub name_error: Option<String>,
+    pub email_error: Option<String>,
+    pub text_error: Option<String>,
+}
+
+impl CommentValidation {
+    pub fn is_valid(&self) -> bool {
+        self.name_error.is_none() && self.email_error.is_none() && self.text_error.is_none()
+    }
+}
+
+/// Validates comment form fields and returns per-field errors.
+pub fn validate_comment_fields(name: &str, email: &str, text: &str) -> CommentValidation {
+    let name_error = if name.trim().is_empty() {
+        Some("Name is required".into())
+    } else if name.len() > MAX_NAME_LEN {
+        Some(format!("Name must be at most {} characters", MAX_NAME_LEN))
+    } else {
+        None
+    };
+
+    let email_error = if email.trim().is_empty() {
+        Some("Email is required".into())
+    } else if email.len() > MAX_EMAIL_LEN {
+        Some(format!("Email must be at most {} characters", MAX_EMAIL_LEN))
+    } else if !email.contains('@') || !email.contains('.') {
+        Some("Please enter a valid email".into())
+    } else {
+        None
+    };
+
+    let text_error = if text.trim().is_empty() {
+        Some("Comment text is required".into())
+    } else if text.len() > MAX_TEXT_LEN {
+        Some(format!("Comment must be at most {} characters", MAX_TEXT_LEN))
+    } else {
+        None
+    };
+
+    CommentValidation {
+        name_error,
+        email_error,
+        text_error,
+    }
+}
 
 #[component]
 pub fn CommentForm(
@@ -21,47 +70,11 @@ pub fn CommentForm(
     let (text_error, set_text_error) = signal(Option::<String>::None);
 
     let validate = move || -> bool {
-        let mut valid = true;
-
-        let n = name.get();
-        if n.trim().is_empty() {
-            set_name_error.set(Some("Name is required".into()));
-            valid = false;
-        } else if n.len() > MAX_NAME_LEN {
-            set_name_error.set(Some(format!("Name must be at most {} characters", MAX_NAME_LEN)));
-            valid = false;
-        } else {
-            set_name_error.set(None);
-        }
-
-        let e = email.get();
-        if e.trim().is_empty() {
-            set_email_error.set(Some("Email is required".into()));
-            valid = false;
-        } else if e.len() > MAX_EMAIL_LEN {
-            set_email_error
-                .set(Some(format!("Email must be at most {} characters", MAX_EMAIL_LEN)));
-            valid = false;
-        } else if !e.contains('@') || !e.contains('.') {
-            set_email_error.set(Some("Please enter a valid email".into()));
-            valid = false;
-        } else {
-            set_email_error.set(None);
-        }
-
-        let t = text.get();
-        if t.trim().is_empty() {
-            set_text_error.set(Some("Comment text is required".into()));
-            valid = false;
-        } else if t.len() > MAX_TEXT_LEN {
-            set_text_error
-                .set(Some(format!("Comment must be at most {} characters", MAX_TEXT_LEN)));
-            valid = false;
-        } else {
-            set_text_error.set(None);
-        }
-
-        valid
+        let result = validate_comment_fields(&name.get(), &email.get(), &text.get());
+        set_name_error.set(result.name_error.clone());
+        set_email_error.set(result.email_error.clone());
+        set_text_error.set(result.text_error.clone());
+        result.is_valid()
     };
 
     let on_success = on_success.clone();
