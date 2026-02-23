@@ -101,83 +101,6 @@ class CommentRepositorySpec extends Specification with DbTest {
       replyComment must beSome.which(_.parentId.contains(1))
     }
 
-    "find comment by id when it exists" >> {
-      val user = random[models.User]
-      val post = random[models.Post].copy(id = PosInt(1), authorId = user.id, isHidden = false)
-      val test = for {
-        _ <- models.User.sql.insert(user)
-        _ <- models.Post.sql.insert(post)
-        comment = random[models.Comment].copy(id = PosInt(42), postId = PosInt(1), parentId = None)
-        _ <- models.Comment.sql.insert(comment)
-        result <- repo.findById(CommentId(42))
-      } yield result
-
-      val result = test.runWithIO()
-      result must beSome.which(_.id.exists(_.value == 42))
-    }
-
-    "return None when comment does not exist" >> {
-      val test = repo.findById(CommentId(99999))
-
-      val result = test.runWithIO()
-      result must beNone
-    }
-
-    "delete comment successfully" >> {
-      val user = random[models.User]
-      val post = random[models.Post].copy(id = PosInt(1), authorId = user.id, isHidden = false)
-      val test = for {
-        _ <- models.User.sql.insert(user)
-        _ <- models.Post.sql.insert(post)
-        comment = random[models.Comment].copy(id = PosInt(1), postId = PosInt(1), parentId = None)
-        _ <- models.Comment.sql.insert(comment)
-        beforeDelete <- repo.findById(CommentId(1))
-        rowsDeleted <- repo.delete(CommentId(1))
-        afterDelete <- repo.findById(CommentId(1))
-      } yield (beforeDelete, rowsDeleted, afterDelete)
-
-      val (beforeDelete, rowsDeleted, afterDelete) = test.runWithIO()
-      beforeDelete must beSome
-      rowsDeleted mustEqual 1
-      afterDelete must beNone
-    }
-
-    "return 0 when deleting non-existent comment" >> {
-      val test = repo.delete(CommentId(99999))
-
-      val result = test.runWithIO()
-      result mustEqual 0
-    }
-
-    "approve comment successfully" >> {
-      val user = random[models.User]
-      val post = random[models.Post].copy(id = PosInt(1), authorId = user.id, isHidden = false)
-      val test = for {
-        _ <- models.User.sql.insert(user)
-        _ <- models.Post.sql.insert(post)
-        comment = random[models.Comment].copy(
-          id = PosInt(1),
-          postId = PosInt(1),
-          parentId = None,
-          isApproved = false
-        )
-        _ <- models.Comment.sql.insert(comment)
-        rowsUpdated <- repo.approve(CommentId(1))
-        updated <- repo.findById(CommentId(1))
-      } yield (rowsUpdated, updated)
-
-      val (rowsUpdated, updated) = test.runWithIO()
-      rowsUpdated mustEqual 1
-      updated must beSome.which(_.isApproved)
-    }
-
-    "return 0 when approving non-existent comment" >> {
-      val test = repo.approve(CommentId(99999))
-
-      val result = test.runWithIO()
-      result mustEqual 0
-    }
-
     "check if IP has rated a comment (not rated)" >> {
       val user = random[models.User]
       val post = random[models.Post].copy(id = PosInt(1), authorId = user.id, isHidden = false)
@@ -247,12 +170,14 @@ class CommentRepositorySpec extends Specification with DbTest {
         )
         _ <- models.Comment.sql.insert(comment)
         rowsUpdated <- repo.updateRating(CommentId(1), 1)
-        updated <- repo.findById(CommentId(1))
-      } yield (rowsUpdated, updated)
+        comments <- repo.findCommentsByPostId(PostId(1))
+      } yield (rowsUpdated, comments)
 
-      val (rowsUpdated, updated) = test.runWithIO()
+      val (rowsUpdated, comments) = test.runWithIO()
       rowsUpdated mustEqual 1
-      updated must beSome.which(_.rating == initialRating + 1)
+      comments.find(_.id.exists(_.value == 1)) must beSome.which(
+        _.rating == initialRating + 1
+      )
     }
 
     "update rating by negative delta" >> {
@@ -270,12 +195,14 @@ class CommentRepositorySpec extends Specification with DbTest {
         )
         _ <- models.Comment.sql.insert(comment)
         rowsUpdated <- repo.updateRating(CommentId(1), -1)
-        updated <- repo.findById(CommentId(1))
-      } yield (rowsUpdated, updated)
+        comments <- repo.findCommentsByPostId(PostId(1))
+      } yield (rowsUpdated, comments)
 
-      val (rowsUpdated, updated) = test.runWithIO()
+      val (rowsUpdated, comments) = test.runWithIO()
       rowsUpdated mustEqual 1
-      updated must beSome.which(_.rating == initialRating - 1)
+      comments.find(_.id.exists(_.value == 1)) must beSome.which(
+        _.rating == initialRating - 1
+      )
     }
 
     "insert comment and return with generated id" >> {
@@ -336,11 +263,10 @@ class CommentRepositorySpec extends Specification with DbTest {
           id = None
         )
         insertedReply <- repo.insert(reply)
-        found <- repo.findById(insertedReply.id.get)
-      } yield (rootId, found)
+      } yield (rootId, insertedReply)
 
       val (rootId, result) = test.runWithIO()
-      result must beSome.which(_.parentId.contains(rootId))
+      result.parentId must beSome(rootId)
     }
   }
 }

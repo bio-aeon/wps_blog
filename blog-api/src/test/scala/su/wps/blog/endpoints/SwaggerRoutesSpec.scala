@@ -88,8 +88,8 @@ class SwaggerRoutesSpec extends Specification {
   }
 
   "ApiEndpoints" >> {
-    "define all 15 endpoints" >> {
-      ApiEndpoints.all must have size 15
+    "define all 13 endpoints" >> {
+      ApiEndpoints.all must have size 13
     }
   }
 }

@@ -13,7 +13,6 @@ object ApiEndpoints {
   private val commentsTag = "Comments"
   private val tagsTag = "Tags"
   private val pagesTag = "Pages"
-  private val adminTag = "Admin"
   private val systemTag = "System"
 
   val getPosts: AnyEndpoint =
@@ -110,25 +109,6 @@ object ApiEndpoints {
       )
       .tag(commentsTag)
 
-  val deleteComment: AnyEndpoint =
-    endpoint.delete
-      .in(v1 / "admin" / "comments" / path[Int]("id").description("Comment ID"))
-      .out(statusCode(StatusCode.NoContent))
-      .summary("Delete comment")
-      .description("Delete a comment (admin only).")
-      .tag(adminTag)
-
-  val approveComment: AnyEndpoint =
-    endpoint.put
-      .in(
-        v1 / "admin" / "comments" / path[Int]("id")
-          .description("Comment ID") / "approve"
-      )
-      .out(statusCode(StatusCode.NoContent))
-      .summary("Approve comment")
-      .description("Approve a comment for public display (admin only).")
-      .tag(adminTag)
-
   val getAllTags: AnyEndpoint =
     endpoint.get
       .in(v1 / "tags")
@@ -183,8 +163,6 @@ object ApiEndpoints {
     getCommentsForPost,
     createComment,
     rateComment,
-    deleteComment,
-    approveComment,
     getAllTags,
     getTagCloud,
     getAllPages,

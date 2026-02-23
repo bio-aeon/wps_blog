@@ -304,24 +304,6 @@ class RoutesSpec extends Specification {
       resp.status mustEqual Status.NoContent
     }
 
-    "return 204 No Content on successful comment deletion" >> {
-      val routes = mkRoutesForCommentModeration[IO]
-      val request = Request[IO](Method.DELETE, Uri.unsafeFromString(s"$v1/admin/comments/1"))
-
-      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
-
-      resp.status mustEqual Status.NoContent
-    }
-
-    "return 204 No Content on successful comment approval" >> {
-      val routes = mkRoutesForCommentModeration[IO]
-      val request = Request[IO](Method.PUT, Uri.unsafeFromString(s"$v1/admin/comments/1/approve"))
-
-      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
-
-      resp.status mustEqual Status.NoContent
-    }
-
     "return 200 with tags list for GET /tags" >> {
       val routes = mkRoutesWithTags[IO]
       val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/tags"))
@@ -827,16 +809,6 @@ class RoutesSpec extends Specification {
   }
 
   private def mkRoutesForRateComment[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
-    val postService = PostServiceMock.create[F]()
-    val commentService = CommentServiceMock.create[F]()
-    val tagService = TagServiceMock.create[F]()
-    val pageService = PageServiceMock.create[F]()
-
-    val healthService = HealthServiceMock.create[F](timestamp = testTimestamp)
-    RoutesImpl.create[F](postService, commentService, tagService, pageService, healthService)
-  }
-
-  private def mkRoutesForCommentModeration[F[_]: Concurrent: Raise[*[_], AppErr]]: Routes[F] = {
     val postService = PostServiceMock.create[F]()
     val commentService = CommentServiceMock.create[F]()
     val tagService = TagServiceMock.create[F]()

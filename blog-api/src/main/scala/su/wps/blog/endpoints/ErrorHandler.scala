@@ -42,9 +42,6 @@ object ErrorHandler {
       case AppErr.PostNotFound(id) =>
         NotFound(ErrorResponse.notFound("Post", id.value.toString).asJson)
 
-      case AppErr.CommentNotFound(id) =>
-        NotFound(ErrorResponse.notFound("Comment", id.value.toString).asJson)
-
       case AppErr.PageNotFound(url) =>
         NotFound(ErrorResponse.notFound("Page", url).asJson)
 

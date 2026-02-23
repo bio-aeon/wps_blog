@@ -79,12 +79,6 @@ final class RoutesImpl[F[_]: Concurrent] private (
         commentService.rateComment(CommentId(id), request.isUpvote, ip) *> NoContent()
       }
 
-    case DELETE -> Root / "admin" / "comments" / IntVar(id) =>
-      commentService.deleteComment(CommentId(id)) *> NoContent()
-
-    case PUT -> Root / "admin" / "comments" / IntVar(id) / "approve" =>
-      commentService.approveComment(CommentId(id)) *> NoContent()
-
     case GET -> Root / "tags" / "cloud" =>
       tagService.getTagCloud.map(_.asJson).flatMap(Ok(_))
 

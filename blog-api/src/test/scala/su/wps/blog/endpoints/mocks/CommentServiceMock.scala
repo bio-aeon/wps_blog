@@ -12,9 +12,7 @@ object CommentServiceMock {
   def create[F[_]: Applicative](
     commentsForPostResult: CommentsListResult = CommentsListResult(Nil, 0),
     createCommentResult: Option[CommentResult] = None,
-    rateCommentResult: Unit = (),
-    deleteCommentResult: Unit = (),
-    approveCommentResult: Unit = ()
+    rateCommentResult: Unit = ()
   ): CommentService[F] =
     new CommentService[F] {
       def getCommentsForPost(postId: PostId): F[CommentsListResult] =
@@ -36,11 +34,5 @@ object CommentServiceMock {
 
       def rateComment(commentId: CommentId, isUpvote: Boolean, ip: String): F[Unit] =
         rateCommentResult.pure[F]
-
-      def deleteComment(commentId: CommentId): F[Unit] =
-        deleteCommentResult.pure[F]
-
-      def approveComment(commentId: CommentId): F[Unit] =
-        approveCommentResult.pure[F]
     }
 }

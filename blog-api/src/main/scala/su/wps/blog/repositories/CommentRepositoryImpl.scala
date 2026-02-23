@@ -9,9 +9,6 @@ final class CommentRepositoryImpl[DB[_]] private (sql: CommentSql[DB])
   def insert(comment: Comment): DB[Comment] =
     sql.insert(comment)
 
-  def findById(commentId: CommentId): DB[Option[Comment]] =
-    sql.findById(commentId)
-
   def findCommentsByPostId(postId: PostId): DB[List[Comment]] =
     sql.findCommentsByPostId(postId)
 
@@ -23,12 +20,6 @@ final class CommentRepositoryImpl[DB[_]] private (sql: CommentSql[DB])
 
   def updateRating(commentId: CommentId, delta: Int): DB[Int] =
     sql.updateRating(commentId, delta)
-
-  def delete(commentId: CommentId): DB[Int] =
-    sql.delete(commentId)
-
-  def approve(commentId: CommentId): DB[Int] =
-    sql.approve(commentId)
 }
 
 object CommentRepositoryImpl {

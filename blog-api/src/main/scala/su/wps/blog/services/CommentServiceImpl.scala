@@ -1,14 +1,12 @@
 package su.wps.blog.services
 
 import cats.Monad
-import cats.data.OptionT
 import cats.syntax.flatMap.*
 import cats.syntax.functor.*
 import mouse.anyf.*
 import su.wps.blog.models.api.{CommentResult, CommentsListResult, CreateCommentRequest}
-import su.wps.blog.models.domain.{AppErr, Comment, CommentId, PostId}
+import su.wps.blog.models.domain.{Comment, CommentId, PostId}
 import su.wps.blog.repositories.CommentRepository
-import tofu.Raise
 import tofu.doobie.transactor.Txr
 
 import java.time.ZonedDateTime
@@ -16,7 +14,7 @@ import java.time.ZonedDateTime
 final class CommentServiceImpl[F[_], DB[_]] private (
   commentRepo: CommentRepository[DB],
   xa: Txr[F, DB]
-)(implicit F: Monad[F], DB: Monad[DB], R: Raise[F, AppErr])
+)(implicit F: Monad[F], DB: Monad[DB])
     extends CommentService[F] {
 
   def getCommentsForPost(postId: PostId): F[CommentsListResult] =
@@ -57,22 +55,6 @@ final class CommentServiceImpl[F[_], DB[_]] private (
     query.thrushK(xa.trans)
   }
 
-  def deleteComment(commentId: CommentId): F[Unit] = {
-    val query = for {
-      commentOpt <- commentRepo.findById(commentId)
-      _ <- commentOpt.fold(DB.unit)(_ => commentRepo.delete(commentId).void)
-    } yield commentOpt
-    OptionT(query.thrushK(xa.trans)).foldF(R.raise(AppErr.CommentNotFound(commentId)))(_ => F.unit)
-  }
-
-  def approveComment(commentId: CommentId): F[Unit] = {
-    val query = for {
-      commentOpt <- commentRepo.findById(commentId)
-      _ <- commentOpt.fold(DB.unit)(_ => commentRepo.approve(commentId).void)
-    } yield commentOpt
-    OptionT(query.thrushK(xa.trans)).foldF(R.raise(AppErr.CommentNotFound(commentId)))(_ => F.unit)
-  }
-
   private def toCommentResult(comment: Comment): CommentResult =
     CommentResult(
       id = comment.id.getOrElse(CommentId(0)),
@@ -106,7 +88,7 @@ final class CommentServiceImpl[F[_], DB[_]] private (
 }
 
 object CommentServiceImpl {
-  def create[F[_]: Monad: Raise[*[_], AppErr], DB[_]: Monad](
+  def create[F[_]: Monad, DB[_]: Monad](
     commentRepo: CommentRepository[DB],
     xa: Txr[F, DB]
   ): CommentServiceImpl[F, DB] =

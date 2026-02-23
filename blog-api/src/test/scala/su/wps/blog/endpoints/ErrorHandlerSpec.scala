@@ -6,7 +6,7 @@ import org.http4s.*
 import org.http4s.dsl.io.*
 import org.http4s.implicits.*
 import org.specs2.mutable.Specification
-import su.wps.blog.models.domain.{AppErr, CommentId, PostId}
+import su.wps.blog.models.domain.{AppErr, PostId}
 
 class ErrorHandlerSpec extends Specification {
 
@@ -29,26 +29,6 @@ class ErrorHandlerSpec extends Specification {
 
       body must contain("\"code\":\"NOT_FOUND\"")
       body must contain("Post not found: 456")
-    }
-
-    "return 404 for CommentNotFound error" >> {
-      val routes = mkFailingRoutes(AppErr.CommentNotFound(CommentId(789)))
-      val request = Request[IO](Method.GET, uri"/test")
-
-      val resp = ErrorHandler(routes).run(request).value.map(_.get).unsafeRunSync()
-
-      resp.status mustEqual Status.NotFound
-    }
-
-    "include comment id in NotFound response body for CommentNotFound" >> {
-      val routes = mkFailingRoutes(AppErr.CommentNotFound(CommentId(999)))
-      val request = Request[IO](Method.GET, uri"/test")
-
-      val resp = ErrorHandler(routes).run(request).value.map(_.get).unsafeRunSync()
-      val body = resp.as[String].unsafeRunSync()
-
-      body must contain("\"code\":\"NOT_FOUND\"")
-      body must contain("Comment not found: 999")
     }
 
     "return 404 for PageNotFound error" >> {
