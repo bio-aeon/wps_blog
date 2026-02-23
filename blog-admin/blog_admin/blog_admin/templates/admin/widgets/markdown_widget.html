@@ -1,0 +1,26 @@
+{% include "django/forms/widgets/textarea.html" %}
+<script>
+(function() {
+    document.addEventListener('DOMContentLoaded', function() {
+        var textarea = document.getElementById('{{ widget.attrs.id }}');
+        if (textarea && !textarea._easymde) {
+            textarea._easymde = new EasyMDE({
+                element: textarea,
+                spellChecker: false,
+                autosave: {
+                    enabled: false,
+                },
+                toolbar: [
+                    'bold', 'italic', 'heading', '|',
+                    'quote', 'unordered-list', 'ordered-list', '|',
+                    'link', 'image', 'code', '|',
+                    'preview', 'side-by-side', 'fullscreen', '|',
+                    'guide'
+                ],
+                status: ['lines', 'words'],
+                minHeight: '400px',
+            });
+        }
+    });
+})();
+</script>
