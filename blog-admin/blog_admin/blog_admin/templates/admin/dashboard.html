@@ -1,0 +1,156 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Dashboard | {{ title }}{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'blog_admin/css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+
+    <!-- Summary Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_posts }}</div>
+            <div class="stat-label">Total Posts</div>
+            <div class="stat-detail">{{ published_posts }} published / {{ draft_posts }} drafts</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ total_views }}</div>
+            <div class="stat-label">Total Views</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ total_comments }}</div>
+            <div class="stat-label">Comments</div>
+            {% if pending_comments > 0 %}
+            <div class="stat-detail stat-warning">{{ pending_comments }} pending moderation</div>
+            {% endif %}
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ total_tags }}</div>
+            <div class="stat-label">Tags</div>
+        </div>
+    </div>
+
+    <div class="dashboard-columns">
+        <!-- Recent Comments -->
+        <div class="dashboard-section">
+            <h2>Recent Comments</h2>
+            {% if recent_comments %}
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th>Author</th>
+                        <th>Comment</th>
+                        <th>Post</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for comment in recent_comments %}
+                    <tr>
+                        <td>{{ comment.name }}</td>
+                        <td>{{ comment.text|truncatewords:12 }}</td>
+                        <td>
+                            <a href="{% url 'admin:blog_admin_post_change' comment.post_id %}">
+                                {{ comment.post.name|truncatewords:5 }}
+                            </a>
+                        </td>
+                        <td>
+                            {% if comment.is_approved %}
+                                <span class="status-approved">Approved</span>
+                            {% else %}
+                                <span class="status-pending">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ comment.created_at|date:"M d, H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="empty-state">No comments yet.</p>
+            {% endif %}
+        </div>
+
+        <!-- Top Posts -->
+        <div class="dashboard-section">
+            <h2>Top Posts by Views</h2>
+            {% if top_posts %}
+            <table class="dashboard-table">
+                <thead>
+                    <tr><th>Post</th><th>Views</th></tr>
+                </thead>
+                <tbody>
+                    {% for post in top_posts %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'admin:blog_admin_post_change' post.pk %}">
+                                {{ post.name }}
+                            </a>
+                        </td>
+                        <td>{{ post.views }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="empty-state">No published posts yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="dashboard-columns">
+        <!-- Recent Posts -->
+        <div class="dashboard-section">
+            <h2>Recent Posts</h2>
+            {% if recent_posts %}
+            <table class="dashboard-table">
+                <thead>
+                    <tr><th>Post</th><th>Status</th><th>Date</th></tr>
+                </thead>
+                <tbody>
+                    {% for post in recent_posts %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'admin:blog_admin_post_change' post.pk %}">
+                                {{ post.name }}
+                            </a>
+                        </td>
+                        <td>
+                            {% if post.is_hidden %}
+                                <span class="status-pending">Draft</span>
+                            {% else %}
+                                <span class="status-approved">Published</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ post.created_at|date:"M d, Y" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="empty-state">No posts yet.</p>
+            {% endif %}
+        </div>
+
+        <!-- Popular Tags -->
+        <div class="dashboard-section">
+            <h2>Popular Tags</h2>
+            {% if popular_tags %}
+            <div class="tag-cloud">
+                {% for tag in popular_tags %}
+                <span class="tag-badge">{{ tag.name }} ({{ tag.post_count }})</span>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="empty-state">No tags yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
