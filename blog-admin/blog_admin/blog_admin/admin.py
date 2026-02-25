@@ -57,7 +57,7 @@ class PostAdmin(admin.ModelAdmin):
     readonly_fields = ('views', 'created_at')
     date_hierarchy = 'created_at'
     ordering = ('-created_at',)
-    inlines = [PostTagInline]
+    inlines = [PostTagInline, CommentInline]
     actions = ['publish_posts', 'unpublish_posts']
 
     fieldsets = (

@@ -73,3 +73,39 @@ class DashboardViewTest(TestCase):
         response = self.client.get(reverse('admin-dashboard'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'No comments yet.')
+
+
+class AnalyticsViewTest(TestCase):
+    def setUp(self):
+        self.admin_user = User.objects.create_superuser('admin', 'a@b.com', 'pass')
+        self.client.force_login(self.admin_user)
+
+    def test_analytics_loads(self):
+        response = self.client.get(reverse('admin-analytics'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_analytics_requires_staff(self):
+        self.client.logout()
+        response = self.client.get(reverse('admin-analytics'))
+        self.assertEqual(response.status_code, 302)
+
+    def test_analytics_contains_chart_containers(self):
+        response = self.client.get(reverse('admin-analytics'))
+        self.assertContains(response, 'postsChart')
+        self.assertContains(response, 'commentsChart')
+        self.assertContains(response, 'viewsChart')
+
+    def test_analytics_includes_chartjs(self):
+        response = self.client.get(reverse('admin-analytics'))
+        self.assertContains(response, 'chart.umd.min.js')
+
+    def test_analytics_passes_json_data(self):
+        baker.make(Post, author=self.admin_user, name='Test Post', views=42, is_hidden=False)
+        response = self.client.get(reverse('admin-analytics'))
+        self.assertContains(response, 'posts-data')
+        self.assertContains(response, 'views-data')
+        self.assertContains(response, 'comments-data')
+
+    def test_analytics_handles_empty_data(self):
+        response = self.client.get(reverse('admin-analytics'))
+        self.assertEqual(response.status_code, 200)

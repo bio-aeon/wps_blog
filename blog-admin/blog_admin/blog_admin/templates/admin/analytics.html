@@ -1,0 +1,36 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Analytics | {{ title }}{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'blog_admin/css/dashboard.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="dashboard-columns">
+        <div class="dashboard-section">
+            <h2>Posts per Month</h2>
+            <canvas id="postsChart" height="300"></canvas>
+        </div>
+        <div class="dashboard-section">
+            <h2>Comments per Month</h2>
+            <canvas id="commentsChart" height="300"></canvas>
+        </div>
+    </div>
+
+    <div class="dashboard-section" style="margin-top: 20px;">
+        <h2>Top Posts by Views</h2>
+        <canvas id="viewsChart" height="300"></canvas>
+    </div>
+</div>
+
+{{ posts_by_month|json_script:"posts-data" }}
+{{ comments_by_month|json_script:"comments-data" }}
+{{ top_posts|json_script:"views-data" }}
+
+<script src="{% static 'blog_admin/js/dashboard_charts.js' %}"></script>
+{% endblock %}

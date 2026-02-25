@@ -1,6 +1,10 @@
+from datetime import timedelta
+
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Count, Sum
+from django.db.models.functions import TruncMonth
 from django.shortcuts import render
+from django.utils import timezone
 
 from blog_admin.models import Post, Comment, Tag, Page, User
 
@@ -43,3 +47,45 @@ def dashboard_view(request):
         'popular_tags': popular_tags,
     }
     return render(request, 'admin/dashboard.html', context)
+
+
+@staff_member_required
+def analytics_view(request):
+    twelve_months_ago = timezone.now() - timedelta(days=365)
+
+    posts_by_month = list(
+        Post.objects
+        .filter(created_at__gte=twelve_months_ago)
+        .annotate(month=TruncMonth('created_at'))
+        .values('month')
+        .annotate(count=Count('id'))
+        .order_by('month')
+    )
+    for entry in posts_by_month:
+        entry['month'] = entry['month'].strftime('%Y-%m')
+
+    top_posts = list(
+        Post.objects
+        .filter(is_hidden=False)
+        .order_by('-views')[:10]
+        .values('name', 'views')
+    )
+
+    comments_by_month = list(
+        Comment.objects
+        .filter(created_at__gte=twelve_months_ago)
+        .annotate(month=TruncMonth('created_at'))
+        .values('month')
+        .annotate(count=Count('id'))
+        .order_by('month')
+    )
+    for entry in comments_by_month:
+        entry['month'] = entry['month'].strftime('%Y-%m')
+
+    context = {
+        'title': 'Analytics',
+        'posts_by_month': posts_by_month,
+        'top_posts': top_posts,
+        'comments_by_month': comments_by_month,
+    }
+    return render(request, 'admin/analytics.html', context)
