@@ -17,4 +17,8 @@ object AppErr {
     override def toString: String =
       s"Validation failed: ${errors.map { case (k, v) => s"$k: $v" }.mkString(", ")}"
   }
+
+  final case class ContactRateLimited(ip: String) extends AppErr {
+    override def toString: String = s"Contact rate limit exceeded for IP $ip"
+  }
 }

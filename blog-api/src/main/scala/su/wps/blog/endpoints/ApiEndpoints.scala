@@ -14,6 +14,8 @@ object ApiEndpoints {
   private val tagsTag = "Tags"
   private val pagesTag = "Pages"
   private val systemTag = "System"
+  private val profileTag = "Profile"
+  private val contactTag = "Contact"
 
   val getPosts: AnyEndpoint =
     endpoint.get
@@ -154,6 +156,62 @@ object ApiEndpoints {
       .description("Check API and database health status.")
       .tag(systemTag)
 
+  val getSkills: AnyEndpoint =
+    endpoint.get
+      .in(v1 / "skills")
+      .out(jsonBody[List[SkillCategoryResult]])
+      .summary("List skills by category")
+      .description(
+        "Get all active skills grouped by category with proficiency levels."
+      )
+      .tag(profileTag)
+
+  val getExperiences: AnyEndpoint =
+    endpoint.get
+      .in(v1 / "experiences")
+      .out(jsonBody[List[ExperienceResult]])
+      .summary("List experiences")
+      .description("Get all active work experiences ordered chronologically.")
+      .tag(profileTag)
+
+  val getSocialLinks: AnyEndpoint =
+    endpoint.get
+      .in(v1 / "social-links")
+      .out(jsonBody[List[SocialLinkResult]])
+      .summary("List social links")
+      .description("Get all active social/platform links.")
+      .tag(profileTag)
+
+  val getTestimonials: AnyEndpoint =
+    endpoint.get
+      .in(v1 / "testimonials")
+      .out(jsonBody[List[TestimonialResult]])
+      .summary("List testimonials")
+      .description("Get all active testimonials and recommendations.")
+      .tag(profileTag)
+
+  val submitContact: AnyEndpoint =
+    endpoint.post
+      .in(v1 / "contact")
+      .in(jsonBody[CreateContactRequest])
+      .out(jsonBody[ContactResponse])
+      .errorOut(jsonBody[ErrorResponse])
+      .summary("Submit contact form")
+      .description(
+        "Submit a contact form message. Rate limited per IP address."
+      )
+      .tag(contactTag)
+
+  val getAbout: AnyEndpoint =
+    endpoint.get
+      .in(v1 / "about")
+      .out(jsonBody[AboutResult])
+      .summary("Get about page")
+      .description(
+        "Get aggregated about page data: profile, skills, experiences, social links, testimonials."
+      )
+      .tag(profileTag)
+
   val all: List[AnyEndpoint] = List(
     getPosts,
     searchPosts,
@@ -167,6 +225,12 @@ object ApiEndpoints {
     getTagCloud,
     getAllPages,
     getPageByUrl,
-    healthCheck
+    healthCheck,
+    getSkills,
+    getExperiences,
+    getSocialLinks,
+    getTestimonials,
+    submitContact,
+    getAbout
   )
 }

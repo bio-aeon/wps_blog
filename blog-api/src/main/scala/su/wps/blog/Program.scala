@@ -20,7 +20,7 @@ import org.typelevel.log4cats.slf4j.Slf4jLogger
 import pureconfig.ConfigSource
 import su.wps.blog.config.{AppConfig, DbConfig, HttpServerConfig}
 import su.wps.blog.endpoints.{ErrorHandler, RoutesImpl, SwaggerRoutes}
-import su.wps.blog.repositories.{CommentRepositoryImpl, PageRepositoryImpl, PostRepositoryImpl, TagRepositoryImpl}
+import su.wps.blog.repositories.*
 import su.wps.blog.repositories.sql.Slf4jDoobieLogHandler
 import su.wps.blog.services.*
 import tofu.doobie.transactor.Txr
@@ -35,18 +35,40 @@ object Program {
         appConfig <- parseAppConfig[F].toResource
         _ <- runMigrations[F](appConfig.db)
         xa <- mkTransactor[F](appConfig.db)
-        postRepo = PostRepositoryImpl.create[xa.DB]
-        tagRepo = TagRepositoryImpl.create[xa.DB]
-        commentRepo = CommentRepositoryImpl.create[xa.DB]
-        pageRepo = PageRepositoryImpl.create[xa.DB]
-        postService = PostServiceImpl.create[F, xa.DB](postRepo, tagRepo, xa)
-        commentService = CommentServiceImpl.create[F, xa.DB](commentRepo, xa)
-        tagService = TagServiceImpl.create[F, xa.DB](tagRepo, xa)
-        pageService = PageServiceImpl.create[F, xa.DB](pageRepo, xa)
-        dbCheck = xa.trans(doobie.FC.isValid(1))
-          .handleError(_ => false)
-        healthService = HealthServiceImpl.create[F](dbCheck)
-        routes = RoutesImpl.create[F](postService, commentService, tagService, pageService, healthService)
+        routes = {
+          val postRepo = PostRepositoryImpl.create[xa.DB]
+          val tagRepo = TagRepositoryImpl.create[xa.DB]
+          val commentRepo = CommentRepositoryImpl.create[xa.DB]
+          val pageRepo = PageRepositoryImpl.create[xa.DB]
+          val skillRepo = SkillRepositoryImpl.create[xa.DB]
+          val experienceRepo = ExperienceRepositoryImpl.create[xa.DB]
+          val socialLinkRepo = SocialLinkRepositoryImpl.create[xa.DB]
+          val contactRepo = ContactSubmissionRepositoryImpl.create[xa.DB]
+          val testimonialRepo = TestimonialRepositoryImpl.create[xa.DB]
+          val configRepo = ConfigRepositoryImpl.create[xa.DB]
+          val postService = PostServiceImpl.create[F, xa.DB](postRepo, tagRepo, xa)
+          val commentService = CommentServiceImpl.create[F, xa.DB](commentRepo, xa)
+          val tagService = TagServiceImpl.create[F, xa.DB](tagRepo, xa)
+          val pageService = PageServiceImpl.create[F, xa.DB](pageRepo, xa)
+          val skillService = SkillServiceImpl.create[F, xa.DB](skillRepo, xa)
+          val experienceService = ExperienceServiceImpl.create[F, xa.DB](experienceRepo, xa)
+          val socialLinkService = SocialLinkServiceImpl.create[F, xa.DB](socialLinkRepo, xa)
+          val contactService =
+            ContactServiceImpl.create[F, xa.DB](contactRepo, configRepo, xa)
+          val testimonialService =
+            TestimonialServiceImpl.create[F, xa.DB](testimonialRepo, xa)
+          val aboutService = AboutServiceImpl.create[F, xa.DB](
+            skillRepo, experienceRepo, socialLinkRepo,
+            testimonialRepo, configRepo, pageRepo, xa
+          )
+          val dbCheck = xa.trans(doobie.FC.isValid(1)).handleError(_ => false)
+          val healthService = HealthServiceImpl.create[F](dbCheck)
+          RoutesImpl.create[F](
+            postService, commentService, tagService, pageService, healthService,
+            skillService, experienceService, socialLinkService,
+            contactService, testimonialService, aboutService
+          )
+        }
         routesWithErrorHandling = ErrorHandler(routes.routes)
         swaggerRoutes = SwaggerRoutes.routes[F]
         allRoutes = swaggerRoutes <+> routesWithErrorHandling

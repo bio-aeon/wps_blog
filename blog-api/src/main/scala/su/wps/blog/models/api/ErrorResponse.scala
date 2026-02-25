@@ -24,4 +24,7 @@ object ErrorResponse {
 
   def validationError(errors: Map[String, String]): ErrorResponse =
     ErrorResponse("VALIDATION_ERROR", "Request validation failed", Some(errors))
+
+  def tooManyRequests(message: String): ErrorResponse =
+    ErrorResponse("RATE_LIMITED", message)
 }

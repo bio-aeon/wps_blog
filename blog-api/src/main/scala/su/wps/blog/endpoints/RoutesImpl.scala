@@ -11,9 +11,9 @@ import org.http4s.circe.CirceEntityDecoder.*
 import org.http4s.dsl.Http4sDsl
 import org.http4s.headers.`X-Forwarded-For`
 import org.http4s.server.Router
-import su.wps.blog.models.api.{CreateCommentRequest, RateCommentRequest}
+import su.wps.blog.models.api.{CreateCommentRequest, CreateContactRequest, RateCommentRequest}
 import su.wps.blog.models.domain.{AppErr, CommentId, PostId}
-import su.wps.blog.services.{CommentService, HealthService, PageService, PostService, TagService}
+import su.wps.blog.services.*
 import su.wps.blog.validation.Validation
 
 final class RoutesImpl[F[_]: Concurrent] private (
@@ -21,7 +21,13 @@ final class RoutesImpl[F[_]: Concurrent] private (
   commentService: CommentService[F],
   tagService: TagService[F],
   pageService: PageService[F],
-  healthService: HealthService[F]
+  healthService: HealthService[F],
+  skillService: SkillService[F],
+  experienceService: ExperienceService[F],
+  socialLinkService: SocialLinkService[F],
+  contactService: ContactService[F],
+  testimonialService: TestimonialService[F],
+  aboutService: AboutService[F]
 ) extends Http4sDsl[F]
     with Routes[F] {
   import RoutesImpl._
@@ -90,6 +96,29 @@ final class RoutesImpl[F[_]: Concurrent] private (
 
     case GET -> Root / "pages" / url =>
       pageService.getPageByUrl(url).map(_.asJson).flatMap(Ok(_))
+
+    case GET -> Root / "skills" =>
+      skillService.getSkillsByCategory.map(_.asJson).flatMap(Ok(_))
+
+    case GET -> Root / "experiences" =>
+      experienceService.getExperiences.map(_.asJson).flatMap(Ok(_))
+
+    case GET -> Root / "social-links" =>
+      socialLinkService.getSocialLinks.map(_.asJson).flatMap(Ok(_))
+
+    case GET -> Root / "testimonials" =>
+      testimonialService.getTestimonials.map(_.asJson).flatMap(Ok(_))
+
+    case req @ POST -> Root / "contact" =>
+      val ip = extractIp(req)
+      req.as[CreateContactRequest].flatMap { request =>
+        withValidContact(request) { validated =>
+          contactService.submitContact(validated, ip).map(_.asJson).flatMap(Ok(_))
+        }
+      }
+
+    case GET -> Root / "about" =>
+      aboutService.getAboutPage.map(_.asJson).flatMap(Ok(_))
   }
 
   private val systemRoutes: HttpRoutes[F] = HttpRoutes.of[F] {
@@ -121,6 +150,21 @@ final class RoutesImpl[F[_]: Concurrent] private (
         Concurrent[F].raiseError(AppErr.ValidationFailed(errors.toNonEmptyList.toList.toMap))
     }
 
+  private def withValidContact(request: CreateContactRequest)(
+    f: CreateContactRequest => F[org.http4s.Response[F]]
+  ): F[org.http4s.Response[F]] =
+    Validation.validateContact(
+      request.name,
+      request.email,
+      request.subject,
+      request.message
+    ) match {
+      case cats.data.Validated.Valid((name, email, subject, message)) =>
+        f(request.copy(name = name, email = email, subject = subject, message = message))
+      case cats.data.Validated.Invalid(errors) =>
+        Concurrent[F].raiseError(AppErr.ValidationFailed(errors.toNonEmptyList.toList.toMap))
+    }
+
   private def extractIp(req: Request[F]): String =
     req.headers
       .get[`X-Forwarded-For`]
@@ -141,7 +185,25 @@ object RoutesImpl {
     commentService: CommentService[F],
     tagService: TagService[F],
     pageService: PageService[F],
-    healthService: HealthService[F]
+    healthService: HealthService[F],
+    skillService: SkillService[F],
+    experienceService: ExperienceService[F],
+    socialLinkService: SocialLinkService[F],
+    contactService: ContactService[F],
+    testimonialService: TestimonialService[F],
+    aboutService: AboutService[F]
   ): RoutesImpl[F] =
-    new RoutesImpl[F](postService, commentService, tagService, pageService, healthService)
+    new RoutesImpl[F](
+      postService,
+      commentService,
+      tagService,
+      pageService,
+      healthService,
+      skillService,
+      experienceService,
+      socialLinkService,
+      contactService,
+      testimonialService,
+      aboutService
+    )
 }

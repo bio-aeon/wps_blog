@@ -48,6 +48,13 @@ object ErrorHandler {
       case AppErr.ValidationFailed(errors) =>
         BadRequest(ErrorResponse.validationError(errors).asJson)
 
+      case AppErr.ContactRateLimited(_) =>
+        TooManyRequests(
+          ErrorResponse
+            .tooManyRequests("Too many contact submissions. Please try again later.")
+            .asJson
+        )
+
       case e: InvalidMessageBodyFailure =>
         BadRequest(ErrorResponse.badRequest(e.getMessage).asJson)
 
