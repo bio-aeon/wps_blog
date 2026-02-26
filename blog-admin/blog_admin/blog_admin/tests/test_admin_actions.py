@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 from model_bakery import baker
 
-from blog_admin.models import User, Post, Comment
+from blog_admin.models import User, Post, Comment, ContactSubmission
 
 
 class CommentModerationTest(TestCase):
@@ -142,3 +142,45 @@ class PublishWorkflowTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.published_post.name)
         self.assertNotContains(response, self.draft_post.name)
+
+
+class ContactSubmissionActionTest(TestCase):
+    def setUp(self):
+        self.admin_user = User.objects.create_superuser('admin', 'a@b.com', 'pass')
+        self.client.force_login(self.admin_user)
+        self.sub1 = ContactSubmission.objects.create(
+            name='Alice', email='alice@test.com',
+            subject='Hello', message='Hi there', is_read=False
+        )
+        self.sub2 = ContactSubmission.objects.create(
+            name='Bob', email='bob@test.com',
+            subject='Question', message='Got a question', is_read=False
+        )
+
+    def test_mark_as_read_action(self):
+        response = self.client.post(
+            reverse('admin:blog_admin_contactsubmission_changelist'),
+            {
+                'action': 'mark_as_read',
+                '_selected_action': [self.sub1.pk, self.sub2.pk],
+            }
+        )
+        self.assertEqual(response.status_code, 302)
+        self.sub1.refresh_from_db()
+        self.sub2.refresh_from_db()
+        self.assertTrue(self.sub1.is_read)
+        self.assertTrue(self.sub2.is_read)
+
+    def test_mark_as_unread_action(self):
+        self.sub1.is_read = True
+        self.sub1.save()
+        response = self.client.post(
+            reverse('admin:blog_admin_contactsubmission_changelist'),
+            {
+                'action': 'mark_as_unread',
+                '_selected_action': [self.sub1.pk],
+            }
+        )
+        self.assertEqual(response.status_code, 302)
+        self.sub1.refresh_from_db()
+        self.assertFalse(self.sub1.is_read)

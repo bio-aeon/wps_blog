@@ -6,7 +6,10 @@ from django.db.models.functions import TruncMonth
 from django.shortcuts import render
 from django.utils import timezone
 
-from blog_admin.models import Post, Comment, Tag, Page, User
+from blog_admin.models import (
+    Post, Comment, Tag, Page, User,
+    Skill, Experience, SocialLink, Testimonial, ContactSubmission,
+)
 
 
 @staff_member_required
@@ -30,6 +33,13 @@ def dashboard_view(request):
         post_count=Count('posttag')
     ).order_by('-post_count')[:10]
 
+    skill_count = Skill.objects.filter(is_active=True).count()
+    experience_count = Experience.objects.filter(is_active=True).count()
+    social_link_count = SocialLink.objects.filter(is_active=True).count()
+    testimonial_count = Testimonial.objects.filter(is_active=True).count()
+    unread_contacts = ContactSubmission.objects.filter(is_read=False).count()
+    recent_contacts = ContactSubmission.objects.order_by('-created_at')[:5]
+
     context = {
         'title': 'Dashboard',
         'total_posts': total_posts,
@@ -45,6 +55,12 @@ def dashboard_view(request):
         'top_posts': top_posts,
         'recent_posts': recent_posts,
         'popular_tags': popular_tags,
+        'skill_count': skill_count,
+        'experience_count': experience_count,
+        'social_link_count': social_link_count,
+        'testimonial_count': testimonial_count,
+        'unread_contacts': unread_contacts,
+        'recent_contacts': recent_contacts,
     }
     return render(request, 'admin/dashboard.html', context)
 

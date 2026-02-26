@@ -33,6 +33,29 @@
             <div class="stat-number">{{ total_tags }}</div>
             <div class="stat-label">Tags</div>
         </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ skill_count }}</div>
+            <div class="stat-label">Skills</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ experience_count }}</div>
+            <div class="stat-label">Experiences</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ testimonial_count }}</div>
+            <div class="stat-label">Testimonials</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ social_link_count }}</div>
+            <div class="stat-label">Social Links</div>
+        </div>
+        {% if unread_contacts > 0 %}
+        <div class="stat-card">
+            <div class="stat-number">{{ unread_contacts }}</div>
+            <div class="stat-label">Unread Messages</div>
+            <div class="stat-detail stat-warning">{{ unread_contacts }} unread</div>
+        </div>
+        {% endif %}
     </div>
 
     <div class="dashboard-columns">
@@ -103,6 +126,45 @@
             {% endif %}
         </div>
     </div>
+
+    <!-- Recent Contact Submissions -->
+    {% if recent_contacts %}
+    <div class="dashboard-columns">
+        <div class="dashboard-section">
+            <h2>Recent Contact Submissions</h2>
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>From</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for contact in recent_contacts %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'admin:blog_admin_contactsubmission_change' contact.pk %}">
+                                {{ contact.subject|truncatewords:8 }}
+                            </a>
+                        </td>
+                        <td>{{ contact.name }}</td>
+                        <td>
+                            {% if contact.is_read %}
+                                <span class="status-approved">Read</span>
+                            {% else %}
+                                <span class="status-pending">Unread</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ contact.created_at|date:"M d, H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
 
     <div class="dashboard-columns">
         <!-- Recent Posts -->

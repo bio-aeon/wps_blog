@@ -6,3 +6,8 @@ from blog_admin.models.comment import Comment
 from blog_admin.models.comment_rater import CommentRater
 from blog_admin.models.page import Page
 from blog_admin.models.config import Config
+from blog_admin.models.skill import Skill
+from blog_admin.models.experience import Experience
+from blog_admin.models.social_link import SocialLink
+from blog_admin.models.contact_submission import ContactSubmission
+from blog_admin.models.testimonial import Testimonial

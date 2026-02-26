@@ -3,6 +3,7 @@ from django.test import TestCase
 
 from blog_admin.models import (
     User, Post, Tag, PostTag, Comment, CommentRater, Page, Config,
+    Skill, Experience, SocialLink, ContactSubmission, Testimonial,
 )
 
 
@@ -62,6 +63,64 @@ class ConfigModelTest(TestCase):
     def test_str_format(self):
         config = Config(name='site_title', value='My Blog', comment='Title')
         self.assertEqual(str(config), 'site_title = My Blog')
+
+
+class SkillModelTest(TestCase):
+    def test_str_shows_name_and_category(self):
+        skill = Skill(name='Rust', slug='rust', category='Languages')
+        self.assertEqual(str(skill), 'Rust (Languages)')
+
+
+class ExperienceModelTest(TestCase):
+    def test_str_with_end_date(self):
+        from datetime import date
+        exp = Experience(
+            position='Engineer', company='Acme',
+            start_date=date(2020, 1, 1), end_date=date(2023, 6, 30),
+            description='Built things'
+        )
+        self.assertEqual(str(exp), 'Engineer at Acme (2020-01-01 – 2023-06-30)')
+
+    def test_str_without_end_date(self):
+        from datetime import date
+        exp = Experience(
+            position='Engineer', company='Acme',
+            start_date=date(2020, 1, 1), end_date=None,
+            description='Building things'
+        )
+        self.assertEqual(str(exp), 'Engineer at Acme (2020-01-01 – Present)')
+
+
+class SocialLinkModelTest(TestCase):
+    def test_str_with_label(self):
+        link = SocialLink(platform='github', url='https://github.com/user', label='GitHub')
+        self.assertEqual(str(link), 'github: GitHub')
+
+    def test_str_without_label(self):
+        link = SocialLink(platform='github', url='https://github.com/user')
+        self.assertEqual(str(link), 'github: https://github.com/user')
+
+
+class ContactSubmissionModelTest(TestCase):
+    def test_str_shows_subject_and_name(self):
+        submission = ContactSubmission(
+            name='Alice', email='alice@test.com',
+            subject='Hello', message='Hi there'
+        )
+        self.assertEqual(str(submission), 'Hello (from Alice)')
+
+
+class TestimonialModelTest(TestCase):
+    def test_str_with_company(self):
+        testimonial = Testimonial(
+            author_name='Bob', author_company='Acme',
+            quote='Great engineer'
+        )
+        self.assertEqual(str(testimonial), 'Bob (Acme)')
+
+    def test_str_without_company(self):
+        testimonial = Testimonial(author_name='Bob', quote='Great engineer')
+        self.assertEqual(str(testimonial), 'Bob')
 
 
 class AllModelsUnmanagedTest(TestCase):

@@ -3,8 +3,11 @@ from django.test import TestCase
 from django.urls import reverse
 from model_bakery import baker
 
-from blog_admin.admin import PostAdmin, CommentAdmin
-from blog_admin.models import User, Post, Tag, PostTag, Comment, Page
+from blog_admin.admin import PostAdmin, CommentAdmin, ExperienceAdmin, TestimonialAdmin
+from blog_admin.models import (
+    User, Post, Tag, PostTag, Comment, Page,
+    Skill, Experience, SocialLink, ContactSubmission, Testimonial,
+)
 
 
 class UserAdminTest(TestCase):
@@ -148,3 +151,103 @@ class ConfigAdminTest(TestCase):
     def test_config_changelist_loads(self):
         response = self.client.get(reverse('admin:blog_admin_config_changelist'))
         self.assertEqual(response.status_code, 200)
+
+
+class SkillAdminTest(TestCase):
+    def setUp(self):
+        self.admin_user = User.objects.create_superuser('admin', 'a@b.com', 'pass')
+        self.client.force_login(self.admin_user)
+
+    def test_skill_changelist_loads(self):
+        response = self.client.get(reverse('admin:blog_admin_skill_changelist'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_skill_add_creates_skill(self):
+        response = self.client.post(reverse('admin:blog_admin_skill_add'), {
+            'name': 'Rust',
+            'slug': 'rust',
+            'category': 'Languages',
+            'proficiency': 85,
+            'sort_order': 0,
+            'is_active': True,
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Skill.objects.filter(slug='rust').exists())
+
+
+class ExperienceAdminTest(TestCase):
+    def setUp(self):
+        self.admin_user = User.objects.create_superuser('admin', 'a@b.com', 'pass')
+        self.client.force_login(self.admin_user)
+
+    def test_experience_changelist_loads(self):
+        response = self.client.get(reverse('admin:blog_admin_experience_changelist'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_is_current_true_when_no_end_date(self):
+        from datetime import date
+        exp = Experience(
+            company='Acme', position='Engineer', description='Work',
+            start_date=date(2020, 1, 1), end_date=None,
+        )
+        admin_instance = ExperienceAdmin(Experience, admin.site)
+        self.assertTrue(admin_instance.is_current(exp))
+
+    def test_is_current_false_when_end_date_set(self):
+        from datetime import date
+        exp = Experience(
+            company='Acme', position='Engineer', description='Work',
+            start_date=date(2020, 1, 1), end_date=date(2023, 1, 1),
+        )
+        admin_instance = ExperienceAdmin(Experience, admin.site)
+        self.assertFalse(admin_instance.is_current(exp))
+
+
+class SocialLinkAdminTest(TestCase):
+    def setUp(self):
+        self.admin_user = User.objects.create_superuser('admin', 'a@b.com', 'pass')
+        self.client.force_login(self.admin_user)
+
+    def test_sociallink_changelist_loads(self):
+        response = self.client.get(reverse('admin:blog_admin_sociallink_changelist'))
+        self.assertEqual(response.status_code, 200)
+
+
+class ContactSubmissionAdminTest(TestCase):
+    def setUp(self):
+        self.admin_user = User.objects.create_superuser('admin', 'a@b.com', 'pass')
+        self.client.force_login(self.admin_user)
+
+    def test_contactsubmission_changelist_loads(self):
+        response = self.client.get(reverse('admin:blog_admin_contactsubmission_changelist'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_contactsubmission_add_permission_denied(self):
+        response = self.client.get(reverse('admin:blog_admin_contactsubmission_add'))
+        self.assertEqual(response.status_code, 403)
+
+
+class TestimonialAdminTest(TestCase):
+    def setUp(self):
+        self.admin_user = User.objects.create_superuser('admin', 'a@b.com', 'pass')
+        self.client.force_login(self.admin_user)
+
+    def test_testimonial_changelist_loads(self):
+        response = self.client.get(reverse('admin:blog_admin_testimonial_changelist'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_short_quote_truncates(self):
+        testimonial = Testimonial(
+            author_name='Bob', quote='x' * 100
+        )
+        admin_instance = TestimonialAdmin(Testimonial, admin.site)
+        display = admin_instance.short_quote(testimonial)
+        self.assertEqual(len(display), 83)
+        self.assertTrue(display.endswith('...'))
+
+    def test_short_quote_no_truncation(self):
+        testimonial = Testimonial(
+            author_name='Bob', quote='Short quote'
+        )
+        admin_instance = TestimonialAdmin(Testimonial, admin.site)
+        self.assertEqual(admin_instance.short_quote(testimonial), 'Short quote')

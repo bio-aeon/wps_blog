@@ -2,7 +2,10 @@ from django.contrib import admin
 from django.db.models import Count
 from django.utils.html import format_html
 
-from blog_admin.models import User, Post, Tag, PostTag, Comment, Page, Config
+from blog_admin.models import (
+    User, Post, Tag, PostTag, Comment, Page, Config,
+    Skill, Experience, SocialLink, ContactSubmission, Testimonial,
+)
 from blog_admin.forms import PostAdminForm, PageAdminForm
 
 
@@ -190,3 +193,86 @@ class ConfigAdmin(admin.ModelAdmin):
     search_fields = ('name', 'value', 'comment')
     readonly_fields = ('created_at',)
     ordering = ('name',)
+
+
+# -- Skill Admin --------------------------------------------------------------
+
+@admin.register(Skill)
+class SkillAdmin(admin.ModelAdmin):
+    list_display = ('name', 'category', 'proficiency', 'sort_order', 'is_active')
+    list_filter = ('category', 'is_active')
+    list_editable = ('sort_order', 'is_active', 'proficiency')
+    search_fields = ('name', 'category')
+    prepopulated_fields = {'slug': ('name',)}
+    ordering = ('sort_order', 'name')
+
+
+# -- Experience Admin ----------------------------------------------------------
+
+@admin.register(Experience)
+class ExperienceAdmin(admin.ModelAdmin):
+    list_display = ('position', 'company', 'start_date', 'end_date', 'is_current', 'sort_order', 'is_active')
+    list_filter = ('is_active',)
+    list_editable = ('sort_order', 'is_active')
+    search_fields = ('company', 'position')
+    ordering = ('sort_order', '-start_date')
+    fieldsets = (
+        (None, {'fields': ('company', 'position', 'description')}),
+        ('Dates & Location', {'fields': ('start_date', 'end_date', 'location', 'company_url')}),
+        ('Display', {'fields': ('sort_order', 'is_active')}),
+    )
+
+    @admin.display(boolean=True, description='Current')
+    def is_current(self, obj):
+        return obj.end_date is None
+
+
+# -- Social Link Admin ---------------------------------------------------------
+
+@admin.register(SocialLink)
+class SocialLinkAdmin(admin.ModelAdmin):
+    list_display = ('platform', 'label', 'url', 'sort_order', 'is_active')
+    list_filter = ('platform', 'is_active')
+    list_editable = ('sort_order', 'is_active')
+    ordering = ('sort_order',)
+
+
+# -- Contact Submission Admin --------------------------------------------------
+
+@admin.register(ContactSubmission)
+class ContactSubmissionAdmin(admin.ModelAdmin):
+    list_display = ('subject', 'name', 'email', 'is_read', 'created_at')
+    list_filter = ('is_read',)
+    search_fields = ('name', 'email', 'subject', 'message')
+    readonly_fields = ('name', 'email', 'subject', 'message', 'ip_address', 'created_at')
+    list_per_page = 30
+    actions = ['mark_as_read', 'mark_as_unread']
+    date_hierarchy = 'created_at'
+
+    def has_add_permission(self, request):
+        return False
+
+    @admin.action(description='Mark selected submissions as read')
+    def mark_as_read(self, request, queryset):
+        queryset.update(is_read=True)
+
+    @admin.action(description='Mark selected submissions as unread')
+    def mark_as_unread(self, request, queryset):
+        queryset.update(is_read=False)
+
+
+# -- Testimonial Admin ---------------------------------------------------------
+
+@admin.register(Testimonial)
+class TestimonialAdmin(admin.ModelAdmin):
+    list_display = ('author_name', 'author_company', 'short_quote', 'sort_order', 'is_active')
+    list_filter = ('is_active',)
+    list_editable = ('sort_order', 'is_active')
+    search_fields = ('author_name', 'author_company', 'quote')
+    ordering = ('sort_order',)
+
+    @admin.display(description='Quote')
+    def short_quote(self, obj):
+        if len(obj.quote) > 80:
+            return obj.quote[:80] + '...'
+        return obj.quote

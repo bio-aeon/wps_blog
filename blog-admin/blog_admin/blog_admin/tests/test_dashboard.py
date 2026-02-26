@@ -2,7 +2,10 @@ from django.test import TestCase
 from django.urls import reverse
 from model_bakery import baker
 
-from blog_admin.models import User, Post, Tag, PostTag, Comment
+from blog_admin.models import (
+    User, Post, Tag, PostTag, Comment,
+    Skill, Experience, SocialLink, Testimonial, ContactSubmission,
+)
 
 
 class DashboardViewTest(TestCase):
@@ -68,6 +71,53 @@ class DashboardViewTest(TestCase):
         PostTag.objects.create(post=post, tag=tag)
         response = self.client.get(reverse('admin-dashboard'))
         self.assertContains(response, 'Rust')
+
+    def test_dashboard_shows_skill_count(self):
+        Skill.objects.create(name='Rust', slug='rust', category='Languages', proficiency=80)
+        Skill.objects.create(name='Python', slug='python', category='Languages', proficiency=90)
+        Skill.objects.create(name='Old', slug='old', category='Legacy', is_active=False)
+        response = self.client.get(reverse('admin-dashboard'))
+        context = response.context
+        self.assertEqual(context['skill_count'], 2)
+
+    def test_dashboard_shows_experience_count(self):
+        from datetime import date
+        Experience.objects.create(
+            company='Acme', position='Engineer', description='Work',
+            start_date=date(2020, 1, 1)
+        )
+        response = self.client.get(reverse('admin-dashboard'))
+        self.assertEqual(response.context['experience_count'], 1)
+
+    def test_dashboard_shows_social_link_count(self):
+        SocialLink.objects.create(platform='github', url='https://github.com/user')
+        response = self.client.get(reverse('admin-dashboard'))
+        self.assertEqual(response.context['social_link_count'], 1)
+
+    def test_dashboard_shows_testimonial_count(self):
+        Testimonial.objects.create(author_name='Alice', quote='Great')
+        response = self.client.get(reverse('admin-dashboard'))
+        self.assertEqual(response.context['testimonial_count'], 1)
+
+    def test_dashboard_shows_unread_contacts(self):
+        ContactSubmission.objects.create(
+            name='Alice', email='a@b.com', subject='Hello',
+            message='Hi there', is_read=False
+        )
+        ContactSubmission.objects.create(
+            name='Bob', email='b@b.com', subject='Question',
+            message='Got a question', is_read=True
+        )
+        response = self.client.get(reverse('admin-dashboard'))
+        self.assertEqual(response.context['unread_contacts'], 1)
+
+    def test_dashboard_shows_recent_contacts(self):
+        ContactSubmission.objects.create(
+            name='Alice', email='a@b.com', subject='Hello',
+            message='Hi there'
+        )
+        response = self.client.get(reverse('admin-dashboard'))
+        self.assertContains(response, 'Alice')
 
     def test_dashboard_handles_empty_state(self):
         response = self.client.get(reverse('admin-dashboard'))
