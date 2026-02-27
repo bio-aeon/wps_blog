@@ -13,7 +13,6 @@ final class AboutServiceImpl[F[_]: Monad, DB[_]: Monad] private (
   skillRepo: SkillRepository[DB],
   experienceRepo: ExperienceRepository[DB],
   socialLinkRepo: SocialLinkRepository[DB],
-  testimonialRepo: TestimonialRepository[DB],
   configRepo: ConfigRepository[DB],
   pageRepo: PageRepository[DB],
   xa: Txr[F, DB]
@@ -31,10 +30,9 @@ final class AboutServiceImpl[F[_]: Monad, DB[_]: Monad] private (
       skillRepo.findAllActive,
       experienceRepo.findAllActive,
       socialLinkRepo.findAllActive,
-      testimonialRepo.findAllActive,
       configRepo.findByNames(ProfileConfigNames),
       pageRepo.findByUrl("about")
-    ).mapN { (skills, experiences, socialLinks, testimonials, configs, aboutPage) =>
+    ).mapN { (skills, experiences, socialLinks, configs, aboutPage) =>
       val configMap = configs.map(c => c.name -> c.value).toMap
       val profile = ProfileResult(
         name = configMap.getOrElse("profile_name", ""),
@@ -47,8 +45,7 @@ final class AboutServiceImpl[F[_]: Monad, DB[_]: Monad] private (
         profile = profile,
         skills = groupSkillsByCategory(skills),
         experiences = experiences.map(transformExperience),
-        socialLinks = socialLinks.map(transformSocialLink),
-        testimonials = testimonials.map(transformTestimonial)
+        socialLinks = socialLinks.map(transformSocialLink)
       )
     }
 
@@ -80,11 +77,6 @@ final class AboutServiceImpl[F[_]: Monad, DB[_]: Monad] private (
     link: su.wps.blog.models.domain.SocialLink
   ): SocialLinkResult =
     link.into[SocialLinkResult].withFieldComputed(_.id, _.nonEmptyId).transform
-
-  private def transformTestimonial(
-    t: su.wps.blog.models.domain.Testimonial
-  ): TestimonialResult =
-    t.into[TestimonialResult].withFieldComputed(_.id, _.nonEmptyId).transform
 }
 
 object AboutServiceImpl {
@@ -92,7 +84,6 @@ object AboutServiceImpl {
     skillRepo: SkillRepository[DB],
     experienceRepo: ExperienceRepository[DB],
     socialLinkRepo: SocialLinkRepository[DB],
-    testimonialRepo: TestimonialRepository[DB],
     configRepo: ConfigRepository[DB],
     pageRepo: PageRepository[DB],
     xa: Txr[F, DB]
@@ -101,7 +92,6 @@ object AboutServiceImpl {
       skillRepo,
       experienceRepo,
       socialLinkRepo,
-      testimonialRepo,
       configRepo,
       pageRepo,
       xa

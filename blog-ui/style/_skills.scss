@@ -1,0 +1,71 @@
+@use "variables" as *;
+
+.skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: $space-8;
+
+    @media (max-width: $bp-sm) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.skill-group {
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $border-radius;
+    padding: $space-6;
+}
+
+.skill-group-title {
+    font-size: $font-size-lg;
+    color: $color-purple;
+    margin: 0 0 $space-4;
+}
+
+.skill-group-items {
+    display: flex;
+    flex-direction: column;
+    gap: $space-3;
+}
+
+.skill-bar {
+    // Individual skill item
+}
+
+.skill-bar-header {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    margin-bottom: $space-1;
+}
+
+.skill-icon {
+    font-size: $font-size-sm;
+}
+
+.skill-name {
+    flex: 1;
+    font-size: $font-size-sm;
+    color: $color-text-bright;
+}
+
+.skill-percent {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    font-family: $font-mono;
+}
+
+.skill-bar-track {
+    height: 6px;
+    background: $color-bg;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.skill-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, $color-blue, $color-cyan);
+    border-radius: 3px;
+    transition: width 0.6s ease;
+}

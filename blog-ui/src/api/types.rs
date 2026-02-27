@@ -108,3 +108,82 @@ pub struct HealthResponse {
     pub database: String,
     pub timestamp: String,
 }
+
+// --- Skills ---
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct SkillResult {
+    pub id: i32,
+    pub name: String,
+    pub slug: String,
+    pub category: String,
+    pub proficiency: i32,
+    pub icon: Option<String>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct SkillCategoryResult {
+    pub category: String,
+    pub skills: Vec<SkillResult>,
+}
+
+// --- Experiences ---
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct ExperienceResult {
+    pub id: i32,
+    pub company: String,
+    pub position: String,
+    pub description: String,
+    pub start_date: String,
+    pub end_date: Option<String>,
+    pub location: Option<String>,
+    pub company_url: Option<String>,
+}
+
+// --- Social Links ---
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct SocialLinkResult {
+    pub id: i32,
+    pub platform: String,
+    pub url: String,
+    pub label: Option<String>,
+    pub icon: Option<String>,
+}
+
+// --- Contact ---
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct CreateContactRequest {
+    pub name: String,
+    pub email: String,
+    pub subject: String,
+    pub message: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub website: Option<String>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct ContactResponse {
+    pub message: String,
+}
+
+// --- About (aggregated) ---
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct ProfileResult {
+    pub name: String,
+    pub title: String,
+    pub photo_url: String,
+    pub resume_url: String,
+    pub bio: String,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct AboutResult {
+    pub profile: ProfileResult,
+    pub skills: Vec<SkillCategoryResult>,
+    pub experiences: Vec<ExperienceResult>,
+    pub social_links: Vec<SocialLinkResult>,
+}

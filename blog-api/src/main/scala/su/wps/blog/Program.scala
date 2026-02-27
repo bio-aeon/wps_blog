@@ -44,7 +44,6 @@ object Program {
           val experienceRepo = ExperienceRepositoryImpl.create[xa.DB]
           val socialLinkRepo = SocialLinkRepositoryImpl.create[xa.DB]
           val contactRepo = ContactSubmissionRepositoryImpl.create[xa.DB]
-          val testimonialRepo = TestimonialRepositoryImpl.create[xa.DB]
           val configRepo = ConfigRepositoryImpl.create[xa.DB]
           val postService = PostServiceImpl.create[F, xa.DB](postRepo, tagRepo, xa)
           val commentService = CommentServiceImpl.create[F, xa.DB](commentRepo, xa)
@@ -55,18 +54,16 @@ object Program {
           val socialLinkService = SocialLinkServiceImpl.create[F, xa.DB](socialLinkRepo, xa)
           val contactService =
             ContactServiceImpl.create[F, xa.DB](contactRepo, configRepo, xa)
-          val testimonialService =
-            TestimonialServiceImpl.create[F, xa.DB](testimonialRepo, xa)
           val aboutService = AboutServiceImpl.create[F, xa.DB](
             skillRepo, experienceRepo, socialLinkRepo,
-            testimonialRepo, configRepo, pageRepo, xa
+            configRepo, pageRepo, xa
           )
           val dbCheck = xa.trans(doobie.FC.isValid(1)).handleError(_ => false)
           val healthService = HealthServiceImpl.create[F](dbCheck)
           RoutesImpl.create[F](
             postService, commentService, tagService, pageService, healthService,
             skillService, experienceService, socialLinkService,
-            contactService, testimonialService, aboutService
+            contactService, aboutService
           )
         }
         routesWithErrorHandling = ErrorHandler(routes.routes)

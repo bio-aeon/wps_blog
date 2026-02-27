@@ -1,0 +1,27 @@
+@use "variables" as *;
+
+.about-page {
+    max-width: 800px;
+}
+
+.about-bio {
+    margin-bottom: $space-8;
+    line-height: $line-height-base;
+    color: $color-text;
+
+    p {
+        margin-bottom: $space-4;
+    }
+}
+
+.about-section {
+    margin-bottom: $space-12;
+}
+
+.about-section-title {
+    font-size: 1.5rem;
+    color: $color-text-bright;
+    margin-bottom: $space-6;
+    padding-bottom: $space-2;
+    border-bottom: 1px solid $color-border;
+}

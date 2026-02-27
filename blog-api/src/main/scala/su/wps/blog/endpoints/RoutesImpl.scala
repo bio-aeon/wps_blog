@@ -26,7 +26,6 @@ final class RoutesImpl[F[_]: Concurrent] private (
   experienceService: ExperienceService[F],
   socialLinkService: SocialLinkService[F],
   contactService: ContactService[F],
-  testimonialService: TestimonialService[F],
   aboutService: AboutService[F]
 ) extends Http4sDsl[F]
     with Routes[F] {
@@ -105,9 +104,6 @@ final class RoutesImpl[F[_]: Concurrent] private (
 
     case GET -> Root / "social-links" =>
       socialLinkService.getSocialLinks.map(_.asJson).flatMap(Ok(_))
-
-    case GET -> Root / "testimonials" =>
-      testimonialService.getTestimonials.map(_.asJson).flatMap(Ok(_))
 
     case req @ POST -> Root / "contact" =>
       val ip = extractIp(req)
@@ -190,7 +186,6 @@ object RoutesImpl {
     experienceService: ExperienceService[F],
     socialLinkService: SocialLinkService[F],
     contactService: ContactService[F],
-    testimonialService: TestimonialService[F],
     aboutService: AboutService[F]
   ): RoutesImpl[F] =
     new RoutesImpl[F](
@@ -203,7 +198,6 @@ object RoutesImpl {
       experienceService,
       socialLinkService,
       contactService,
-      testimonialService,
       aboutService
     )
 }

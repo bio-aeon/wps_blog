@@ -1,0 +1,60 @@
+@use "variables" as *;
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: $space-8;
+    margin-bottom: $space-8;
+
+    @media (max-width: $bp-md) {
+        flex-direction: column;
+        text-align: center;
+        gap: $space-6;
+    }
+}
+
+.profile-photo {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid $color-border;
+    flex-shrink: 0;
+
+    @media (max-width: $bp-md) {
+        width: 120px;
+        height: 120px;
+    }
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-name {
+    font-size: 2.25rem;
+    color: $color-text-bright;
+    margin: 0 0 $space-2;
+    line-height: $line-height-tight;
+}
+
+.profile-title {
+    font-size: $font-size-lg;
+    color: $color-text-muted;
+    margin: 0 0 $space-4;
+}
+
+.profile-resume-link {
+    display: inline-block;
+    padding: $space-2 $space-6;
+    background: $color-primary;
+    color: $color-bg;
+    border-radius: $border-radius;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background $transition-fast;
+
+    &:hover {
+        background: $color-primary-hover;
+    }
+}

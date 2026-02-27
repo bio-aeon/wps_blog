@@ -57,7 +57,7 @@ pub fn Sidebar() -> impl IntoView {
             <p class="sidebar-about">
                 "A personal blog about software engineering, technology, and more."
             </p>
-            <a href="/pages/about" class="sidebar-about-link">"Read more"</a>
+            <a href="/about" class="sidebar-about-link">"Read more"</a>
         </div>
     }
 }

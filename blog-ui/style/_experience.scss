@@ -1,0 +1,88 @@
+@use "variables" as *;
+
+.experience-timeline {
+    position: relative;
+    padding-left: $space-8;
+
+    &::before {
+        content: "";
+        position: absolute;
+        left: 7px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: $color-border;
+    }
+}
+
+.timeline-item {
+    position: relative;
+    padding-bottom: $space-8;
+
+    &:last-child {
+        padding-bottom: 0;
+    }
+}
+
+.timeline-marker {
+    position: absolute;
+    left: calc(-#{$space-8} + 3px);
+    top: 6px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: $color-blue;
+    border: 2px solid $color-bg;
+}
+
+.timeline-content {
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $border-radius;
+    padding: $space-6;
+}
+
+.timeline-position {
+    font-size: $font-size-lg;
+    color: $color-text-bright;
+    margin: 0 0 $space-1;
+}
+
+.timeline-company {
+    color: $color-text;
+    margin-bottom: $space-1;
+
+    a {
+        color: $color-blue;
+        text-decoration: none;
+        transition: color $transition-fast;
+
+        &:hover {
+            color: $color-cyan;
+        }
+    }
+}
+
+.timeline-location {
+    color: $color-text-muted;
+}
+
+.timeline-date {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    font-family: $font-mono;
+    margin-bottom: $space-3;
+}
+
+.timeline-description {
+    color: $color-text;
+    line-height: $line-height-base;
+
+    p {
+        margin-bottom: $space-2;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+}

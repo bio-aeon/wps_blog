@@ -4,7 +4,7 @@ from django.utils.html import format_html
 
 from blog_admin.models import (
     User, Post, Tag, PostTag, Comment, Page, Config,
-    Skill, Experience, SocialLink, ContactSubmission, Testimonial,
+    Skill, Experience, SocialLink, ContactSubmission,
 )
 from blog_admin.forms import PostAdminForm, PageAdminForm
 
@@ -260,19 +260,3 @@ class ContactSubmissionAdmin(admin.ModelAdmin):
     def mark_as_unread(self, request, queryset):
         queryset.update(is_read=False)
 
-
-# -- Testimonial Admin ---------------------------------------------------------
-
-@admin.register(Testimonial)
-class TestimonialAdmin(admin.ModelAdmin):
-    list_display = ('author_name', 'author_company', 'short_quote', 'sort_order', 'is_active')
-    list_filter = ('is_active',)
-    list_editable = ('sort_order', 'is_active')
-    search_fields = ('author_name', 'author_company', 'quote')
-    ordering = ('sort_order',)
-
-    @admin.display(description='Quote')
-    def short_quote(self, obj):
-        if len(obj.quote) > 80:
-            return obj.quote[:80] + '...'
-        return obj.quote

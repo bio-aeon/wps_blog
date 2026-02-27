@@ -3,7 +3,7 @@ from django.test import TestCase
 
 from blog_admin.models import (
     User, Post, Tag, PostTag, Comment, CommentRater, Page, Config,
-    Skill, Experience, SocialLink, ContactSubmission, Testimonial,
+    Skill, Experience, SocialLink, ContactSubmission,
 )
 
 
@@ -109,18 +109,6 @@ class ContactSubmissionModelTest(TestCase):
         )
         self.assertEqual(str(submission), 'Hello (from Alice)')
 
-
-class TestimonialModelTest(TestCase):
-    def test_str_with_company(self):
-        testimonial = Testimonial(
-            author_name='Bob', author_company='Acme',
-            quote='Great engineer'
-        )
-        self.assertEqual(str(testimonial), 'Bob (Acme)')
-
-    def test_str_without_company(self):
-        testimonial = Testimonial(author_name='Bob', quote='Great engineer')
-        self.assertEqual(str(testimonial), 'Bob')
 
 
 class AllModelsUnmanagedTest(TestCase):

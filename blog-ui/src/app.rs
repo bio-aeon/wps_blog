@@ -43,6 +43,8 @@ pub fn App() -> impl IntoView {
                         <Route path=path!("/tags") view=TagListPage/>
                         <Route path=path!("/tags/:slug") view=TagPostsPage/>
                         <Route path=path!("/pages/:url") view=StaticPageView/>
+                        <Route path=path!("/about") view=AboutPage/>
+                        <Route path=path!("/contact") view=ContactPage/>
                         <Route path=path!("/search") view=SearchPage/>
                     </Routes>
                 </main>

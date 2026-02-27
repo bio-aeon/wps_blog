@@ -1,0 +1,60 @@
+@use "variables" as *;
+
+.social-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-3;
+}
+
+.social-link {
+    display: inline-block;
+    padding: $space-2 $space-4;
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $border-radius;
+    color: $color-text;
+    text-decoration: none;
+    font-size: $font-size-sm;
+    font-weight: 600;
+    transition: all $transition-fast;
+
+    &:hover {
+        border-color: $color-blue;
+        color: $color-text-bright;
+    }
+
+    &-github:hover {
+        border-color: $color-text-bright;
+        color: $color-text-bright;
+    }
+
+    &-linkedin:hover {
+        border-color: $color-blue;
+        color: $color-blue;
+    }
+
+    &-twitter:hover {
+        border-color: $color-cyan;
+        color: $color-cyan;
+    }
+
+    &-email:hover {
+        border-color: $color-green;
+        color: $color-green;
+    }
+
+    &-mastodon:hover {
+        border-color: $color-purple;
+        color: $color-purple;
+    }
+
+    &-stackoverflow:hover {
+        border-color: $color-orange;
+        color: $color-orange;
+    }
+
+    &-website:hover {
+        border-color: $color-cyan;
+        color: $color-cyan;
+    }
+}

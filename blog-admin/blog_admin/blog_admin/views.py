@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from blog_admin.models import (
     Post, Comment, Tag, Page, User,
-    Skill, Experience, SocialLink, Testimonial, ContactSubmission,
+    Skill, Experience, SocialLink, ContactSubmission,
 )
 
 
@@ -36,7 +36,6 @@ def dashboard_view(request):
     skill_count = Skill.objects.filter(is_active=True).count()
     experience_count = Experience.objects.filter(is_active=True).count()
     social_link_count = SocialLink.objects.filter(is_active=True).count()
-    testimonial_count = Testimonial.objects.filter(is_active=True).count()
     unread_contacts = ContactSubmission.objects.filter(is_read=False).count()
     recent_contacts = ContactSubmission.objects.order_by('-created_at')[:5]
 
@@ -58,7 +57,6 @@ def dashboard_view(request):
         'skill_count': skill_count,
         'experience_count': experience_count,
         'social_link_count': social_link_count,
-        'testimonial_count': testimonial_count,
         'unread_contacts': unread_contacts,
         'recent_contacts': recent_contacts,
     }

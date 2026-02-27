@@ -10,4 +10,3 @@ from blog_admin.models.skill import Skill
 from blog_admin.models.experience import Experience
 from blog_admin.models.social_link import SocialLink
 from blog_admin.models.contact_submission import ContactSubmission
-from blog_admin.models.testimonial import Testimonial

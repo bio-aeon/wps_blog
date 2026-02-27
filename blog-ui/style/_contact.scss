@@ -1,0 +1,112 @@
+@use "variables" as *;
+
+.contact-page {
+    max-width: 600px;
+
+    h1 {
+        color: $color-text-bright;
+        margin-bottom: $space-2;
+    }
+}
+
+.contact-intro {
+    color: $color-text-muted;
+    margin-bottom: $space-8;
+}
+
+.contact-form {
+    .form-group {
+        margin-bottom: $space-4;
+
+        label {
+            display: block;
+            margin-bottom: $space-1;
+            color: $color-text-bright;
+            font-size: $font-size-sm;
+            font-weight: 600;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: $space-3;
+            background: $color-surface;
+            border: 1px solid $color-border;
+            border-radius: $border-radius-sm;
+            color: $color-text;
+            font-size: $font-size-base;
+            font-family: $font-sans;
+            transition: border-color $transition-fast;
+
+            &:focus {
+                outline: none;
+                border-color: $color-blue;
+            }
+
+            &::placeholder {
+                color: $color-text-muted;
+            }
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .field-error {
+            display: block;
+            margin-top: $space-1;
+            font-size: $font-size-sm;
+            color: $color-error;
+        }
+    }
+}
+
+.contact-honeypot {
+    position: absolute;
+    left: -9999px;
+    opacity: 0;
+    height: 0;
+    width: 0;
+    overflow: hidden;
+}
+
+.contact-submit {
+    display: inline-block;
+    padding: $space-3 $space-8;
+    background: $color-primary;
+    color: $color-bg;
+    border: none;
+    border-radius: $border-radius;
+    font-size: $font-size-base;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background $transition-fast;
+
+    &:hover:not(:disabled) {
+        background: $color-primary-hover;
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+}
+
+.contact-success {
+    padding: $space-4;
+    background: rgba($color-green, 0.1);
+    border: 1px solid $color-green;
+    border-radius: $border-radius;
+    color: $color-green;
+    margin-bottom: $space-6;
+}
+
+.contact-form-error {
+    padding: $space-4;
+    background: rgba($color-red, 0.1);
+    border: 1px solid $color-red;
+    border-radius: $border-radius;
+    color: $color-red;
+    margin-bottom: $space-6;
+}

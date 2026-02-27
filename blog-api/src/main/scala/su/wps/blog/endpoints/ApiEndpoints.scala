@@ -182,14 +182,6 @@ object ApiEndpoints {
       .description("Get all active social/platform links.")
       .tag(profileTag)
 
-  val getTestimonials: AnyEndpoint =
-    endpoint.get
-      .in(v1 / "testimonials")
-      .out(jsonBody[List[TestimonialResult]])
-      .summary("List testimonials")
-      .description("Get all active testimonials and recommendations.")
-      .tag(profileTag)
-
   val submitContact: AnyEndpoint =
     endpoint.post
       .in(v1 / "contact")
@@ -208,7 +200,7 @@ object ApiEndpoints {
       .out(jsonBody[AboutResult])
       .summary("Get about page")
       .description(
-        "Get aggregated about page data: profile, skills, experiences, social links, testimonials."
+        "Get aggregated about page data: profile, skills, experiences, social links."
       )
       .tag(profileTag)
 
@@ -229,7 +221,6 @@ object ApiEndpoints {
     getSkills,
     getExperiences,
     getSocialLinks,
-    getTestimonials,
     submitContact,
     getAbout
   )

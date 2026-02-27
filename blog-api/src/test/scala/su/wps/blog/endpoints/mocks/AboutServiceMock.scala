@@ -11,7 +11,6 @@ object AboutServiceMock {
       ProfileResult("", "", "", "", ""),
       Nil,
       Nil,
-      Nil,
       Nil
     )
   ): AboutService[F] = new AboutService[F] {

@@ -647,7 +647,7 @@ class RoutesSpec extends Specification {
       postService, commentService, tagService, pageService, healthService,
       SkillServiceMock.create[F](), ExperienceServiceMock.create[F](),
       SocialLinkServiceMock.create[F](), ContactServiceMock.create[F](),
-      TestimonialServiceMock.create[F](), AboutServiceMock.create[F]()
+      AboutServiceMock.create[F]()
     )
   }
 
@@ -676,7 +676,7 @@ class RoutesSpec extends Specification {
       postService, commentService, tagService, pageService, healthService,
       SkillServiceMock.create[F](), ExperienceServiceMock.create[F](),
       SocialLinkServiceMock.create[F](), ContactServiceMock.create[F](),
-      TestimonialServiceMock.create[F](), AboutServiceMock.create[F]()
+      AboutServiceMock.create[F]()
     )
   }
 
@@ -708,7 +708,7 @@ class RoutesSpec extends Specification {
       postService, commentService, tagService, pageService, healthService,
       SkillServiceMock.create[F](), ExperienceServiceMock.create[F](),
       SocialLinkServiceMock.create[F](), ContactServiceMock.create[F](),
-      TestimonialServiceMock.create[F](), AboutServiceMock.create[F]()
+      AboutServiceMock.create[F]()
     )
   }
 
@@ -723,7 +723,7 @@ class RoutesSpec extends Specification {
       postService, commentService, tagService, pageService, healthService,
       SkillServiceMock.create[F](), ExperienceServiceMock.create[F](),
       SocialLinkServiceMock.create[F](), ContactServiceMock.create[F](),
-      TestimonialServiceMock.create[F](), AboutServiceMock.create[F]()
+      AboutServiceMock.create[F]()
     )
   }
 
@@ -755,7 +755,7 @@ class RoutesSpec extends Specification {
       postService, commentService, tagService, pageService, healthService,
       SkillServiceMock.create[F](), ExperienceServiceMock.create[F](),
       SocialLinkServiceMock.create[F](), ContactServiceMock.create[F](),
-      TestimonialServiceMock.create[F](), AboutServiceMock.create[F]()
+      AboutServiceMock.create[F]()
     )
   }
 
@@ -770,7 +770,7 @@ class RoutesSpec extends Specification {
       postService, commentService, tagService, pageService, healthService,
       SkillServiceMock.create[F](), ExperienceServiceMock.create[F](),
       SocialLinkServiceMock.create[F](), ContactServiceMock.create[F](),
-      TestimonialServiceMock.create[F](), AboutServiceMock.create[F]()
+      AboutServiceMock.create[F]()
     )
   }
 
@@ -801,7 +801,7 @@ class RoutesSpec extends Specification {
       postService, commentService, tagService, pageService, healthService,
       SkillServiceMock.create[F](), ExperienceServiceMock.create[F](),
       SocialLinkServiceMock.create[F](), ContactServiceMock.create[F](),
-      TestimonialServiceMock.create[F](), AboutServiceMock.create[F]()
+      AboutServiceMock.create[F]()
     )
   }
 
@@ -816,7 +816,7 @@ class RoutesSpec extends Specification {
       postService, commentService, tagService, pageService, healthService,
       SkillServiceMock.create[F](), ExperienceServiceMock.create[F](),
       SocialLinkServiceMock.create[F](), ContactServiceMock.create[F](),
-      TestimonialServiceMock.create[F](), AboutServiceMock.create[F]()
+      AboutServiceMock.create[F]()
     )
   }
 
@@ -839,7 +839,7 @@ class RoutesSpec extends Specification {
       postService, commentService, tagService, pageService, healthService,
       SkillServiceMock.create[F](), ExperienceServiceMock.create[F](),
       SocialLinkServiceMock.create[F](), ContactServiceMock.create[F](),
-      TestimonialServiceMock.create[F](), AboutServiceMock.create[F]()
+      AboutServiceMock.create[F]()
     )
   }
 
@@ -854,7 +854,7 @@ class RoutesSpec extends Specification {
       postService, commentService, tagService, pageService, healthService,
       SkillServiceMock.create[F](), ExperienceServiceMock.create[F](),
       SocialLinkServiceMock.create[F](), ContactServiceMock.create[F](),
-      TestimonialServiceMock.create[F](), AboutServiceMock.create[F]()
+      AboutServiceMock.create[F]()
     )
   }
 
@@ -869,7 +869,7 @@ class RoutesSpec extends Specification {
       postService, commentService, tagService, pageService, healthService,
       SkillServiceMock.create[F](), ExperienceServiceMock.create[F](),
       SocialLinkServiceMock.create[F](), ContactServiceMock.create[F](),
-      TestimonialServiceMock.create[F](), AboutServiceMock.create[F]()
+      AboutServiceMock.create[F]()
     )
   }
 
@@ -888,7 +888,7 @@ class RoutesSpec extends Specification {
       postService, commentService, tagService, pageService, healthService,
       SkillServiceMock.create[F](), ExperienceServiceMock.create[F](),
       SocialLinkServiceMock.create[F](), ContactServiceMock.create[F](),
-      TestimonialServiceMock.create[F](), AboutServiceMock.create[F]()
+      AboutServiceMock.create[F]()
     )
   }
 
@@ -903,7 +903,7 @@ class RoutesSpec extends Specification {
       postService, commentService, tagService, pageService, healthService,
       SkillServiceMock.create[F](), ExperienceServiceMock.create[F](),
       SocialLinkServiceMock.create[F](), ContactServiceMock.create[F](),
-      TestimonialServiceMock.create[F](), AboutServiceMock.create[F]()
+      AboutServiceMock.create[F]()
     )
   }
 
@@ -921,7 +921,7 @@ class RoutesSpec extends Specification {
       postService, commentService, tagService, pageService, healthService,
       SkillServiceMock.create[F](), ExperienceServiceMock.create[F](),
       SocialLinkServiceMock.create[F](), ContactServiceMock.create[F](),
-      TestimonialServiceMock.create[F](), AboutServiceMock.create[F]()
+      AboutServiceMock.create[F]()
     )
   }
 
@@ -936,7 +936,7 @@ class RoutesSpec extends Specification {
       postService, commentService, tagService, pageService, healthService,
       SkillServiceMock.create[F](), ExperienceServiceMock.create[F](),
       SocialLinkServiceMock.create[F](), ContactServiceMock.create[F](),
-      TestimonialServiceMock.create[F](), AboutServiceMock.create[F]()
+      AboutServiceMock.create[F]()
     )
   }
 
@@ -952,7 +952,7 @@ class RoutesSpec extends Specification {
       postService, commentService, tagService, pageService, healthService,
       SkillServiceMock.create[F](), ExperienceServiceMock.create[F](),
       SocialLinkServiceMock.create[F](), ContactServiceMock.create[F](),
-      TestimonialServiceMock.create[F](), AboutServiceMock.create[F]()
+      AboutServiceMock.create[F]()
     )
   }
 
@@ -967,7 +967,7 @@ class RoutesSpec extends Specification {
       postService, commentService, tagService, pageService, healthService,
       SkillServiceMock.create[F](), ExperienceServiceMock.create[F](),
       SocialLinkServiceMock.create[F](), ContactServiceMock.create[F](),
-      TestimonialServiceMock.create[F](), AboutServiceMock.create[F]()
+      AboutServiceMock.create[F]()
     )
   }
 
@@ -989,7 +989,7 @@ class RoutesSpec extends Specification {
       postService, commentService, tagService, pageService, healthService,
       SkillServiceMock.create[F](), ExperienceServiceMock.create[F](),
       SocialLinkServiceMock.create[F](), ContactServiceMock.create[F](),
-      TestimonialServiceMock.create[F](), AboutServiceMock.create[F]()
+      AboutServiceMock.create[F]()
     )
   }
 
@@ -1004,7 +1004,7 @@ class RoutesSpec extends Specification {
       postService, commentService, tagService, pageService, healthService,
       SkillServiceMock.create[F](), ExperienceServiceMock.create[F](),
       SocialLinkServiceMock.create[F](), ContactServiceMock.create[F](),
-      TestimonialServiceMock.create[F](), AboutServiceMock.create[F]()
+      AboutServiceMock.create[F]()
     )
   }
 
@@ -1019,7 +1019,7 @@ class RoutesSpec extends Specification {
       postService, commentService, tagService, pageService, healthService,
       SkillServiceMock.create[F](), ExperienceServiceMock.create[F](),
       SocialLinkServiceMock.create[F](), ContactServiceMock.create[F](),
-      TestimonialServiceMock.create[F](), AboutServiceMock.create[F]()
+      AboutServiceMock.create[F]()
     )
   }
 
@@ -1035,7 +1035,7 @@ class RoutesSpec extends Specification {
       postService, commentService, tagService, pageService, healthService,
       SkillServiceMock.create[F](), ExperienceServiceMock.create[F](),
       SocialLinkServiceMock.create[F](), ContactServiceMock.create[F](),
-      TestimonialServiceMock.create[F](), AboutServiceMock.create[F]()
+      AboutServiceMock.create[F]()
     )
   }
 }

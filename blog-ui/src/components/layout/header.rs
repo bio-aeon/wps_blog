@@ -45,11 +45,18 @@ pub fn Header() -> impl IntoView {
                         "Tags"
                     </a>
                     <a
-                        href="/pages/about"
-                        class:active=move || pathname() == "/pages/about"
+                        href="/about"
+                        class:active=move || pathname() == "/about"
                         on:click=close_menu
                     >
                         "About"
+                    </a>
+                    <a
+                        href="/contact"
+                        class:active=move || pathname() == "/contact"
+                        on:click=close_menu
+                    >
+                        "Contact"
                     </a>
                     <div class="header-search">
                         <input type="text" placeholder="Search..." />

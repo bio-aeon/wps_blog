@@ -188,4 +188,45 @@ impl BlogApiClient {
             .await?;
         self.handle_response(resp).await
     }
+
+    pub async fn get_skills(&self) -> Result<Vec<SkillCategoryResult>, ApiError> {
+        let resp = self.client.get(self.url("/v1/skills")).send().await?;
+        self.handle_response(resp).await
+    }
+
+    pub async fn get_experiences(&self) -> Result<Vec<ExperienceResult>, ApiError> {
+        let resp = self
+            .client
+            .get(self.url("/v1/experiences"))
+            .send()
+            .await?;
+        self.handle_response(resp).await
+    }
+
+    pub async fn get_social_links(&self) -> Result<Vec<SocialLinkResult>, ApiError> {
+        let resp = self
+            .client
+            .get(self.url("/v1/social-links"))
+            .send()
+            .await?;
+        self.handle_response(resp).await
+    }
+
+    pub async fn submit_contact(
+        &self,
+        request: &CreateContactRequest,
+    ) -> Result<ContactResponse, ApiError> {
+        let resp = self
+            .client
+            .post(self.url("/v1/contact"))
+            .json(request)
+            .send()
+            .await?;
+        self.handle_response(resp).await
+    }
+
+    pub async fn get_about(&self) -> Result<AboutResult, ApiError> {
+        let resp = self.client.get(self.url("/v1/about")).send().await?;
+        self.handle_response(resp).await
+    }
 }

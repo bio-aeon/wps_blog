@@ -1,6 +1,6 @@
 -- =================================================================
 -- V4: Business Card Features
--- Skills, experiences, social links, testimonials, contact form
+-- Skills, experiences, social links, contact form
 -- =================================================================
 
 -- Skills: Technical competencies with categories and proficiency levels
@@ -69,19 +69,4 @@ CREATE INDEX idx_contact_submissions_is_read ON contact_submissions(is_read);
 CREATE INDEX idx_contact_submissions_created_at ON contact_submissions(created_at DESC);
 CREATE INDEX idx_contact_submissions_ip_address ON contact_submissions(ip_address);
 
--- Testimonials: Recommendations and quotes
-CREATE TABLE IF NOT EXISTS testimonials (
-    id SERIAL PRIMARY KEY,
-    author_name VARCHAR(255) NOT NULL,
-    author_title VARCHAR(255),
-    author_company VARCHAR(255),
-    author_url VARCHAR(500),
-    author_image_url VARCHAR(500),
-    quote TEXT NOT NULL,
-    sort_order INTEGER NOT NULL DEFAULT 0,
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
 
-CREATE INDEX idx_testimonials_is_active ON testimonials(is_active);
-CREATE INDEX idx_testimonials_sort_order ON testimonials(sort_order);

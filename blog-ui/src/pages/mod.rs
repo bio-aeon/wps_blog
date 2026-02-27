@@ -1,3 +1,5 @@
+pub mod about;
+pub mod contact;
 pub mod home;
 pub mod not_found;
 pub mod post_detail;
@@ -7,6 +9,8 @@ pub mod static_page;
 pub mod tag_list;
 pub mod tag_posts;
 
+pub use about::AboutPage;
+pub use contact::ContactPage;
 pub use home::HomePage;
 pub use not_found::NotFoundPage;
 pub use post_detail::PostDetailPage;

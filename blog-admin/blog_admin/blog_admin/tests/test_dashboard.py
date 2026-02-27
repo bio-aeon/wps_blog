@@ -4,7 +4,7 @@ from model_bakery import baker
 
 from blog_admin.models import (
     User, Post, Tag, PostTag, Comment,
-    Skill, Experience, SocialLink, Testimonial, ContactSubmission,
+    Skill, Experience, SocialLink, ContactSubmission,
 )
 
 
@@ -93,11 +93,6 @@ class DashboardViewTest(TestCase):
         SocialLink.objects.create(platform='github', url='https://github.com/user')
         response = self.client.get(reverse('admin-dashboard'))
         self.assertEqual(response.context['social_link_count'], 1)
-
-    def test_dashboard_shows_testimonial_count(self):
-        Testimonial.objects.create(author_name='Alice', quote='Great')
-        response = self.client.get(reverse('admin-dashboard'))
-        self.assertEqual(response.context['testimonial_count'], 1)
 
     def test_dashboard_shows_unread_contacts(self):
         ContactSubmission.objects.create(

@@ -3,10 +3,10 @@ from django.test import TestCase
 from django.urls import reverse
 from model_bakery import baker
 
-from blog_admin.admin import PostAdmin, CommentAdmin, ExperienceAdmin, TestimonialAdmin
+from blog_admin.admin import PostAdmin, CommentAdmin, ExperienceAdmin
 from blog_admin.models import (
     User, Post, Tag, PostTag, Comment, Page,
-    Skill, Experience, SocialLink, ContactSubmission, Testimonial,
+    Skill, Experience, SocialLink, ContactSubmission,
 )
 
 
@@ -226,28 +226,3 @@ class ContactSubmissionAdminTest(TestCase):
         response = self.client.get(reverse('admin:blog_admin_contactsubmission_add'))
         self.assertEqual(response.status_code, 403)
 
-
-class TestimonialAdminTest(TestCase):
-    def setUp(self):
-        self.admin_user = User.objects.create_superuser('admin', 'a@b.com', 'pass')
-        self.client.force_login(self.admin_user)
-
-    def test_testimonial_changelist_loads(self):
-        response = self.client.get(reverse('admin:blog_admin_testimonial_changelist'))
-        self.assertEqual(response.status_code, 200)
-
-    def test_short_quote_truncates(self):
-        testimonial = Testimonial(
-            author_name='Bob', quote='x' * 100
-        )
-        admin_instance = TestimonialAdmin(Testimonial, admin.site)
-        display = admin_instance.short_quote(testimonial)
-        self.assertEqual(len(display), 83)
-        self.assertTrue(display.endswith('...'))
-
-    def test_short_quote_no_truncation(self):
-        testimonial = Testimonial(
-            author_name='Bob', quote='Short quote'
-        )
-        admin_instance = TestimonialAdmin(Testimonial, admin.site)
-        self.assertEqual(admin_instance.short_quote(testimonial), 'Short quote')

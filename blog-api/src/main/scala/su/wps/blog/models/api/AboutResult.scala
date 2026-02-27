@@ -21,17 +21,12 @@ final case class AboutResult(
   profile: ProfileResult,
   skills: List[SkillCategoryResult],
   experiences: List[ExperienceResult],
-  socialLinks: List[SocialLinkResult],
-  testimonials: List[TestimonialResult]
+  socialLinks: List[SocialLinkResult]
 )
 
 object AboutResult {
   implicit val encoder: Encoder[AboutResult] =
-    Encoder.forProduct5(
-      "profile",
-      "skills",
-      "experiences",
-      "social_links",
-      "testimonials"
-    )(r => (r.profile, r.skills, r.experiences, r.socialLinks, r.testimonials))
+    Encoder.forProduct4("profile", "skills", "experiences", "social_links")(r =>
+      (r.profile, r.skills, r.experiences, r.socialLinks)
+    )
 }

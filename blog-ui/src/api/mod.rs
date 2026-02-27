@@ -138,3 +138,60 @@ pub async fn get_page(url: String) -> Result<PageResult, ServerFnError> {
         .await
         .map_err(|e| ServerFnError::new(e.to_string()))
 }
+
+#[server]
+pub async fn get_about() -> Result<AboutResult, ServerFnError> {
+    let client = api_client();
+    client
+        .get_about()
+        .await
+        .map_err(|e| ServerFnError::new(e.to_string()))
+}
+
+#[server]
+pub async fn get_skills() -> Result<Vec<SkillCategoryResult>, ServerFnError> {
+    let client = api_client();
+    client
+        .get_skills()
+        .await
+        .map_err(|e| ServerFnError::new(e.to_string()))
+}
+
+#[server]
+pub async fn get_experiences() -> Result<Vec<ExperienceResult>, ServerFnError> {
+    let client = api_client();
+    client
+        .get_experiences()
+        .await
+        .map_err(|e| ServerFnError::new(e.to_string()))
+}
+
+#[server]
+pub async fn get_social_links() -> Result<Vec<SocialLinkResult>, ServerFnError> {
+    let client = api_client();
+    client
+        .get_social_links()
+        .await
+        .map_err(|e| ServerFnError::new(e.to_string()))
+}
+
+#[server]
+pub async fn submit_contact(
+    name: String,
+    email: String,
+    subject: String,
+    message: String,
+) -> Result<ContactResponse, ServerFnError> {
+    let client = api_client();
+    let request = CreateContactRequest {
+        name,
+        email,
+        subject,
+        message,
+        website: None,
+    };
+    client
+        .submit_contact(&request)
+        .await
+        .map_err(|e| ServerFnError::new(e.to_string()))
+}
