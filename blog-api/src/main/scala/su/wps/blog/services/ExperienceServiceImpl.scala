@@ -15,9 +15,7 @@ final class ExperienceServiceImpl[F[_]: Monad, DB[_]: Monad] private (
 
   def getExperiences: F[List[ExperienceResult]] =
     experienceRepo.findAllActive.thrushK(xa.trans).map { experiences =>
-      experiences.map(
-        _.into[ExperienceResult].withFieldComputed(_.id, _.nonEmptyId).transform
-      )
+      experiences.map(_.into[ExperienceResult].withFieldComputed(_.id, _.nonEmptyId).transform)
     }
 }
 

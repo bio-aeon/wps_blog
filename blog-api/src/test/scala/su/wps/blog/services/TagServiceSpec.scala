@@ -11,8 +11,8 @@ class TagServiceSpec extends Specification {
 
   val xa: Txr[RunF, Id] = TxrMock.create[RunF]
 
-  "TagService should" >> {
-    "return all tags with post counts" >> {
+  "TagService" >> {
+    "returns all tags with post counts" >> {
       val tags = List(
         Tag("scala", "scala", Some(TagId(1))),
         Tag("rust", "rust", Some(TagId(2))),
@@ -26,7 +26,7 @@ class TagServiceSpec extends Specification {
       }
     }
 
-    "return tags with correct post counts" >> {
+    "returns tags with correct post counts" >> {
       val tags = List(
         (Tag("scala", "scala", Some(TagId(1))), 10),
         (Tag("rust", "rust", Some(TagId(2))), 5),
@@ -41,7 +41,7 @@ class TagServiceSpec extends Specification {
       }
     }
 
-    "return empty list when no tags exist" >> {
+    "returns empty list when no tags exist" >> {
       val service = mkService(Nil)
 
       service.getAllTags must beRight.which { r =>
@@ -49,7 +49,7 @@ class TagServiceSpec extends Specification {
       }
     }
 
-    "return tags ordered by name (as provided by repository)" >> {
+    "returns tags ordered by name (as provided by repository)" >> {
       val tags = List(
         (Tag("alpha", "alpha", Some(TagId(1))), 3),
         (Tag("beta", "beta", Some(TagId(2))), 2),
@@ -62,7 +62,7 @@ class TagServiceSpec extends Specification {
       }
     }
 
-    "transform Tag domain model to TagWithCountResult API model" >> {
+    "transforms Tag domain model to TagWithCountResult API model" >> {
       val tag = Tag("scala", "scala-lang", Some(TagId(42)))
       val service = mkService(List((tag, 7)))
 
@@ -77,8 +77,8 @@ class TagServiceSpec extends Specification {
     }
   }
 
-  "TagService.getTagCloud should" >> {
-    "return tag cloud with normalized weights" >> {
+  "TagService.getTagCloud" >> {
+    "returns tag cloud with normalized weights" >> {
       val tags = List(
         (Tag("scala", "scala", Some(TagId(1))), 10),
         (Tag("rust", "rust", Some(TagId(2))), 5),
@@ -93,7 +93,7 @@ class TagServiceSpec extends Specification {
       }
     }
 
-    "return empty tag cloud when no tags exist" >> {
+    "returns empty tag cloud when no tags exist" >> {
       val service = mkService(Nil)
 
       service.getTagCloud must beRight.which { r =>
@@ -101,7 +101,7 @@ class TagServiceSpec extends Specification {
       }
     }
 
-    "return weight of 1.0 for single tag" >> {
+    "returns weight of 1.0 for single tag" >> {
       val tags = List((Tag("scala", "scala", Some(TagId(1))), 5))
       val service = mkService(tags)
 
@@ -110,7 +110,7 @@ class TagServiceSpec extends Specification {
       }
     }
 
-    "return correct counts in tag cloud items" >> {
+    "returns correct counts in tag cloud items" >> {
       val tags =
         List((Tag("scala", "scala", Some(TagId(1))), 10), (Tag("rust", "rust", Some(TagId(2))), 5))
       val service = mkService(tags)
@@ -121,7 +121,7 @@ class TagServiceSpec extends Specification {
       }
     }
 
-    "handle tags with zero post count" >> {
+    "handles tags with zero post count" >> {
       val tags =
         List((Tag("scala", "scala", Some(TagId(1))), 10), (Tag("rust", "rust", Some(TagId(2))), 0))
       val service = mkService(tags)

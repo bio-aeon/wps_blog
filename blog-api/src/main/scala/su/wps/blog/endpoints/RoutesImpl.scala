@@ -117,15 +117,11 @@ final class RoutesImpl[F[_]: Concurrent] private (
       aboutService.getAboutPage.map(_.asJson).flatMap(Ok(_))
   }
 
-  private val systemRoutes: HttpRoutes[F] = HttpRoutes.of[F] {
-    case GET -> Root / "health" =>
-      healthService.check.map(_.asJson).flatMap(Ok(_))
+  private val systemRoutes: HttpRoutes[F] = HttpRoutes.of[F] { case GET -> Root / "health" =>
+    healthService.check.map(_.asJson).flatMap(Ok(_))
   }
 
-  val routes: HttpRoutes[F] = Router(
-    s"/$ApiVersion" -> apiRoutes,
-    "/" -> systemRoutes
-  )
+  val routes: HttpRoutes[F] = Router(s"/$ApiVersion" -> apiRoutes, "/" -> systemRoutes)
 
   private def withValidPagination(limit: Int, offset: Int)(
     f: (Int, Int) => F[org.http4s.Response[F]]
@@ -136,9 +132,9 @@ final class RoutesImpl[F[_]: Concurrent] private (
         Concurrent[F].raiseError(AppErr.ValidationFailed(errors.toNonEmptyList.toList.toMap))
     }
 
-  private def withValidComment(request: CreateCommentRequest)(
-    f: CreateCommentRequest => F[org.http4s.Response[F]]
-  ): F[org.http4s.Response[F]] =
+  private def withValidComment(
+    request: CreateCommentRequest
+  )(f: CreateCommentRequest => F[org.http4s.Response[F]]): F[org.http4s.Response[F]] =
     Validation.validateComment(request.name, request.email, request.text) match {
       case cats.data.Validated.Valid((name, email, text)) =>
         f(request.copy(name = name, email = email, text = text))
@@ -146,9 +142,9 @@ final class RoutesImpl[F[_]: Concurrent] private (
         Concurrent[F].raiseError(AppErr.ValidationFailed(errors.toNonEmptyList.toList.toMap))
     }
 
-  private def withValidContact(request: CreateContactRequest)(
-    f: CreateContactRequest => F[org.http4s.Response[F]]
-  ): F[org.http4s.Response[F]] =
+  private def withValidContact(
+    request: CreateContactRequest
+  )(f: CreateContactRequest => F[org.http4s.Response[F]]): F[org.http4s.Response[F]] =
     Validation.validateContact(
       request.name,
       request.email,

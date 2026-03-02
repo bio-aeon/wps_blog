@@ -18,12 +18,8 @@ final class AboutServiceImpl[F[_]: Monad, DB[_]: Monad] private (
   xa: Txr[F, DB]
 ) extends AboutService[F] {
 
-  private val ProfileConfigNames = List(
-    "profile_name",
-    "profile_title",
-    "profile_photo_url",
-    "resume_url"
-  )
+  private val ProfileConfigNames =
+    List("profile_name", "profile_title", "profile_photo_url", "resume_url")
 
   def getAboutPage: F[AboutResult] = {
     val fetchAll = (
@@ -68,14 +64,10 @@ final class AboutServiceImpl[F[_]: Monad, DB[_]: Monad] private (
         )
       }
 
-  private def transformExperience(
-    exp: su.wps.blog.models.domain.Experience
-  ): ExperienceResult =
+  private def transformExperience(exp: su.wps.blog.models.domain.Experience): ExperienceResult =
     exp.into[ExperienceResult].withFieldComputed(_.id, _.nonEmptyId).transform
 
-  private def transformSocialLink(
-    link: su.wps.blog.models.domain.SocialLink
-  ): SocialLinkResult =
+  private def transformSocialLink(link: su.wps.blog.models.domain.SocialLink): SocialLinkResult =
     link.into[SocialLinkResult].withFieldComputed(_.id, _.nonEmptyId).transform
 }
 
@@ -88,12 +80,5 @@ object AboutServiceImpl {
     pageRepo: PageRepository[DB],
     xa: Txr[F, DB]
   ): AboutServiceImpl[F, DB] =
-    new AboutServiceImpl(
-      skillRepo,
-      experienceRepo,
-      socialLinkRepo,
-      configRepo,
-      pageRepo,
-      xa
-    )
+    new AboutServiceImpl(skillRepo, experienceRepo, socialLinkRepo, configRepo, pageRepo, xa)
 }

@@ -397,3 +397,221 @@ async fn server_error_returns_api_error() {
         other => panic!("Expected Server, got {:?}", other),
     }
 }
+
+// --- Skills ---
+
+#[tokio::test]
+async fn get_skills_returns_categories() {
+    let (server, client) = setup().await;
+
+    let body = serde_json::json!([{
+        "category": "Backend",
+        "skills": [
+            {"id": 1, "name": "Scala", "slug": "scala", "category": "Backend", "proficiency": 90, "icon": null}
+        ]
+    }]);
+
+    Mock::given(method("GET"))
+        .and(path("/v1/skills"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(&body))
+        .mount(&server)
+        .await;
+
+    let result = client.get_skills().await.unwrap();
+    assert_eq!(result.len(), 1);
+    assert_eq!(result[0].category, "Backend");
+    assert_eq!(result[0].skills[0].name, "Scala");
+    assert_eq!(result[0].skills[0].proficiency, 90);
+}
+
+#[tokio::test]
+async fn get_skills_empty() {
+    let (server, client) = setup().await;
+
+    Mock::given(method("GET"))
+        .and(path("/v1/skills"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(&serde_json::json!([])))
+        .mount(&server)
+        .await;
+
+    let result = client.get_skills().await.unwrap();
+    assert!(result.is_empty());
+}
+
+// --- Experiences ---
+
+#[tokio::test]
+async fn get_experiences_returns_list() {
+    let (server, client) = setup().await;
+
+    let body = serde_json::json!([{
+        "id": 1,
+        "company": "Acme Corp",
+        "position": "Engineer",
+        "description": "Building things",
+        "start_date": "2020-01-01",
+        "end_date": "2023-06-15",
+        "location": "Remote",
+        "company_url": "https://acme.com"
+    }]);
+
+    Mock::given(method("GET"))
+        .and(path("/v1/experiences"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(&body))
+        .mount(&server)
+        .await;
+
+    let result = client.get_experiences().await.unwrap();
+    assert_eq!(result.len(), 1);
+    assert_eq!(result[0].company, "Acme Corp");
+    assert_eq!(result[0].end_date, Some("2023-06-15".to_string()));
+}
+
+#[tokio::test]
+async fn get_experiences_with_null_end_date() {
+    let (server, client) = setup().await;
+
+    let body = serde_json::json!([{
+        "id": 2,
+        "company": "Current Job",
+        "position": "CTO",
+        "description": "Leading",
+        "start_date": "2023-07-01",
+        "end_date": null,
+        "location": null,
+        "company_url": null
+    }]);
+
+    Mock::given(method("GET"))
+        .and(path("/v1/experiences"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(&body))
+        .mount(&server)
+        .await;
+
+    let result = client.get_experiences().await.unwrap();
+    assert_eq!(result.len(), 1);
+    assert!(result[0].end_date.is_none());
+}
+
+// --- Social Links ---
+
+#[tokio::test]
+async fn get_social_links_returns_list() {
+    let (server, client) = setup().await;
+
+    let body = serde_json::json!([
+        {"id": 1, "platform": "github", "url": "https://github.com/user", "label": "GitHub", "icon": "gh-icon"},
+        {"id": 2, "platform": "linkedin", "url": "https://linkedin.com/in/user", "label": null, "icon": null}
+    ]);
+
+    Mock::given(method("GET"))
+        .and(path("/v1/social-links"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(&body))
+        .mount(&server)
+        .await;
+
+    let result = client.get_social_links().await.unwrap();
+    assert_eq!(result.len(), 2);
+    assert_eq!(result[0].platform, "github");
+    assert_eq!(result[0].label, Some("GitHub".to_string()));
+    assert!(result[1].label.is_none());
+}
+
+// --- Contact ---
+
+#[tokio::test]
+async fn submit_contact_success() {
+    let (server, client) = setup().await;
+
+    let req = CreateContactRequest {
+        name: "John".to_string(),
+        email: "john@example.com".to_string(),
+        subject: "Hello".to_string(),
+        message: "Test message".to_string(),
+        website: None,
+    };
+
+    Mock::given(method("POST"))
+        .and(path("/v1/contact"))
+        .respond_with(
+            ResponseTemplate::new(200)
+                .set_body_json(&serde_json::json!({"message": "Thank you for your message!"})),
+        )
+        .mount(&server)
+        .await;
+
+    let result = client.submit_contact(&req).await.unwrap();
+    assert_eq!(result.message, "Thank you for your message!");
+}
+
+#[tokio::test]
+async fn submit_contact_rate_limited() {
+    let (server, client) = setup().await;
+
+    let req = CreateContactRequest {
+        name: "John".to_string(),
+        email: "john@example.com".to_string(),
+        subject: "Hello".to_string(),
+        message: "Test message".to_string(),
+        website: None,
+    };
+
+    Mock::given(method("POST"))
+        .and(path("/v1/contact"))
+        .respond_with(ResponseTemplate::new(429).set_body_string("Too many requests"))
+        .mount(&server)
+        .await;
+
+    let result = client.submit_contact(&req).await;
+    assert!(result.is_err());
+    match result.unwrap_err() {
+        ApiError::Server(msg) => assert_eq!(msg, "Too many requests"),
+        other => panic!("Expected Server error for 429, got {:?}", other),
+    }
+}
+
+// --- About ---
+
+#[tokio::test]
+async fn get_about_returns_full_result() {
+    let (server, client) = setup().await;
+
+    let body = serde_json::json!({
+        "profile": {
+            "name": "John",
+            "title": "Engineer",
+            "photo_url": "https://example.com/photo.jpg",
+            "resume_url": "https://example.com/resume.pdf",
+            "bio": "About me"
+        },
+        "skills": [{
+            "category": "Backend",
+            "skills": [{"id": 1, "name": "Scala", "slug": "scala", "category": "Backend", "proficiency": 90, "icon": null}]
+        }],
+        "experiences": [{
+            "id": 1,
+            "company": "Acme",
+            "position": "Engineer",
+            "description": "Work",
+            "start_date": "2020-01-01",
+            "end_date": null,
+            "location": "Remote",
+            "company_url": null
+        }],
+        "social_links": [
+            {"id": 1, "platform": "github", "url": "https://github.com", "label": "GitHub", "icon": null}
+        ]
+    });
+
+    Mock::given(method("GET"))
+        .and(path("/v1/about"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(&body))
+        .mount(&server)
+        .await;
+
+    let result = client.get_about().await.unwrap();
+    assert_eq!(result.profile.name, "John");
+    assert_eq!(result.skills.len(), 1);
+    assert_eq!(result.experiences.len(), 1);
+    assert_eq!(result.social_links.len(), 1);
+}

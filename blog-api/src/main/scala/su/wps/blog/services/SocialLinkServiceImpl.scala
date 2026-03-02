@@ -15,9 +15,7 @@ final class SocialLinkServiceImpl[F[_]: Monad, DB[_]: Monad] private (
 
   def getSocialLinks: F[List[SocialLinkResult]] =
     socialLinkRepo.findAllActive.thrushK(xa.trans).map { links =>
-      links.map(
-        _.into[SocialLinkResult].withFieldComputed(_.id, _.nonEmptyId).transform
-      )
+      links.map(_.into[SocialLinkResult].withFieldComputed(_.id, _.nonEmptyId).transform)
     }
 }
 

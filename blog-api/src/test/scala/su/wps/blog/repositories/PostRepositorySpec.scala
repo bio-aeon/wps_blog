@@ -22,8 +22,8 @@ class PostRepositorySpec extends Specification with DbTest {
   implicit val genPost: Gen[models.Post] = arbitrary[models.Post]
   implicit val genTag: Gen[models.Tag] = arbitrary[models.Tag]
 
-  "PostRepository should" >> {
-    "return only visible posts with limit and offset" >> {
+  "PostRepository" >> {
+    "returns only visible posts with limit and offset" >> {
       val test = for {
         r0 <- repo.findAllWithLimitAndOffset(10, 0)
         user = random[models.User]
@@ -44,7 +44,7 @@ class PostRepositorySpec extends Specification with DbTest {
       r1.forall(!_.isHidden) must beTrue
     }
 
-    "return correct count excluding hidden posts" >> {
+    "returns correct count excluding hidden posts" >> {
       val test = for {
         r0 <- repo.findCount
         user = random[models.User]
@@ -64,7 +64,7 @@ class PostRepositorySpec extends Specification with DbTest {
       r1 mustEqual 8 // Only visible posts counted
     }
 
-    "respect pagination with visible posts only" >> {
+    "respects pagination with visible posts only" >> {
       val user = random[models.User]
       val test = for {
         _ <- models.User.sql.insert(user)
@@ -87,7 +87,7 @@ class PostRepositorySpec extends Specification with DbTest {
       page3 must haveLength(1) // Only 1 visible post left (10 - 9 = 1)
     }
 
-    "return all posts including hidden for admin method" >> {
+    "returns all posts including hidden for admin method" >> {
       val user = random[models.User]
       val test = for {
         _ <- models.User.sql.insert(user)
@@ -111,7 +111,7 @@ class PostRepositorySpec extends Specification with DbTest {
       totalCount mustEqual 8
     }
 
-    "return the post by id if it exists" >> {
+    "returns the post by id if it exists" >> {
       val postId = 1
       val test = for {
         r0 <- repo.findById(PostId(postId))
@@ -127,7 +127,7 @@ class PostRepositorySpec extends Specification with DbTest {
       r1 must beSome
     }
 
-    "return posts matching the tag slug" >> {
+    "returns posts matching the tag slug" >> {
       val user = random[models.User]
       val tag = random[models.Tag].copy(id = PosInt(1), slug = Varchar("scala"))
       val test = for {
@@ -155,7 +155,7 @@ class PostRepositorySpec extends Specification with DbTest {
       result.map(_.nonEmptyId.value) must contain(exactly(1, 2))
     }
 
-    "exclude hidden posts even if tagged" >> {
+    "excludes hidden posts even if tagged" >> {
       val user = random[models.User]
       val tag = random[models.Tag].copy(id = PosInt(1), slug = Varchar("rust"))
       val test = for {
@@ -175,7 +175,7 @@ class PostRepositorySpec extends Specification with DbTest {
       result.head.nonEmptyId.value mustEqual 1
     }
 
-    "return empty list for non-existent tag" >> {
+    "returns empty list for non-existent tag" >> {
       val user = random[models.User]
       val test = for {
         _ <- models.User.sql.insert(user)
@@ -188,7 +188,7 @@ class PostRepositorySpec extends Specification with DbTest {
       result must beEmpty
     }
 
-    "respect pagination for posts by tag" >> {
+    "respects pagination for posts by tag" >> {
       val user = random[models.User]
       val tag = random[models.Tag].copy(id = PosInt(1), slug = Varchar("fp"))
       val test = for {
@@ -211,7 +211,7 @@ class PostRepositorySpec extends Specification with DbTest {
       page3 must haveLength(1)
     }
 
-    "return correct count for posts by tag slug" >> {
+    "returns correct count for posts by tag slug" >> {
       val user = random[models.User]
       val tag = random[models.Tag].copy(id = PosInt(1), slug = Varchar("cats"))
       val test = for {
@@ -235,7 +235,7 @@ class PostRepositorySpec extends Specification with DbTest {
       count mustEqual 3
     }
 
-    "increment view count by 1 for visible post" >> {
+    "increments view count by 1 for visible post" >> {
       val postId = 1
       val initialViews = 10
       val user = random[models.User]
@@ -257,7 +257,7 @@ class PostRepositorySpec extends Specification with DbTest {
       updated must beSome.which(p => p.views == initialViews + 1)
     }
 
-    "not increment views for hidden posts" >> {
+    "does not increment views for hidden posts" >> {
       val postId = 1
       val initialViews = 10
       val user = random[models.User]
@@ -279,14 +279,14 @@ class PostRepositorySpec extends Specification with DbTest {
       unchanged must beSome.which(p => p.views == initialViews)
     }
 
-    "return 0 for non-existent post" >> {
+    "returns 0 for non-existent post" >> {
       val test = repo.incrementViews(PostId(99999))
 
       val rowsUpdated = test.runWithIO()
       rowsUpdated mustEqual 0
     }
 
-    "search posts by query matching name" >> {
+    "searches posts by query matching name" >> {
       val user = random[models.User]
       val test = for {
         _ <- models.User.sql.insert(user)
@@ -317,7 +317,7 @@ class PostRepositorySpec extends Specification with DbTest {
       result.head.name must contain("Scala")
     }
 
-    "search posts matching short_text content" >> {
+    "searches posts matching short_text content" >> {
       val user = random[models.User]
       val test = for {
         _ <- models.User.sql.insert(user)
@@ -347,7 +347,7 @@ class PostRepositorySpec extends Specification with DbTest {
       result.head.shortText must contain("functional")
     }
 
-    "exclude hidden posts from search results" >> {
+    "excludes hidden posts from search results" >> {
       val user = random[models.User]
       val test = for {
         _ <- models.User.sql.insert(user)
@@ -377,7 +377,7 @@ class PostRepositorySpec extends Specification with DbTest {
       result.head.isHidden must beFalse
     }
 
-    "return empty list when no posts match search query" >> {
+    "returns empty list when no posts match search query" >> {
       val user = random[models.User]
       val test = for {
         _ <- models.User.sql.insert(user)
@@ -397,7 +397,7 @@ class PostRepositorySpec extends Specification with DbTest {
       result must beEmpty
     }
 
-    "return correct count for search results" >> {
+    "returns correct count for search results" >> {
       val user = random[models.User]
       val test = for {
         _ <- models.User.sql.insert(user)
@@ -432,7 +432,7 @@ class PostRepositorySpec extends Specification with DbTest {
       count mustEqual 3
     }
 
-    "respect pagination in search results" >> {
+    "respects pagination in search results" >> {
       val user = random[models.User]
       val test = for {
         _ <- models.User.sql.insert(user)
@@ -459,7 +459,7 @@ class PostRepositorySpec extends Specification with DbTest {
       page3 must haveLength(1)
     }
 
-    "return recent visible posts limited by count" >> {
+    "returns recent visible posts limited by count" >> {
       val user = random[models.User]
       val test = for {
         _ <- models.User.sql.insert(user)
@@ -474,7 +474,7 @@ class PostRepositorySpec extends Specification with DbTest {
       result must haveLength(5)
     }
 
-    "exclude hidden posts from recent results" >> {
+    "excludes hidden posts from recent results" >> {
       val user = random[models.User]
       val test = for {
         _ <- models.User.sql.insert(user)
@@ -494,7 +494,7 @@ class PostRepositorySpec extends Specification with DbTest {
       result.forall(!_.isHidden) must beTrue
     }
 
-    "return posts ordered by created_at DESC in recent" >> {
+    "returns posts ordered by created_at DESC in recent" >> {
       val user = random[models.User]
       val test = for {
         _ <- models.User.sql.insert(user)
@@ -506,7 +506,7 @@ class PostRepositorySpec extends Specification with DbTest {
       dates mustEqual dates.sortBy(_.toEpochSecond).reverse
     }
 
-    "return empty list when no visible posts exist for recent" >> {
+    "returns empty list when no visible posts exist for recent" >> {
       val user = random[models.User]
       val test = for {
         _ <- models.User.sql.insert(user)

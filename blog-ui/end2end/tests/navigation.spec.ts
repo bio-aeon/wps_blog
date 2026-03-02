@@ -2,14 +2,14 @@ import { test, expect } from "@playwright/test";
 
 test.describe("Navigation", () => {
   test("header is visible on all pages", async ({ page }) => {
-    for (const path of ["/", "/posts", "/tags", "/search"]) {
+    for (const path of ["/", "/posts", "/tags", "/search", "/about", "/contact"]) {
       await page.goto(path);
       await expect(page.locator(".site-header")).toBeVisible();
     }
   });
 
   test("footer is visible on all pages", async ({ page }) => {
-    for (const path of ["/", "/posts", "/tags", "/search"]) {
+    for (const path of ["/", "/posts", "/tags", "/search", "/about", "/contact"]) {
       await page.goto(path);
       await expect(page.locator(".site-footer")).toBeVisible();
     }
@@ -32,7 +32,14 @@ test.describe("Navigation", () => {
 
     // Click About link
     await page.locator(".main-nav a", { hasText: "About" }).click();
-    await expect(page).toHaveURL(/\/pages\/about$/);
+    await expect(page).toHaveURL(/\/about$/);
+
+    // Click Contact link
+    const contactLink = page.locator(".main-nav a", { hasText: "Contact" });
+    if ((await contactLink.count()) > 0) {
+      await contactLink.click();
+      await expect(page).toHaveURL(/\/contact$/);
+    }
   });
 
   test("logo navigates to home", async ({ page }) => {

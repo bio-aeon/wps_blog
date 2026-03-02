@@ -29,14 +29,14 @@ class PostServiceSpec extends Specification {
   private def postsWithUniqueIds(count: Int): List[Post] =
     random[Post](count).zipWithIndex.map { case (p, i) => p.copy(id = Some(PostId(i + 1))) }
 
-  "PostService should" >> {
-    "return posts with total count by limit and offset" >> {
+  "PostService" >> {
+    "returns posts with total count by limit and offset" >> {
       val service = mkService(random[Post](5), 10)
 
       service.allPosts(5, 10) must beRight.which(r => r.items.length == 5 && r.total == 10)
     }
 
-    "include tags in post list results" >> {
+    "includes tags in post list results" >> {
       val posts = postsWithUniqueIds(2)
       val tag1 = Tag("scala", "scala", Some(TagId(1)))
       val tag2 = Tag("rust", "rust", Some(TagId(2)))
@@ -48,14 +48,14 @@ class PostServiceSpec extends Specification {
       }
     }
 
-    "return post if exists" >> {
+    "returns post if exists" >> {
       val post = random[Post]
       val service = mkService(findByIdResult = Some(post))
 
       service.postById(post.nonEmptyId) must beRight.which(_.name == post.name)
     }
 
-    "include tags in single post result" >> {
+    "includes tags in single post result" >> {
       val post = random[Post]
       val tags = List(Tag("scala", "scala", Some(TagId(1))), Tag("fp", "fp", Some(TagId(2))))
       val service = mkService(findByIdResult = Some(post), findByPostIdResult = tags)
@@ -65,13 +65,13 @@ class PostServiceSpec extends Specification {
       }
     }
 
-    "return an error if post doesn't exist" >> {
+    "returns an error if post doesn't exist" >> {
       val service = mkService()
 
       service.postById(PostId(1)) must beLeft(PostNotFound(PostId(1)))
     }
 
-    "handle posts with no tags" >> {
+    "handles posts with no tags" >> {
       val posts = random[Post](2)
       val service = mkService(posts, 2, findByPostIdsResult = Nil)
 
@@ -80,7 +80,7 @@ class PostServiceSpec extends Specification {
       }
     }
 
-    "return posts filtered by tag with correct pagination" >> {
+    "returns posts filtered by tag with correct pagination" >> {
       val posts = random[Post](3)
       val service = mkService(findByTagSlugResult = posts, findCountByTagSlugResult = 10)
 
@@ -89,7 +89,7 @@ class PostServiceSpec extends Specification {
       }
     }
 
-    "include tags in filtered post results" >> {
+    "includes tags in filtered post results" >> {
       val posts = postsWithUniqueIds(2)
       val tag1 = Tag("scala", "scala", Some(TagId(1)))
       val tag2 = Tag("fp", "fp", Some(TagId(2)))
@@ -105,7 +105,7 @@ class PostServiceSpec extends Specification {
       }
     }
 
-    "return empty result for non-existent tag" >> {
+    "returns empty result for non-existent tag" >> {
       val service = mkService(findByTagSlugResult = Nil, findCountByTagSlugResult = 0)
 
       service.postsByTag("nonexistent", 10, 0) must beRight.which { r =>
@@ -113,19 +113,19 @@ class PostServiceSpec extends Specification {
       }
     }
 
-    "successfully increment view count for visible post" >> {
+    "successfully increments view count for visible post" >> {
       val service = mkService(incrementViewsResult = 1)
 
       service.incrementViewCount(PostId(1)) must beRight(())
     }
 
-    "complete without error for hidden post (no-op)" >> {
+    "completes without error for hidden post (no-op)" >> {
       val service = mkService(incrementViewsResult = 0)
 
       service.incrementViewCount(PostId(1)) must beRight(())
     }
 
-    "return search results with correct pagination" >> {
+    "returns search results with correct pagination" >> {
       val posts = random[Post](3)
       val service = mkService(searchPostsResult = posts, searchPostsCountResult = 10)
 
@@ -134,7 +134,7 @@ class PostServiceSpec extends Specification {
       }
     }
 
-    "include tags in search results" >> {
+    "includes tags in search results" >> {
       val posts = postsWithUniqueIds(2)
       val tag1 = Tag("scala", "scala", Some(TagId(1)))
       val tag2 = Tag("fp", "fp", Some(TagId(2)))
@@ -150,7 +150,7 @@ class PostServiceSpec extends Specification {
       }
     }
 
-    "return empty result for search with no matches" >> {
+    "returns empty result for search with no matches" >> {
       val service = mkService(searchPostsResult = Nil, searchPostsCountResult = 0)
 
       service.searchPosts("nonexistent", 10, 0) must beRight.which { r =>
@@ -158,14 +158,14 @@ class PostServiceSpec extends Specification {
       }
     }
 
-    "return recent posts limited by count" >> {
+    "returns recent posts limited by count" >> {
       val posts = random[Post](5)
       val service = mkService(findRecentResult = posts)
 
       service.recentPosts(5) must beRight.which(_.length == 5)
     }
 
-    "include tags in recent posts results" >> {
+    "includes tags in recent posts results" >> {
       val posts = postsWithUniqueIds(2)
       val tag1 = Tag("scala", "scala", Some(TagId(1)))
       val tag2 = Tag("fp", "fp", Some(TagId(2)))
@@ -177,13 +177,13 @@ class PostServiceSpec extends Specification {
       }
     }
 
-    "return empty list when no recent posts exist" >> {
+    "returns empty list when no recent posts exist" >> {
       val service = mkService(findRecentResult = Nil)
 
       service.recentPosts(5) must beRight.which(_.isEmpty)
     }
 
-    "handle recent posts with no tags" >> {
+    "handles recent posts with no tags" >> {
       val posts = random[Post](3)
       val service = mkService(findRecentResult = posts, findByPostIdsResult = Nil)
 

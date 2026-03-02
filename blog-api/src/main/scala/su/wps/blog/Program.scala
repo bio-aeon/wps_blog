@@ -55,15 +55,26 @@ object Program {
           val contactService =
             ContactServiceImpl.create[F, xa.DB](contactRepo, configRepo, xa)
           val aboutService = AboutServiceImpl.create[F, xa.DB](
-            skillRepo, experienceRepo, socialLinkRepo,
-            configRepo, pageRepo, xa
+            skillRepo,
+            experienceRepo,
+            socialLinkRepo,
+            configRepo,
+            pageRepo,
+            xa
           )
           val dbCheck = xa.trans(doobie.FC.isValid(1)).handleError(_ => false)
           val healthService = HealthServiceImpl.create[F](dbCheck)
           RoutesImpl.create[F](
-            postService, commentService, tagService, pageService, healthService,
-            skillService, experienceService, socialLinkService,
-            contactService, aboutService
+            postService,
+            commentService,
+            tagService,
+            pageService,
+            healthService,
+            skillService,
+            experienceService,
+            socialLinkService,
+            contactService,
+            aboutService
           )
         }
         routesWithErrorHandling = ErrorHandler(routes.routes)

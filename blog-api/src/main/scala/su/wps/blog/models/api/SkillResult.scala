@@ -19,10 +19,7 @@ object SkillResult {
     )
 }
 
-final case class SkillCategoryResult(
-  category: String,
-  skills: List[SkillResult]
-)
+final case class SkillCategoryResult(category: String, skills: List[SkillResult])
 
 object SkillCategoryResult {
   implicit val encoder: Encoder[SkillCategoryResult] =

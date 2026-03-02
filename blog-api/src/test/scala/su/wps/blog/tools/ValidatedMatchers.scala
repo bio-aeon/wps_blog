@@ -17,12 +17,7 @@ trait ValidatedMatchers {
               t
             )
           case Validated.Invalid(e) =>
-            result(
-              false,
-              "",
-              s"${t.description} is Invalid($e) but expected Valid($expected)",
-              t
-            )
+            result(false, "", s"${t.description} is Invalid($e) but expected Valid($expected)", t)
         }
     }
 
@@ -33,12 +28,7 @@ trait ValidatedMatchers {
           case Validated.Invalid(_) =>
             result(true, s"${t.description} is Invalid", "", t)
           case Validated.Valid(v) =>
-            result(
-              false,
-              "",
-              s"${t.description} is Valid($v) but expected Invalid",
-              t
-            )
+            result(false, "", s"${t.description} is Valid($v) but expected Invalid", t)
         }
     }
 }

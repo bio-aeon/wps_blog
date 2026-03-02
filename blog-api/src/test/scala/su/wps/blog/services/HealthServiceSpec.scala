@@ -6,8 +6,8 @@ import org.specs2.mutable.Specification
 
 class HealthServiceSpec extends Specification {
 
-  "HealthService should" >> {
-    "return healthy status when database check succeeds" >> {
+  "HealthService" >> {
+    "returns healthy status when database check succeeds" >> {
       val service = HealthServiceImpl.create[IO](IO.pure(true))
       val result = service.check.unsafeRunSync()
 
@@ -16,7 +16,7 @@ class HealthServiceSpec extends Specification {
       result.timestamp must not(beEmpty)
     }
 
-    "return degraded status when database check fails" >> {
+    "returns degraded status when database check fails" >> {
       val service = HealthServiceImpl.create[IO](IO.pure(false))
       val result = service.check.unsafeRunSync()
 
@@ -24,7 +24,7 @@ class HealthServiceSpec extends Specification {
       result.database mustEqual "unhealthy"
     }
 
-    "produce ISO-8601 timestamp" >> {
+    "produces ISO-8601 timestamp" >> {
       val service = HealthServiceImpl.create[IO](IO.pure(true))
       val result = service.check.unsafeRunSync()
 

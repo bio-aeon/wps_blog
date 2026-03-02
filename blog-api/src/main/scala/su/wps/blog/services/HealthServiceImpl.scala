@@ -7,9 +7,7 @@ import su.wps.blog.models.api.HealthResponse
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
-final class HealthServiceImpl[F[_]: Monad] private (
-  dbCheck: F[Boolean]
-) extends HealthService[F] {
+final class HealthServiceImpl[F[_]: Monad] private (dbCheck: F[Boolean]) extends HealthService[F] {
 
   def check: F[HealthResponse] =
     dbCheck.map { isDbHealthy =>

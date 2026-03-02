@@ -11,7 +11,7 @@ import su.wps.blog.models.domain.{AppErr, PostId}
 class ErrorHandlerSpec extends Specification {
 
   "ErrorHandler" >> {
-    "return 404 for PostNotFound error" >> {
+    "returns 404 for PostNotFound error" >> {
       val routes = mkFailingRoutes(AppErr.PostNotFound(PostId(123)))
       val request = Request[IO](Method.GET, uri"/test")
 
@@ -20,7 +20,7 @@ class ErrorHandlerSpec extends Specification {
       resp.status mustEqual Status.NotFound
     }
 
-    "include post id in NotFound response body for PostNotFound" >> {
+    "includes post id in NotFound response body for PostNotFound" >> {
       val routes = mkFailingRoutes(AppErr.PostNotFound(PostId(456)))
       val request = Request[IO](Method.GET, uri"/test")
 
@@ -31,7 +31,7 @@ class ErrorHandlerSpec extends Specification {
       body must contain("Post not found: 456")
     }
 
-    "return 404 for PageNotFound error" >> {
+    "returns 404 for PageNotFound error" >> {
       val routes = mkFailingRoutes(AppErr.PageNotFound("about-us"))
       val request = Request[IO](Method.GET, uri"/test")
 
@@ -40,7 +40,7 @@ class ErrorHandlerSpec extends Specification {
       resp.status mustEqual Status.NotFound
     }
 
-    "include page url in NotFound response body for PageNotFound" >> {
+    "includes page url in NotFound response body for PageNotFound" >> {
       val routes = mkFailingRoutes(AppErr.PageNotFound("contact"))
       val request = Request[IO](Method.GET, uri"/test")
 
@@ -51,7 +51,7 @@ class ErrorHandlerSpec extends Specification {
       body must contain("Page not found: contact")
     }
 
-    "return 500 for unexpected exceptions" >> {
+    "returns 500 for unexpected exceptions" >> {
       val routes = mkFailingRoutes(new RuntimeException("Unexpected error"))
       val request = Request[IO](Method.GET, uri"/test")
 
@@ -60,7 +60,7 @@ class ErrorHandlerSpec extends Specification {
       resp.status mustEqual Status.InternalServerError
     }
 
-    "hide internal error details in response body" >> {
+    "hides internal error details in response body" >> {
       val routes = mkFailingRoutes(new RuntimeException("Database connection failed"))
       val request = Request[IO](Method.GET, uri"/test")
 
@@ -72,7 +72,7 @@ class ErrorHandlerSpec extends Specification {
       body must not contain "Database connection failed"
     }
 
-    "return 400 for ValidationFailed error" >> {
+    "returns 400 for ValidationFailed error" >> {
       val errors = Map("limit" -> "Must be between 1 and 100", "offset" -> "Must be non-negative")
       val routes = mkFailingRoutes(AppErr.ValidationFailed(errors))
       val request = Request[IO](Method.GET, uri"/test")
@@ -82,7 +82,7 @@ class ErrorHandlerSpec extends Specification {
       resp.status mustEqual Status.BadRequest
     }
 
-    "include validation error details in response body" >> {
+    "includes validation error details in response body" >> {
       val errors = Map("limit" -> "Must be between 1 and 100")
       val routes = mkFailingRoutes(AppErr.ValidationFailed(errors))
       val request = Request[IO](Method.GET, uri"/test")
@@ -95,7 +95,7 @@ class ErrorHandlerSpec extends Specification {
       body must contain("Must be between 1 and 100")
     }
 
-    "pass through successful responses unchanged" >> {
+    "passes through successful responses unchanged" >> {
       val routes = HttpRoutes.of[IO] { case GET -> Root / "test" =>
         IO.pure(Response[IO](Status.Ok).withEntity("success"))
       }

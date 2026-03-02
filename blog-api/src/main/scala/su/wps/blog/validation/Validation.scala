@@ -24,10 +24,7 @@ object Validation {
     if (offset >= MinOffset) offset.validNec
     else ("offset" -> "Must be non-negative").invalidNec
 
-  def validatePagination(
-    limit: Int,
-    offset: Int
-  ): ValidatedNec[FieldError, (Int, Int)] =
+  def validatePagination(limit: Int, offset: Int): ValidatedNec[FieldError, (Int, Int)] =
     (validateLimit(limit), validateOffset(offset)).mapN((l, o) => (l, o))
 
   def validateCommentName(name: String): ValidatedNec[FieldError, String] =
@@ -55,11 +52,9 @@ object Validation {
     email: String,
     text: String
   ): ValidatedNec[FieldError, (String, String, String)] =
-    (
-      validateCommentName(name),
-      validateCommentEmail(email),
-      validateCommentText(text)
-    ).mapN((n, e, t) => (n, e, t))
+    (validateCommentName(name), validateCommentEmail(email), validateCommentText(text)).mapN(
+      (n, e, t) => (n, e, t)
+    )
 
   val MaxContactNameLength = 255
   val MaxContactEmailLength = 255

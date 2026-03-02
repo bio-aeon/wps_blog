@@ -22,8 +22,8 @@ class CommentRepositorySpec extends Specification with DbTest {
   implicit val genComment: Gen[models.Comment] = arbitrary[models.Comment]
   implicit val genCommentRater: Gen[models.CommentRater] = arbitrary[models.CommentRater]
 
-  "CommentRepository should" >> {
-    "return all comments for a post" >> {
+  "CommentRepository" >> {
+    "returns all comments for a post" >> {
       val user = random[models.User]
       val post = random[models.Post].copy(id = PosInt(1), authorId = user.id, isHidden = false)
       val test = for {
@@ -42,7 +42,7 @@ class CommentRepositorySpec extends Specification with DbTest {
       result must haveLength(3)
     }
 
-    "return comments ordered by created_at ASC" >> {
+    "returns comments ordered by created_at ASC" >> {
       val user = random[models.User]
       val post = random[models.Post].copy(id = PosInt(1), authorId = user.id, isHidden = false)
       val test = for {
@@ -61,7 +61,7 @@ class CommentRepositorySpec extends Specification with DbTest {
       dates mustEqual dates.sorted
     }
 
-    "return empty list for post with no comments" >> {
+    "returns empty list for post with no comments" >> {
       val user = random[models.User]
       val post = random[models.Post].copy(id = PosInt(1), authorId = user.id, isHidden = false)
       val test = for {
@@ -74,7 +74,7 @@ class CommentRepositorySpec extends Specification with DbTest {
       result must beEmpty
     }
 
-    "include nested replies (parent_id references)" >> {
+    "includes nested replies (parent_id references)" >> {
       val user = random[models.User]
       val post = random[models.Post].copy(id = PosInt(1), authorId = user.id, isHidden = false)
       val test = for {
@@ -101,7 +101,7 @@ class CommentRepositorySpec extends Specification with DbTest {
       replyComment must beSome.which(_.parentId.contains(1))
     }
 
-    "check if IP has rated a comment (not rated)" >> {
+    "checks if IP has rated a comment (not rated)" >> {
       val user = random[models.User]
       val post = random[models.Post].copy(id = PosInt(1), authorId = user.id, isHidden = false)
       val test = for {
@@ -116,7 +116,7 @@ class CommentRepositorySpec extends Specification with DbTest {
       result must beFalse
     }
 
-    "check if IP has rated a comment (already rated)" >> {
+    "checks if IP has rated a comment (already rated)" >> {
       val user = random[models.User]
       val post = random[models.Post].copy(id = PosInt(1), authorId = user.id, isHidden = false)
       val test = for {
@@ -137,7 +137,7 @@ class CommentRepositorySpec extends Specification with DbTest {
       result must beTrue
     }
 
-    "insert rater successfully" >> {
+    "inserts rater successfully" >> {
       val user = random[models.User]
       val post = random[models.Post].copy(id = PosInt(1), authorId = user.id, isHidden = false)
       val test = for {
@@ -155,7 +155,7 @@ class CommentRepositorySpec extends Specification with DbTest {
       afterInsert must beTrue
     }
 
-    "update rating by positive delta" >> {
+    "updates rating by positive delta" >> {
       val user = random[models.User]
       val post = random[models.Post].copy(id = PosInt(1), authorId = user.id, isHidden = false)
       val initialRating = 5
@@ -175,12 +175,10 @@ class CommentRepositorySpec extends Specification with DbTest {
 
       val (rowsUpdated, comments) = test.runWithIO()
       rowsUpdated mustEqual 1
-      comments.find(_.id.exists(_.value == 1)) must beSome.which(
-        _.rating == initialRating + 1
-      )
+      comments.find(_.id.exists(_.value == 1)) must beSome.which(_.rating == initialRating + 1)
     }
 
-    "update rating by negative delta" >> {
+    "updates rating by negative delta" >> {
       val user = random[models.User]
       val post = random[models.Post].copy(id = PosInt(1), authorId = user.id, isHidden = false)
       val initialRating = 5
@@ -200,12 +198,10 @@ class CommentRepositorySpec extends Specification with DbTest {
 
       val (rowsUpdated, comments) = test.runWithIO()
       rowsUpdated mustEqual 1
-      comments.find(_.id.exists(_.value == 1)) must beSome.which(
-        _.rating == initialRating - 1
-      )
+      comments.find(_.id.exists(_.value == 1)) must beSome.which(_.rating == initialRating - 1)
     }
 
-    "insert comment and return with generated id" >> {
+    "inserts comment and returns with generated id" >> {
       val user = random[models.User]
       val post = random[models.Post].copy(id = PosInt(1), authorId = user.id, isHidden = false)
       val test = for {
@@ -231,7 +227,7 @@ class CommentRepositorySpec extends Specification with DbTest {
       result.name mustEqual "Author"
     }
 
-    "insert reply comment with parent_id" >> {
+    "inserts reply comment with parent_id" >> {
       val user = random[models.User]
       val post = random[models.Post].copy(id = PosInt(1), authorId = user.id, isHidden = false)
       val test = for {

@@ -4,8 +4,7 @@ import su.wps.blog.models.domain.Config
 import su.wps.blog.repositories.sql.{ConfigSql, ConfigSqlImpl}
 import tofu.doobie.LiftConnectionIO
 
-final class ConfigRepositoryImpl[DB[_]] private (sql: ConfigSql[DB])
-    extends ConfigRepository[DB] {
+final class ConfigRepositoryImpl[DB[_]] private (sql: ConfigSql[DB]) extends ConfigRepository[DB] {
   def findByName(name: String): DB[Option[Config]] =
     sql.findByName(name)
 

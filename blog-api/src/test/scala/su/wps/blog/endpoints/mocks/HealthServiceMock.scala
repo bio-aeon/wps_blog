@@ -15,10 +15,6 @@ object HealthServiceMock {
     timestamp: ZonedDateTime
   ): HealthService[F] = new HealthService[F] {
     def check: F[HealthResponse] =
-      HealthResponse(
-        status,
-        database,
-        timestamp.format(DateTimeFormatter.ISO_INSTANT)
-      ).pure[F]
+      HealthResponse(status, database, timestamp.format(DateTimeFormatter.ISO_INSTANT)).pure[F]
   }
 }

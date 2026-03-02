@@ -11,7 +11,7 @@ class SwaggerRoutesSpec extends Specification {
   private val swaggerRoutes = SwaggerRoutes.routes[IO]
 
   "SwaggerRoutes" >> {
-    "serve Swagger UI at /docs" >> {
+    "serves Swagger UI at /docs" >> {
       val request = Request[IO](Method.GET, uri"/docs")
       val resp = swaggerRoutes.run(request).value.unsafeRunSync()
 
@@ -19,7 +19,7 @@ class SwaggerRoutesSpec extends Specification {
       resp.get.status mustEqual Status.PermanentRedirect
     }
 
-    "serve OpenAPI YAML spec at /docs/docs.yaml" >> {
+    "serves OpenAPI YAML spec at /docs/docs.yaml" >> {
       val request = Request[IO](Method.GET, uri"/docs/docs.yaml")
       val resp = swaggerRoutes.run(request).value.unsafeRunSync()
 
@@ -27,7 +27,7 @@ class SwaggerRoutesSpec extends Specification {
       resp.get.status mustEqual Status.Ok
     }
 
-    "include API title in OpenAPI spec" >> {
+    "includes API title in OpenAPI spec" >> {
       val request = Request[IO](Method.GET, uri"/docs/docs.yaml")
       val resp = swaggerRoutes.run(request).value.map(_.get).unsafeRunSync()
       val body = resp.as[String].unsafeRunSync()
@@ -35,7 +35,7 @@ class SwaggerRoutesSpec extends Specification {
       body must contain("WPS Blog API")
     }
 
-    "include API version in OpenAPI spec" >> {
+    "includes API version in OpenAPI spec" >> {
       val request = Request[IO](Method.GET, uri"/docs/docs.yaml")
       val resp = swaggerRoutes.run(request).value.map(_.get).unsafeRunSync()
       val body = resp.as[String].unsafeRunSync()
@@ -43,7 +43,7 @@ class SwaggerRoutesSpec extends Specification {
       body must contain("1.0.0")
     }
 
-    "include posts endpoints in OpenAPI spec" >> {
+    "includes posts endpoints in OpenAPI spec" >> {
       val request = Request[IO](Method.GET, uri"/docs/docs.yaml")
       val resp = swaggerRoutes.run(request).value.map(_.get).unsafeRunSync()
       val body = resp.as[String].unsafeRunSync()
@@ -53,7 +53,7 @@ class SwaggerRoutesSpec extends Specification {
       body must contain("/posts/recent")
     }
 
-    "include comments endpoints in OpenAPI spec" >> {
+    "includes comments endpoints in OpenAPI spec" >> {
       val request = Request[IO](Method.GET, uri"/docs/docs.yaml")
       val resp = swaggerRoutes.run(request).value.map(_.get).unsafeRunSync()
       val body = resp.as[String].unsafeRunSync()
@@ -61,7 +61,7 @@ class SwaggerRoutesSpec extends Specification {
       body must contain("/comments")
     }
 
-    "include tags endpoints in OpenAPI spec" >> {
+    "includes tags endpoints in OpenAPI spec" >> {
       val request = Request[IO](Method.GET, uri"/docs/docs.yaml")
       val resp = swaggerRoutes.run(request).value.map(_.get).unsafeRunSync()
       val body = resp.as[String].unsafeRunSync()
@@ -70,7 +70,7 @@ class SwaggerRoutesSpec extends Specification {
       body must contain("/tags/cloud")
     }
 
-    "include pages endpoints in OpenAPI spec" >> {
+    "includes pages endpoints in OpenAPI spec" >> {
       val request = Request[IO](Method.GET, uri"/docs/docs.yaml")
       val resp = swaggerRoutes.run(request).value.map(_.get).unsafeRunSync()
       val body = resp.as[String].unsafeRunSync()
@@ -78,7 +78,7 @@ class SwaggerRoutesSpec extends Specification {
       body must contain("/pages")
     }
 
-    "include health endpoint in OpenAPI spec" >> {
+    "includes health endpoint in OpenAPI spec" >> {
       val request = Request[IO](Method.GET, uri"/docs/docs.yaml")
       val resp = swaggerRoutes.run(request).value.map(_.get).unsafeRunSync()
       val body = resp.as[String].unsafeRunSync()
@@ -88,7 +88,7 @@ class SwaggerRoutesSpec extends Specification {
   }
 
   "ApiEndpoints" >> {
-    "define all 18 endpoints" >> {
+    "defines all 18 endpoints" >> {
       ApiEndpoints.all must have size 18
     }
   }

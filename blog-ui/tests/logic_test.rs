@@ -1,7 +1,13 @@
+use blog_ui::components::about::experience_item::format_experience_date;
 use blog_ui::components::comment::comment_form::{
     validate_comment_fields, MAX_EMAIL_LEN, MAX_NAME_LEN, MAX_TEXT_LEN,
 };
 use blog_ui::components::common::pagination::{calculate_pagination, page_url};
+use blog_ui::components::contact::contact_form::{
+    validate_contact_fields as validate_contact, MAX_CONTACT_EMAIL_LEN, MAX_CONTACT_MESSAGE_LEN,
+    MAX_CONTACT_NAME_LEN, MAX_CONTACT_SUBJECT_LEN, MIN_CONTACT_MESSAGE_LEN,
+    MIN_CONTACT_SUBJECT_LEN,
+};
 use blog_ui::components::post::format_date;
 use blog_ui::components::tag::tag_cloud::{tag_font_size, MAX_FONT_SIZE_REM, MIN_FONT_SIZE_REM};
 
@@ -192,4 +198,132 @@ fn tag_font_size_at_half_weight() {
     let size = tag_font_size(0.5);
     let expected = (MIN_FONT_SIZE_REM + MAX_FONT_SIZE_REM) / 2.0;
     assert!((size - expected).abs() < f64::EPSILON);
+}
+
+// --- format_experience_date ---
+
+#[test]
+fn format_experience_date_valid() {
+    assert_eq!(format_experience_date("2020-01-15"), "January 2020");
+}
+
+#[test]
+fn format_experience_date_december() {
+    assert_eq!(format_experience_date("2023-12-01"), "December 2023");
+}
+
+#[test]
+fn format_experience_date_invalid_returns_original() {
+    assert_eq!(format_experience_date("not-a-date"), "not-a-date");
+}
+
+#[test]
+fn format_experience_date_empty_returns_empty() {
+    assert_eq!(format_experience_date(""), "");
+}
+
+// --- validate_contact_fields ---
+
+#[test]
+fn contact_validation_all_valid() {
+    let result = validate_contact("John", "john@example.com", "Hello there", "This is a test message");
+    assert!(result.is_ok());
+}
+
+#[test]
+fn contact_validation_empty_name() {
+    let result = validate_contact("", "john@example.com", "Hello there", "This is a test message");
+    assert!(result.is_err());
+    assert!(result.unwrap_err().contains_key("name"));
+}
+
+#[test]
+fn contact_validation_name_too_long() {
+    let long_name = "a".repeat(MAX_CONTACT_NAME_LEN + 1);
+    let result = validate_contact(&long_name, "john@example.com", "Hello there", "This is a test message");
+    assert!(result.is_err());
+    assert!(result.unwrap_err()["name"].contains("at most"));
+}
+
+#[test]
+fn contact_validation_empty_email() {
+    let result = validate_contact("John", "", "Hello there", "This is a test message");
+    assert!(result.is_err());
+    assert!(result.unwrap_err().contains_key("email"));
+}
+
+#[test]
+fn contact_validation_invalid_email() {
+    let result = validate_contact("John", "not-an-email", "Hello there", "This is a test message");
+    assert!(result.is_err());
+    assert!(result.unwrap_err()["email"].contains("Invalid"));
+}
+
+#[test]
+fn contact_validation_email_too_long() {
+    let long_email = format!("a@{}.com", "b".repeat(MAX_CONTACT_EMAIL_LEN));
+    let result = validate_contact("John", &long_email, "Hello there", "This is a test message");
+    assert!(result.is_err());
+    assert!(result.unwrap_err()["email"].contains("at most"));
+}
+
+#[test]
+fn contact_validation_empty_subject() {
+    let result = validate_contact("John", "john@example.com", "", "This is a test message");
+    assert!(result.is_err());
+    assert!(result.unwrap_err().contains_key("subject"));
+}
+
+#[test]
+fn contact_validation_subject_too_short() {
+    let result = validate_contact("John", "john@example.com", "ab", "This is a test message");
+    assert!(result.is_err());
+    assert!(result.unwrap_err()["subject"].contains("at least"));
+}
+
+#[test]
+fn contact_validation_subject_too_long() {
+    let long_subject = "a".repeat(MAX_CONTACT_SUBJECT_LEN + 1);
+    let result = validate_contact("John", "john@example.com", &long_subject, "This is a test message");
+    assert!(result.is_err());
+    assert!(result.unwrap_err()["subject"].contains("at most"));
+}
+
+#[test]
+fn contact_validation_empty_message() {
+    let result = validate_contact("John", "john@example.com", "Hello there", "");
+    assert!(result.is_err());
+    assert!(result.unwrap_err().contains_key("message"));
+}
+
+#[test]
+fn contact_validation_message_too_short() {
+    let result = validate_contact("John", "john@example.com", "Hello there", "short");
+    assert!(result.is_err());
+    assert!(result.unwrap_err()["message"].contains("at least"));
+}
+
+#[test]
+fn contact_validation_message_too_long() {
+    let long_message = "a".repeat(MAX_CONTACT_MESSAGE_LEN + 1);
+    let result = validate_contact("John", "john@example.com", "Hello there", &long_message);
+    assert!(result.is_err());
+    assert!(result.unwrap_err()["message"].contains("at most"));
+}
+
+#[test]
+fn contact_validation_all_fields_invalid() {
+    let result = validate_contact("", "", "", "");
+    assert!(result.is_err());
+    let errors = result.unwrap_err();
+    assert!(errors.contains_key("name"));
+    assert!(errors.contains_key("email"));
+    assert!(errors.contains_key("subject"));
+    assert!(errors.contains_key("message"));
+}
+
+#[test]
+fn contact_validation_trims_whitespace() {
+    let result = validate_contact("  John  ", "  john@example.com  ", "  Hello there  ", "  This is a test message  ");
+    assert!(result.is_ok());
 }

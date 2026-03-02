@@ -17,65 +17,69 @@ class PageRepositorySpec extends Specification with DbTest {
 
   implicit val genPage: Gen[models.Page] = arbitrary[models.Page]
 
-  "PageRepository should" >> {
-    "findByUrl returns the page if it exists" >> {
-      val test = for {
-        page <- insertPage(url = "about")
-        result <- repo.findByUrl("about")
-      } yield result
+  "PageRepository" >> {
+    "findByUrl" >> {
+      "returns the page if it exists" >> {
+        val test = for {
+          page <- insertPage(url = "about")
+          result <- repo.findByUrl("about")
+        } yield result
 
-      val result = test.runWithIO()
-      result must beSome.which(_.url == "about")
+        val result = test.runWithIO()
+        result must beSome.which(_.url == "about")
+      }
+
+      "returns None for non-existent url" >> {
+        val test = repo.findByUrl("non-existent-url")
+
+        val result = test.runWithIO()
+        result must beNone
+      }
+
+      "returns correct page when multiple pages exist" >> {
+        val test = for {
+          _ <- insertPage(id = PosInt(1), url = "about")
+          _ <- insertPage(id = PosInt(2), url = "contact")
+          _ <- insertPage(id = PosInt(3), url = "privacy")
+          result <- repo.findByUrl("contact")
+        } yield result
+
+        val result = test.runWithIO()
+        result must beSome.which(_.url == "contact")
+      }
     }
 
-    "findByUrl returns None for non-existent url" >> {
-      val test = repo.findByUrl("non-existent-url")
+    "findAll" >> {
+      "returns all pages" >> {
+        val test = for {
+          _ <- insertPage(id = PosInt(1), url = "about")
+          _ <- insertPage(id = PosInt(2), url = "contact")
+          _ <- insertPage(id = PosInt(3), url = "privacy")
+          result <- repo.findAll
+        } yield result
 
-      val result = test.runWithIO()
-      result must beNone
-    }
+        val result = test.runWithIO()
+        result must have size 3
+      }
 
-    "findByUrl returns correct page when multiple pages exist" >> {
-      val test = for {
-        _ <- insertPage(id = PosInt(1), url = "about")
-        _ <- insertPage(id = PosInt(2), url = "contact")
-        _ <- insertPage(id = PosInt(3), url = "privacy")
-        result <- repo.findByUrl("contact")
-      } yield result
+      "returns empty list when no pages exist" >> {
+        val test = repo.findAll
 
-      val result = test.runWithIO()
-      result must beSome.which(_.url == "contact")
-    }
+        val result = test.runWithIO()
+        result must beEmpty
+      }
 
-    "findAll returns all pages" >> {
-      val test = for {
-        _ <- insertPage(id = PosInt(1), url = "about")
-        _ <- insertPage(id = PosInt(2), url = "contact")
-        _ <- insertPage(id = PosInt(3), url = "privacy")
-        result <- repo.findAll
-      } yield result
+      "orders pages by title" >> {
+        val test = for {
+          _ <- insertPage(id = PosInt(1), url = "zebra", title = "Zebra Page")
+          _ <- insertPage(id = PosInt(2), url = "about", title = "About Us")
+          _ <- insertPage(id = PosInt(3), url = "contact", title = "Contact")
+          result <- repo.findAll
+        } yield result
 
-      val result = test.runWithIO()
-      result must have size 3
-    }
-
-    "findAll returns empty list when no pages exist" >> {
-      val test = repo.findAll
-
-      val result = test.runWithIO()
-      result must beEmpty
-    }
-
-    "findAll returns pages ordered by title" >> {
-      val test = for {
-        _ <- insertPage(id = PosInt(1), url = "zebra", title = "Zebra Page")
-        _ <- insertPage(id = PosInt(2), url = "about", title = "About Us")
-        _ <- insertPage(id = PosInt(3), url = "contact", title = "Contact")
-        result <- repo.findAll
-      } yield result
-
-      val result = test.runWithIO()
-      result.map(_.title) mustEqual List("About Us", "Contact", "Zebra Page")
+        val result = test.runWithIO()
+        result.map(_.title) mustEqual List("About Us", "Contact", "Zebra Page")
+      }
     }
   }
 

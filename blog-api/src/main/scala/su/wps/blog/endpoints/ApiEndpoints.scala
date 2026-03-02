@@ -29,9 +29,7 @@ object ApiEndpoints {
       .out(jsonBody[ListItemsResult[ListPostResult]])
       .errorOut(jsonBody[ErrorResponse])
       .summary("List posts")
-      .description(
-        "List blog posts with pagination. Optionally filter by tag slug."
-      )
+      .description("List blog posts with pagination. Optionally filter by tag slug.")
       .tag(postsTag)
 
   val searchPosts: AnyEndpoint =
@@ -124,9 +122,7 @@ object ApiEndpoints {
       .in(v1 / "tags" / "cloud")
       .out(jsonBody[TagCloudResult])
       .summary("Tag cloud")
-      .description(
-        "Get tag cloud data with normalized weights for visualization."
-      )
+      .description("Get tag cloud data with normalized weights for visualization.")
       .tag(tagsTag)
 
   val getAllPages: AnyEndpoint =
@@ -134,9 +130,7 @@ object ApiEndpoints {
       .in(v1 / "pages")
       .out(jsonBody[ListItemsResult[ListPageResult]])
       .summary("List all pages")
-      .description(
-        "Get all static pages (URL and title) for navigation menus."
-      )
+      .description("Get all static pages (URL and title) for navigation menus.")
       .tag(pagesTag)
 
   val getPageByUrl: AnyEndpoint =
@@ -161,9 +155,7 @@ object ApiEndpoints {
       .in(v1 / "skills")
       .out(jsonBody[List[SkillCategoryResult]])
       .summary("List skills by category")
-      .description(
-        "Get all active skills grouped by category with proficiency levels."
-      )
+      .description("Get all active skills grouped by category with proficiency levels.")
       .tag(profileTag)
 
   val getExperiences: AnyEndpoint =
@@ -189,9 +181,7 @@ object ApiEndpoints {
       .out(jsonBody[ContactResponse])
       .errorOut(jsonBody[ErrorResponse])
       .summary("Submit contact form")
-      .description(
-        "Submit a contact form message. Rate limited per IP address."
-      )
+      .description("Submit a contact form message. Rate limited per IP address.")
       .tag(contactTag)
 
   val getAbout: AnyEndpoint =
@@ -199,9 +189,7 @@ object ApiEndpoints {
       .in(v1 / "about")
       .out(jsonBody[AboutResult])
       .summary("Get about page")
-      .description(
-        "Get aggregated about page data: profile, skills, experiences, social links."
-      )
+      .description("Get aggregated about page data: profile, skills, experiences, social links.")
       .tag(profileTag)
 
   val all: List[AnyEndpoint] = List(

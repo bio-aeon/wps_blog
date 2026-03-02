@@ -6,9 +6,8 @@ import tofu.doobie.LiftConnectionIO
 
 import java.time.ZonedDateTime
 
-final class ContactSubmissionRepositoryImpl[DB[_]] private (
-  sql: ContactSubmissionSql[DB]
-) extends ContactSubmissionRepository[DB] {
+final class ContactSubmissionRepositoryImpl[DB[_]] private (sql: ContactSubmissionSql[DB])
+    extends ContactSubmissionRepository[DB] {
   def insert(submission: ContactSubmission): DB[ContactSubmissionId] =
     sql.insert(submission)
 

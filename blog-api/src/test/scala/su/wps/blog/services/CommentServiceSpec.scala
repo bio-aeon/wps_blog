@@ -23,8 +23,8 @@ class CommentServiceSpec extends Specification {
     comment <- arbitrary[Comment].map(_.copy(id = Some(id), parentId = None))
   } yield comment
 
-  "CommentService should" >> {
-    "return comments as threaded tree structure" >> {
+  "CommentService" >> {
+    "returns comments as threaded tree structure" >> {
       val rootComment = mkComment(CommentId(1), None)
       val reply1 = mkComment(CommentId(2), Some(1))
       val reply2 = mkComment(CommentId(3), Some(1))
@@ -38,7 +38,7 @@ class CommentServiceSpec extends Specification {
       }
     }
 
-    "correctly nest deeply nested replies" >> {
+    "correctly nests deeply nested replies" >> {
       val root = mkComment(CommentId(1), None)
       val reply1 = mkComment(CommentId(2), Some(1))
       val subReply = mkComment(CommentId(3), Some(2))
@@ -53,7 +53,7 @@ class CommentServiceSpec extends Specification {
       }
     }
 
-    "return total count of all comments (flat)" >> {
+    "returns total count of all comments (flat)" >> {
       val root = mkComment(CommentId(1), None)
       val reply1 = mkComment(CommentId(2), Some(1))
       val reply2 = mkComment(CommentId(3), Some(1))
@@ -67,7 +67,7 @@ class CommentServiceSpec extends Specification {
       result must beRight.which(_.total == 5)
     }
 
-    "sort root comments by createdAt" >> {
+    "sorts root comments by createdAt" >> {
       val older = mkComment(CommentId(1), None, ZonedDateTime.now().minusHours(2))
       val newer = mkComment(CommentId(2), None, ZonedDateTime.now())
       val comments = List(newer, older)
@@ -80,7 +80,7 @@ class CommentServiceSpec extends Specification {
       }
     }
 
-    "sort replies within each parent by createdAt" >> {
+    "sorts replies within each parent by createdAt" >> {
       val root = mkComment(CommentId(1), None)
       val olderReply = mkComment(CommentId(2), Some(1), ZonedDateTime.now().minusHours(2))
       val newerReply = mkComment(CommentId(3), Some(1), ZonedDateTime.now())
@@ -95,7 +95,7 @@ class CommentServiceSpec extends Specification {
       }
     }
 
-    "return empty result for post with no comments" >> {
+    "returns empty result for post with no comments" >> {
       val service = mkService(Nil)
 
       val result = service.getCommentsForPost(PostId(1))
@@ -105,7 +105,7 @@ class CommentServiceSpec extends Specification {
       }
     }
 
-    "create a comment and return CommentResult" >> {
+    "creates a comment and returns CommentResult" >> {
       val request = CreateCommentRequest("Author", "test@example.com", "Comment text", None)
       val service = mkServiceForCreate()
 
@@ -116,7 +116,7 @@ class CommentServiceSpec extends Specification {
       }
     }
 
-    "create a reply linked to parent comment" >> {
+    "creates a reply linked to parent comment" >> {
       val request = CreateCommentRequest("Replier", "reply@example.com", "Reply text", Some(1))
       val service = mkServiceForCreate()
 
@@ -125,7 +125,7 @@ class CommentServiceSpec extends Specification {
       result must beRight.which(_.id.value > 0)
     }
 
-    "return comment with generated id after creation" >> {
+    "returns comment with generated id after creation" >> {
       val request = CreateCommentRequest("Author", "test@example.com", "Comment text", None)
       val service = mkServiceForCreate(generatedId = CommentId(42))
 
@@ -134,7 +134,7 @@ class CommentServiceSpec extends Specification {
       result must beRight.which(_.id.value == 42)
     }
 
-    "return comment with zero rating for newly created comment" >> {
+    "returns comment with zero rating for newly created comment" >> {
       val request = CreateCommentRequest("Author", "test@example.com", "Comment text", None)
       val service = mkServiceForCreate()
 
@@ -143,7 +143,7 @@ class CommentServiceSpec extends Specification {
       result must beRight.which(_.rating == 0)
     }
 
-    "return comment with empty replies list for newly created comment" >> {
+    "returns comment with empty replies list for newly created comment" >> {
       val request = CreateCommentRequest("Author", "test@example.com", "Comment text", None)
       val service = mkServiceForCreate()
 
@@ -152,7 +152,7 @@ class CommentServiceSpec extends Specification {
       result must beRight.which(_.replies.isEmpty)
     }
 
-    "rate comment successfully when not already rated" >> {
+    "rates comment successfully when not already rated" >> {
       val service = mkServiceForRating(hasRated = false)
 
       val result = service.rateComment(CommentId(1), isUpvote = true, "192.168.1.1")
@@ -160,7 +160,7 @@ class CommentServiceSpec extends Specification {
       result must beRight(())
     }
 
-    "not update rating when IP has already rated" >> {
+    "does not update rating when IP has already rated" >> {
       val service = mkServiceForRating(hasRated = true)
 
       val result = service.rateComment(CommentId(1), isUpvote = true, "192.168.1.1")
@@ -168,7 +168,7 @@ class CommentServiceSpec extends Specification {
       result must beRight(())
     }
 
-    "handle upvote (positive delta)" >> {
+    "handles upvote (positive delta)" >> {
       val service = mkServiceForRating(hasRated = false)
 
       val result = service.rateComment(CommentId(1), isUpvote = true, "192.168.1.1")
@@ -176,7 +176,7 @@ class CommentServiceSpec extends Specification {
       result must beRight(())
     }
 
-    "handle downvote (negative delta)" >> {
+    "handles downvote (negative delta)" >> {
       val service = mkServiceForRating(hasRated = false)
 
       val result = service.rateComment(CommentId(1), isUpvote = false, "192.168.1.1")

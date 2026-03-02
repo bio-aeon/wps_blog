@@ -14,8 +14,7 @@ final class ContactSubmissionSqlImpl private extends ContactSubmissionSql[Connec
   def insert(submission: ContactSubmission): ConnectionIO[ContactSubmissionId] =
     sql"""INSERT INTO contact_submissions (name, email, subject, message, ip_address)
           VALUES (${submission.name}, ${submission.email}, ${submission.subject},
-                  ${submission.message}, ${submission.ipAddress})"""
-      .update
+                  ${submission.message}, ${submission.ipAddress})""".update
       .withUniqueGeneratedKeys[ContactSubmissionId]("id")
 
   def countByIpSince(ip: String, since: ZonedDateTime): ConnectionIO[Int] =

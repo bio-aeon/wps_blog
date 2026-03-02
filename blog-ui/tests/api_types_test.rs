@@ -173,3 +173,184 @@ fn serialize_rate_comment_request() {
     let json = serde_json::to_value(&req).unwrap();
     assert_eq!(json["is_upvote"], true);
 }
+
+// --- Skill types ---
+
+#[test]
+fn deserialize_skill_category_result() {
+    let json = r#"[{
+        "category": "Backend",
+        "skills": [
+            {"id": 1, "name": "Scala", "slug": "scala", "category": "Backend", "proficiency": 90, "icon": "scala-icon"},
+            {"id": 2, "name": "Rust", "slug": "rust", "category": "Backend", "proficiency": 80, "icon": null}
+        ]
+    }]"#;
+    let result: Vec<SkillCategoryResult> = serde_json::from_str(json).unwrap();
+    assert_eq!(result.len(), 1);
+    assert_eq!(result[0].category, "Backend");
+    assert_eq!(result[0].skills.len(), 2);
+    assert_eq!(result[0].skills[0].name, "Scala");
+    assert_eq!(result[0].skills[0].proficiency, 90);
+    assert_eq!(result[0].skills[0].icon, Some("scala-icon".to_string()));
+    assert_eq!(result[0].skills[1].icon, None);
+}
+
+#[test]
+fn deserialize_skill_category_result_empty() {
+    let json = r#"[]"#;
+    let result: Vec<SkillCategoryResult> = serde_json::from_str(json).unwrap();
+    assert!(result.is_empty());
+}
+
+// --- Experience types ---
+
+#[test]
+fn deserialize_experience_result_with_end_date() {
+    let json = r#"{
+        "id": 1,
+        "company": "Acme Corp",
+        "position": "Engineer",
+        "description": "Building things",
+        "start_date": "2020-01-01",
+        "end_date": "2023-06-15",
+        "location": "Remote",
+        "company_url": "https://acme.com"
+    }"#;
+    let result: ExperienceResult = serde_json::from_str(json).unwrap();
+    assert_eq!(result.company, "Acme Corp");
+    assert_eq!(result.position, "Engineer");
+    assert_eq!(result.start_date, "2020-01-01");
+    assert_eq!(result.end_date, Some("2023-06-15".to_string()));
+    assert_eq!(result.location, Some("Remote".to_string()));
+    assert_eq!(result.company_url, Some("https://acme.com".to_string()));
+}
+
+#[test]
+fn deserialize_experience_result_without_end_date() {
+    let json = r#"{
+        "id": 2,
+        "company": "Startup Inc",
+        "position": "CTO",
+        "description": "Leading tech",
+        "start_date": "2023-07-01",
+        "end_date": null,
+        "location": null,
+        "company_url": null
+    }"#;
+    let result: ExperienceResult = serde_json::from_str(json).unwrap();
+    assert_eq!(result.company, "Startup Inc");
+    assert!(result.end_date.is_none());
+    assert!(result.location.is_none());
+    assert!(result.company_url.is_none());
+}
+
+// --- SocialLink types ---
+
+#[test]
+fn deserialize_social_link_result() {
+    let json = r#"[
+        {"id": 1, "platform": "github", "url": "https://github.com/user", "label": "GitHub", "icon": "gh-icon"},
+        {"id": 2, "platform": "linkedin", "url": "https://linkedin.com/in/user", "label": null, "icon": null}
+    ]"#;
+    let result: Vec<SocialLinkResult> = serde_json::from_str(json).unwrap();
+    assert_eq!(result.len(), 2);
+    assert_eq!(result[0].platform, "github");
+    assert_eq!(result[0].label, Some("GitHub".to_string()));
+    assert!(result[1].label.is_none());
+}
+
+// --- Contact types ---
+
+#[test]
+fn serialize_create_contact_request() {
+    let req = CreateContactRequest {
+        name: "John".to_string(),
+        email: "john@example.com".to_string(),
+        subject: "Hello".to_string(),
+        message: "Test message".to_string(),
+        website: None,
+    };
+    let json = serde_json::to_value(&req).unwrap();
+    assert_eq!(json["name"], "John");
+    assert_eq!(json["subject"], "Hello");
+    assert!(json.get("website").is_none());
+}
+
+#[test]
+fn serialize_create_contact_request_with_honeypot() {
+    let req = CreateContactRequest {
+        name: "John".to_string(),
+        email: "john@example.com".to_string(),
+        subject: "Hello".to_string(),
+        message: "Test message".to_string(),
+        website: Some("spam".to_string()),
+    };
+    let json = serde_json::to_value(&req).unwrap();
+    assert_eq!(json["website"], "spam");
+}
+
+#[test]
+fn deserialize_contact_response() {
+    let json = r#"{"message": "Thank you for your message!"}"#;
+    let result: ContactResponse = serde_json::from_str(json).unwrap();
+    assert_eq!(result.message, "Thank you for your message!");
+}
+
+// --- About types ---
+
+#[test]
+fn deserialize_about_result() {
+    let json = r#"{
+        "profile": {
+            "name": "John",
+            "title": "Engineer",
+            "photo_url": "https://example.com/photo.jpg",
+            "resume_url": "https://example.com/resume.pdf",
+            "bio": "About me text"
+        },
+        "skills": [{
+            "category": "Backend",
+            "skills": [{"id": 1, "name": "Scala", "slug": "scala", "category": "Backend", "proficiency": 90, "icon": null}]
+        }],
+        "experiences": [{
+            "id": 1,
+            "company": "Acme",
+            "position": "Engineer",
+            "description": "Work",
+            "start_date": "2020-01-01",
+            "end_date": null,
+            "location": "Remote",
+            "company_url": null
+        }],
+        "social_links": [
+            {"id": 1, "platform": "github", "url": "https://github.com", "label": "GitHub", "icon": null}
+        ]
+    }"#;
+    let result: AboutResult = serde_json::from_str(json).unwrap();
+    assert_eq!(result.profile.name, "John");
+    assert_eq!(result.profile.title, "Engineer");
+    assert_eq!(result.profile.bio, "About me text");
+    assert_eq!(result.skills.len(), 1);
+    assert_eq!(result.experiences.len(), 1);
+    assert_eq!(result.social_links.len(), 1);
+}
+
+#[test]
+fn deserialize_about_result_empty_sections() {
+    let json = r#"{
+        "profile": {
+            "name": "",
+            "title": "",
+            "photo_url": "",
+            "resume_url": "",
+            "bio": ""
+        },
+        "skills": [],
+        "experiences": [],
+        "social_links": []
+    }"#;
+    let result: AboutResult = serde_json::from_str(json).unwrap();
+    assert!(result.skills.is_empty());
+    assert!(result.experiences.is_empty());
+    assert!(result.social_links.is_empty());
+}

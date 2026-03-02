@@ -34,15 +34,6 @@ object ExperienceResult {
       "location",
       "company_url"
     )(r =>
-      (
-        r.id,
-        r.company,
-        r.position,
-        r.description,
-        r.startDate,
-        r.endDate,
-        r.location,
-        r.companyUrl
-      )
+      (r.id, r.company, r.position, r.description, r.startDate, r.endDate, r.location, r.companyUrl)
     )
 }

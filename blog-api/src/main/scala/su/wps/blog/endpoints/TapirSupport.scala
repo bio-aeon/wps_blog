@@ -37,9 +37,7 @@ object TapirSupport {
     Decoder.forProduct4("name", "text", "created_at", "tags")(PostResult.apply)
 
   implicit val listPostResultDecoder: Decoder[ListPostResult] =
-    Decoder.forProduct5("id", "name", "short_text", "created_at", "tags")(
-      ListPostResult.apply
-    )
+    Decoder.forProduct5("id", "name", "short_text", "created_at", "tags")(ListPostResult.apply)
 
   implicit def listItemsResultDecoder[T: Decoder]: Decoder[ListItemsResult[T]] =
     Decoder.forProduct2("items", "total")(ListItemsResult.apply[T])
@@ -157,9 +155,7 @@ object TapirSupport {
     }
 
   implicit val skillResultDecoder: Decoder[SkillResult] =
-    Decoder.forProduct6("id", "name", "slug", "category", "proficiency", "icon")(
-      SkillResult.apply
-    )
+    Decoder.forProduct6("id", "name", "slug", "category", "proficiency", "icon")(SkillResult.apply)
 
   implicit val skillCategoryResultDecoder: Decoder[SkillCategoryResult] =
     Decoder.forProduct2("category", "skills")(SkillCategoryResult.apply)
@@ -183,12 +179,8 @@ object TapirSupport {
     Decoder.forProduct1("message")(ContactResponse.apply)
 
   implicit val profileResultDecoder: Decoder[ProfileResult] =
-    Decoder.forProduct5("name", "title", "photo_url", "resume_url", "bio")(
-      ProfileResult.apply
-    )
+    Decoder.forProduct5("name", "title", "photo_url", "resume_url", "bio")(ProfileResult.apply)
 
   implicit val aboutResultDecoder: Decoder[AboutResult] =
-    Decoder.forProduct4("profile", "skills", "experiences", "social_links")(
-      AboutResult.apply
-    )
+    Decoder.forProduct4("profile", "skills", "experiences", "social_links")(AboutResult.apply)
 }

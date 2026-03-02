@@ -50,9 +50,7 @@ final class ContactServiceImpl[F[_]: Monad, DB[_]: Monad] private (
           isRead = false,
           createdAt = ZonedDateTime.now()
         )
-        contactRepo.insert(submission).thrushK(xa.trans).map(_ =>
-          ContactResponse(SuccessMessage)
-        )
+        contactRepo.insert(submission).thrushK(xa.trans).map(_ => ContactResponse(SuccessMessage))
       }
     }
   }
