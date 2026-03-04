@@ -13,6 +13,13 @@
   padding-top: $space-8;
   padding-bottom: $space-12;
 
+  // Tablet: narrower sidebar
+  @media (max-width: $bp-lg) and (min-width: $bp-md + 1) {
+    grid-template-columns: 1fr 220px;
+    gap: $space-6;
+  }
+
+  // Mobile: single column
   @media (max-width: $bp-md) {
     grid-template-columns: 1fr;
     padding: $space-6 0;
@@ -25,4 +32,30 @@
 
 .content {
   min-width: 0;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+// Skip-to-content link
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: $space-4;
+  z-index: 200;
+  padding: $space-2 $space-4;
+  background: $color-primary;
+  color: $color-bg;
+  font-size: $font-size-sm;
+  font-weight: 600;
+  border-radius: 0 0 $border-radius-sm $border-radius-sm;
+  text-decoration: none;
+  transition: top 0.2s ease;
+
+  &:focus {
+    top: 0;
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+  }
 }

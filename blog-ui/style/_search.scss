@@ -45,7 +45,11 @@
     color: $color-text-muted;
     cursor: pointer;
     line-height: 1;
-    padding: 0 $space-1;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 
     &:hover {
         color: $color-text;

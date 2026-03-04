@@ -1,0 +1,35 @@
+/* Tokyo Night Dark theme for Prism.js */
+code[class*="language-"],
+pre[class*="language-"] {
+  background: #16161e;
+  color: #a9b1d6;
+}
+.token.keyword,
+.token.selector { color: #bb9af7; }
+.token.builtin { color: #7aa2f7; }
+.token.string,
+.token.char,
+.token.attr-value { color: #9ece6a; }
+.token.number,
+.token.boolean,
+.token.constant { color: #ff9e64; }
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata { color: #565f89; font-style: italic; }
+.token.function { color: #7aa2f7; }
+.token.class-name { color: #e0af68; }
+.token.variable { color: #c0caf5; }
+.token.namespace { color: #7dcfff; }
+.token.tag { color: #f7768e; }
+.token.attr-name { color: #bb9af7; }
+.token.symbol { color: #7dcfff; }
+.token.operator { color: #89ddff; }
+.token.punctuation { color: #a9b1d6; }
+.token.parameter { color: #c0caf5; }
+.token.property { color: #7dcfff; }
+.token.regex { color: #f7768e; }
+.token.deleted { color: #f7768e; }
+.token.inserted { color: #9ece6a; }
+.token.atrule { color: #bb9af7; }
+.token.important { color: #f7768e; font-weight: bold; }

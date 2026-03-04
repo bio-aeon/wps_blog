@@ -9,7 +9,7 @@ pub fn ErrorDisplay(
     #[prop(optional)] back_label: Option<String>,
 ) -> impl IntoView {
     view! {
-        <div class="error-display">
+        <div class="error-display" role="alert">
             <h2 class="error-display-title">{title}</h2>
             <p class="error-display-message">{message}</p>
             <div class="error-display-actions">

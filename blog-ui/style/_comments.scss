@@ -75,8 +75,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.5rem;
-    height: 1.5rem;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
     border: 1px solid $color-border;
     border-radius: $border-radius-sm;
     background: $color-bg;
@@ -109,7 +109,10 @@
     color: $color-text-muted;
     font-size: $font-size-sm;
     cursor: pointer;
-    padding: 0;
+    padding: $space-2 $space-3;
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
 
     &:hover {
         color: $color-primary;

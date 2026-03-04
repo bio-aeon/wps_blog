@@ -184,6 +184,8 @@ pub fn ContactForm() -> impl IntoView {
                     type="text"
                     id="contact-name"
                     placeholder="Your name"
+                    required
+                    aria-required="true"
                     maxlength=MAX_CONTACT_NAME_LEN.to_string()
                     prop:value=move || name.get()
                     on:input=move |ev| set_name.set(event_target_value(&ev))
@@ -199,6 +201,8 @@ pub fn ContactForm() -> impl IntoView {
                     type="email"
                     id="contact-email"
                     placeholder="your@email.com"
+                    required
+                    aria-required="true"
                     maxlength=MAX_CONTACT_EMAIL_LEN.to_string()
                     prop:value=move || email.get()
                     on:input=move |ev| set_email.set(event_target_value(&ev))
@@ -214,6 +218,8 @@ pub fn ContactForm() -> impl IntoView {
                     type="text"
                     id="contact-subject"
                     placeholder="Subject"
+                    required
+                    aria-required="true"
                     maxlength=MAX_CONTACT_SUBJECT_LEN.to_string()
                     prop:value=move || subject.get()
                     on:input=move |ev| set_subject.set(event_target_value(&ev))
@@ -228,6 +234,8 @@ pub fn ContactForm() -> impl IntoView {
                 <textarea
                     id="contact-message"
                     placeholder="Your message..."
+                    required
+                    aria-required="true"
                     maxlength=MAX_CONTACT_MESSAGE_LEN.to_string()
                     rows="6"
                     prop:value=move || message.get()

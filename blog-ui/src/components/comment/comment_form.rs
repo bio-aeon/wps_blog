@@ -127,6 +127,8 @@ pub fn CommentForm(
                     type="text"
                     id="comment-name"
                     placeholder="Your name"
+                    required
+                    aria-required="true"
                     maxlength=MAX_NAME_LEN.to_string()
                     prop:value=move || name.get()
                     on:input=move |ev| set_name.set(event_target_value(&ev))
@@ -141,6 +143,8 @@ pub fn CommentForm(
                     type="email"
                     id="comment-email"
                     placeholder="your@email.com"
+                    required
+                    aria-required="true"
                     maxlength=MAX_EMAIL_LEN.to_string()
                     prop:value=move || email.get()
                     on:input=move |ev| set_email.set(event_target_value(&ev))
@@ -154,6 +158,8 @@ pub fn CommentForm(
                 <textarea
                     id="comment-text"
                     placeholder="Write your comment..."
+                    required
+                    aria-required="true"
                     maxlength=MAX_TEXT_LEN.to_string()
                     rows="4"
                     prop:value=move || text.get()

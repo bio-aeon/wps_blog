@@ -75,16 +75,16 @@ pub fn CommentItem(
                         class="rate-btn upvote"
                         on:click=handle_upvote
                         disabled=move || voted.get()
-                        title="Upvote"
+                        aria-label="Upvote this comment"
                     >
                         "+"
                     </button>
-                    <span class="rating-value">{move || rating.get()}</span>
+                    <span class="rating-value" aria-label=move || format!("Rating: {}", rating.get())>{move || rating.get()}</span>
                     <button
                         class="rate-btn downvote"
                         on:click=handle_downvote
                         disabled=move || voted.get()
-                        title="Downvote"
+                        aria-label="Downvote this comment"
                     >
                         "-"
                     </button>

@@ -48,17 +48,18 @@ pub fn SearchBar(
     };
 
     view! {
-        <form class="search-bar" on:submit=handle_submit>
+        <form class="search-bar" role="search" on:submit=handle_submit>
             <div class="search-input-wrapper">
                 <input
-                    type="text"
+                    type="search"
                     class="search-input"
                     placeholder="Search posts..."
+                    aria-label="Search posts"
                     prop:value=move || query.get()
                     on:input=handle_input
                 />
                 <Show when=move || !query.get().is_empty()>
-                    <button type="button" class="search-clear" on:click=handle_clear>
+                    <button type="button" class="search-clear" aria-label="Clear search" on:click=handle_clear>
                         "×"
                     </button>
                 </Show>

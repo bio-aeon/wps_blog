@@ -5,10 +5,10 @@ use blog_ui::components::comment::comment_form::{
 use blog_ui::components::common::pagination::{calculate_pagination, page_url};
 use blog_ui::components::contact::contact_form::{
     validate_contact_fields as validate_contact, MAX_CONTACT_EMAIL_LEN, MAX_CONTACT_MESSAGE_LEN,
-    MAX_CONTACT_NAME_LEN, MAX_CONTACT_SUBJECT_LEN, MIN_CONTACT_MESSAGE_LEN,
-    MIN_CONTACT_SUBJECT_LEN,
+    MAX_CONTACT_NAME_LEN, MAX_CONTACT_SUBJECT_LEN,
 };
-use blog_ui::components::post::format_date;
+use blog_ui::components::post::toc::{extract_headings, inject_heading_ids, slugify, TocEntry};
+use blog_ui::components::post::{estimate_reading_time, format_date, strip_html_tags};
 use blog_ui::components::tag::tag_cloud::{tag_font_size, MAX_FONT_SIZE_REM, MIN_FONT_SIZE_REM};
 
 // --- format_date ---
@@ -326,4 +326,182 @@ fn contact_validation_all_fields_invalid() {
 fn contact_validation_trims_whitespace() {
     let result = validate_contact("  John  ", "  john@example.com  ", "  Hello there  ", "  This is a test message  ");
     assert!(result.is_ok());
+}
+
+// --- strip_html_tags ---
+
+#[test]
+fn strip_html_tags_removes_simple_tags() {
+    assert_eq!(strip_html_tags("<p>Hello <b>world</b></p>"), "Hello world");
+}
+
+#[test]
+fn strip_html_tags_returns_plain_text_as_is() {
+    assert_eq!(strip_html_tags("no tags here"), "no tags here");
+}
+
+#[test]
+fn strip_html_tags_handles_empty_string() {
+    assert_eq!(strip_html_tags(""), "");
+}
+
+#[test]
+fn strip_html_tags_handles_nested_tags() {
+    assert_eq!(
+        strip_html_tags("<div><p><strong>deep</strong></p></div>"),
+        "deep"
+    );
+}
+
+#[test]
+fn strip_html_tags_preserves_whitespace_between_tags() {
+    assert_eq!(strip_html_tags("<p>one</p> <p>two</p>"), "one two");
+}
+
+// --- estimate_reading_time ---
+
+#[test]
+fn reading_time_minimum_one_minute() {
+    assert_eq!(estimate_reading_time("short"), 1);
+}
+
+#[test]
+fn reading_time_empty_content() {
+    assert_eq!(estimate_reading_time(""), 1);
+}
+
+#[test]
+fn reading_time_strips_html() {
+    let html = format!("<p>{}</p>", "word ".repeat(400));
+    assert_eq!(estimate_reading_time(&html), 2);
+}
+
+#[test]
+fn reading_time_exactly_200_words() {
+    let text = "word ".repeat(200);
+    assert_eq!(estimate_reading_time(&text), 1);
+}
+
+#[test]
+fn reading_time_1000_words() {
+    let text = "word ".repeat(1000);
+    assert_eq!(estimate_reading_time(&text), 5);
+}
+
+// --- slugify ---
+
+#[test]
+fn slugify_simple_text() {
+    assert_eq!(slugify("Hello World"), "hello-world");
+}
+
+#[test]
+fn slugify_special_characters() {
+    assert_eq!(slugify("What's New?"), "whats-new");
+}
+
+#[test]
+fn slugify_multiple_spaces_and_dashes() {
+    assert_eq!(slugify("hello   world--foo"), "hello-world-foo");
+}
+
+#[test]
+fn slugify_numbers_preserved() {
+    assert_eq!(slugify("Chapter 3 Overview"), "chapter-3-overview");
+}
+
+#[test]
+fn slugify_uppercase_lowered() {
+    assert_eq!(slugify("ALL CAPS TITLE"), "all-caps-title");
+}
+
+#[test]
+fn slugify_underscores_become_dashes() {
+    assert_eq!(slugify("hello_world"), "hello-world");
+}
+
+// --- extract_headings ---
+
+#[test]
+fn extract_headings_returns_empty_for_few_headings() {
+    let html = "<h2>One</h2><h2>Two</h2>";
+    assert!(extract_headings(html).is_empty());
+}
+
+#[test]
+fn extract_headings_returns_entries_for_three_or_more() {
+    let html = "<h2>First</h2><h2>Second</h2><h3>Third</h3>";
+    let entries = extract_headings(html);
+    assert_eq!(entries.len(), 3);
+    assert_eq!(
+        entries[0],
+        TocEntry { id: "first".into(), text: "First".into(), level: 2 }
+    );
+    assert_eq!(entries[2].level, 3);
+}
+
+#[test]
+fn extract_headings_strips_inner_html() {
+    let html = "<h2><strong>Bold</strong> Title</h2><h2>Two</h2><h2>Three</h2>";
+    let entries = extract_headings(html);
+    assert_eq!(entries[0].text, "Bold Title");
+}
+
+#[test]
+fn extract_headings_ignores_h1_and_h5() {
+    let html = "<h1>Top</h1><h5>Small</h5><h2>A</h2><h2>B</h2><h2>C</h2>";
+    let entries = extract_headings(html);
+    assert_eq!(entries.len(), 3);
+    assert_eq!(entries[0].text, "A");
+}
+
+#[test]
+fn extract_headings_mixed_levels() {
+    let html = "<h2>Intro</h2><h3>Sub</h3><h4>Detail</h4>";
+    let entries = extract_headings(html);
+    assert_eq!(entries.len(), 3);
+    assert_eq!(entries[0].level, 2);
+    assert_eq!(entries[1].level, 3);
+    assert_eq!(entries[2].level, 4);
+}
+
+// --- inject_heading_ids ---
+
+#[test]
+fn inject_heading_ids_adds_ids() {
+    let html = "<h2>Hello World</h2>";
+    assert_eq!(
+        inject_heading_ids(html),
+        "<h2 id=\"hello-world\">Hello World</h2>"
+    );
+}
+
+#[test]
+fn inject_heading_ids_preserves_existing_id() {
+    let html = "<h2 id=\"custom\">Title</h2>";
+    assert_eq!(inject_heading_ids(html), html);
+}
+
+#[test]
+fn inject_heading_ids_leaves_h1_alone() {
+    let html = "<h1>Top Level</h1>";
+    assert_eq!(inject_heading_ids(html), html);
+}
+
+#[test]
+fn inject_heading_ids_handles_h3_and_h4() {
+    let html = "<h3>Sub</h3><h4>Detail</h4>";
+    assert_eq!(
+        inject_heading_ids(html),
+        "<h3 id=\"sub\">Sub</h3><h4 id=\"detail\">Detail</h4>"
+    );
+}
+
+#[test]
+fn inject_heading_ids_preserves_surrounding_content() {
+    let html = "<p>Before</p><h2>Title</h2><p>After</p>";
+    assert_eq!(
+        inject_heading_ids(html),
+        "<p>Before</p><h2 id=\"title\">Title</h2><p>After</p>"
+    );
 }

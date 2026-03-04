@@ -108,6 +108,21 @@
   50% { opacity: 0.4; }
 }
 
+// Tablet: compact sidebar
+@media (max-width: $bp-lg) and (min-width: $bp-md + 1) {
+  .sidebar-section {
+    padding: $space-3;
+  }
+
+  .sidebar-heading {
+    font-size: 0.8rem;
+  }
+
+  .recent-posts-list a {
+    font-size: 0.82rem;
+  }
+}
+
 @media (max-width: $bp-md) {
   .sidebar {
     position: static;

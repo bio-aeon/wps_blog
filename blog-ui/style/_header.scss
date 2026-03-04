@@ -113,6 +113,22 @@
   }
 }
 
+// Tablet: tighter spacing, hide search
+@media (max-width: $bp-lg) and (min-width: $bp-md + 1) {
+  .header-search {
+    display: none;
+  }
+
+  .header-nav {
+    gap: $space-4;
+
+    a {
+      font-size: 0.85rem;
+    }
+  }
+}
+
+// Mobile: nav links hide, mobile menu toggle and min-height tap targets
 @media (max-width: $bp-md) {
   .site-header {
     padding: 0 $space-6;
@@ -136,6 +152,9 @@
     a {
       padding: $space-3 $space-4;
       font-size: $font-size-base;
+      min-height: 2.75rem;
+      display: flex;
+      align-items: center;
     }
   }
 

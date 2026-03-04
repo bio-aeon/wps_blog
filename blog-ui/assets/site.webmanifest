@@ -1,0 +1,10 @@
+{
+  "name": "WPS Blog",
+  "short_name": "WPS",
+  "icons": [
+    { "src": "/assets/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ],
+  "theme_color": "#1a1b26",
+  "background_color": "#1a1b26",
+  "display": "standalone"
+}

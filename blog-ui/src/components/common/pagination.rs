@@ -78,27 +78,27 @@ pub fn Pagination(
     let pages: Vec<i32> = (start..=end).collect();
 
     view! {
-        <nav class="pagination">
+        <nav class="pagination" aria-label="Pagination">
             {if current_page > 1 {
-                view! { <a href=prev_url class="pagination-link">"← Prev"</a> }.into_any()
+                view! { <a href=prev_url class="pagination-link" aria-label="Previous page">"← Prev"</a> }.into_any()
             } else {
-                view! { <span class="pagination-link disabled">"← Prev"</span> }.into_any()
+                view! { <span class="pagination-link disabled" aria-disabled="true">"← Prev"</span> }.into_any()
             }}
             {pages
                 .into_iter()
                 .map(|page| {
                     let url = page_url(page);
                     if page == current_page {
-                        view! { <span class="pagination-link active">{page}</span> }.into_any()
+                        view! { <span class="pagination-link active" aria-current="page" aria-label=format!("Page {}", page)>{page}</span> }.into_any()
                     } else {
-                        view! { <a href=url class="pagination-link">{page}</a> }.into_any()
+                        view! { <a href=url class="pagination-link" aria-label=format!("Go to page {}", page)>{page}</a> }.into_any()
                     }
                 })
                 .collect_view()}
             {if current_page < total_pages {
-                view! { <a href=next_url class="pagination-link">"Next →"</a> }.into_any()
+                view! { <a href=next_url class="pagination-link" aria-label="Next page">"Next →"</a> }.into_any()
             } else {
-                view! { <span class="pagination-link disabled">"Next →"</span> }.into_any()
+                view! { <span class="pagination-link disabled" aria-disabled="true">"Next →"</span> }.into_any()
             }}
         </nav>
     }

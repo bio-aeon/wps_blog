@@ -25,6 +25,10 @@
     color: $color-text-muted;
     text-decoration: none;
     font-size: 0.82rem;
+    padding: $space-2 $space-3;
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
 
     &:hover {
       color: $color-primary;

@@ -19,9 +19,16 @@ pub fn Header() -> impl IntoView {
         <header class="site-header">
             <div class="header-inner">
                 <a class="logo" href="/">"WPS Blog"</a>
-                <div
+                <nav
                     class="header-nav"
+                    id="main-nav"
+                    aria-label="Main navigation"
                     class:open=move || mobile_menu_open.get()
+                    on:keydown=move |ev: leptos::ev::KeyboardEvent| {
+                        if ev.key() == "Escape" {
+                            mobile_menu_open.set(false);
+                        }
+                    }
                 >
                     <a
                         href="/"
@@ -58,17 +65,22 @@ pub fn Header() -> impl IntoView {
                     >
                         "Contact"
                     </a>
-                    <div class="header-search">
-                        <input type="text" placeholder="Search..." />
+                    <div class="header-search" role="search">
+                        <input
+                            type="search"
+                            placeholder="Search..."
+                            aria-label="Search posts"
+                        />
                     </div>
-                </div>
+                </nav>
                 <button
                     class="mobile-menu-toggle"
                     aria-label="Toggle menu"
                     aria-expanded=move || mobile_menu_open.get().to_string()
+                    aria-controls="main-nav"
                     on:click=toggle_menu
                 >
-                    <span class="hamburger"></span>
+                    <span class="hamburger" aria-hidden="true"></span>
                 </button>
             </div>
         </header>

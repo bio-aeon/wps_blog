@@ -1,7 +1,8 @@
 use crate::api::{get_post, increment_view};
 use crate::components::comment::CommentThread;
 use crate::components::common::{ErrorDisplay, PostDetailSkeleton};
-use crate::components::post::{PostContent, PostMeta};
+use crate::components::post::toc::{extract_headings, inject_heading_ids, TableOfContents};
+use crate::components::post::{estimate_reading_time, PostContent, PostMeta};
 use leptos::prelude::*;
 use leptos_meta::Title;
 use leptos_router::hooks::use_params_map;
@@ -36,12 +37,21 @@ pub fn PostDetailPage() -> impl IntoView {
             {move || Suspend::new(async move {
                 match post_resource.await {
                     Ok(post) => {
+                        let reading_time = estimate_reading_time(&post.text);
+                        let headings = extract_headings(&post.text);
+                        let html_with_ids = inject_heading_ids(&post.text);
+
                         view! {
                             <Title text=format!("{} - WPS Blog", &post.name)/>
                             <article class="post-detail">
                                 <h1 class="post-title">{post.name.clone()}</h1>
-                                <PostMeta created_at=post.created_at.clone() tags=post.tags.clone()/>
-                                <PostContent html_content=post.text.clone()/>
+                                <PostMeta
+                                    created_at=post.created_at.clone()
+                                    tags=post.tags.clone()
+                                    reading_time=reading_time
+                                />
+                                <TableOfContents entries=headings/>
+                                <PostContent html_content=html_with_ids/>
                             </article>
                             <CommentThread post_id=id()/>
                             <a href="/posts" class="back-link">"← Back to posts"</a>
