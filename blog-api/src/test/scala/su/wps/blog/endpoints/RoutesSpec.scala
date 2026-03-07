@@ -48,7 +48,7 @@ class RoutesSpec extends Specification {
       val respBody = resp.as[String].unsafeRunSync()
 
       resp.status mustEqual Status.Ok
-      respBody mustEqual """{"name":"name","text":"text","created_at":"2001-01-01T09:15:00Z","tags":[{"id":1,"name":"scala","slug":"scala"}]}"""
+      respBody mustEqual """{"id":1,"name":"name","text":"text","created_at":"2001-01-01T09:15:00Z","tags":[{"id":1,"name":"scala","slug":"scala"}],"meta_title":null,"meta_description":null,"meta_keywords":null}"""
     }
 
     "returns 200 with filtered posts when tag parameter is provided" >> {
@@ -726,6 +726,44 @@ class RoutesSpec extends Specification {
       respBody must contain("\"code\":\"VALIDATION_ERROR\"")
     }
 
+    "returns 200 with feed data for GET /feed" >> {
+      val feedData = FeedResult(
+        List(
+          FeedPostItem(
+            PostId(1),
+            "Test Post",
+            "Short text",
+            Some("Meta desc"),
+            testTimestamp,
+            testTags
+          )
+        ),
+        List(FeedPageItem("about", "About Us", testTimestamp)),
+        List(FeedTagItem("scala", "scala"))
+      )
+      val routes = buildRoutes[IO](feedResult = feedData)
+      val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/feed"))
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+      val respBody = resp.as[String].unsafeRunSync()
+
+      resp.status mustEqual Status.Ok
+      respBody must contain("\"posts\":")
+      respBody must contain("\"pages\":")
+      respBody must contain("\"tags\":")
+    }
+
+    "returns empty feed when no data exists" >> {
+      val routes = buildRoutes[IO]()
+      val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/feed"))
+
+      val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
+      val respBody = resp.as[String].unsafeRunSync()
+
+      resp.status mustEqual Status.Ok
+      respBody mustEqual """{"posts":[],"pages":[],"tags":[]}"""
+    }
+
     "returns 200 with about page data for GET /about" >> {
       val routes = buildRoutes[IO](aboutResult = testAbout)
       val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/about"))
@@ -748,7 +786,7 @@ class RoutesSpec extends Specification {
   )
 
   private val testSinglePost =
-    PostResult("name", "text", testTimestamp, testTags)
+    PostResult(PostId(1), "name", "text", testTimestamp, testTags, None, None, None)
 
   private val testTaggedPosts = List(
     ListPostResult(PostId(2), "scala-post", "scala-text", testTimestamp, testTags)
@@ -894,7 +932,8 @@ class RoutesSpec extends Specification {
     skillsResult: List[SkillCategoryResult] = Nil,
     experiencesResult: List[ExperienceResult] = Nil,
     socialLinksResult: List[SocialLinkResult] = Nil,
-    aboutResult: AboutResult = AboutResult(ProfileResult("", "", "", "", ""), Nil, Nil, Nil)
+    aboutResult: AboutResult = AboutResult(ProfileResult("", "", "", "", ""), Nil, Nil, Nil),
+    feedResult: FeedResult = FeedResult(Nil, Nil, Nil)
   ): Routes[F] = RoutesImpl.create[F](
     PostServiceMock.create[F](
       allPostsResult,
@@ -911,7 +950,8 @@ class RoutesSpec extends Specification {
     ExperienceServiceMock.create[F](experiencesResult),
     SocialLinkServiceMock.create[F](socialLinksResult),
     ContactServiceMock.create[F](),
-    AboutServiceMock.create[F](aboutResult)
+    AboutServiceMock.create[F](aboutResult),
+    FeedServiceMock.create[F](feedResult)
   )
 
 }

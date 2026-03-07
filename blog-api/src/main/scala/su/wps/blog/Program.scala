@@ -54,6 +54,8 @@ object Program {
           val socialLinkService = SocialLinkServiceImpl.create[F, xa.DB](socialLinkRepo, xa)
           val contactService =
             ContactServiceImpl.create[F, xa.DB](contactRepo, configRepo, xa)
+          val feedService =
+            FeedServiceImpl.create[F, xa.DB](postRepo, tagRepo, pageRepo, xa)
           val aboutService = AboutServiceImpl.create[F, xa.DB](
             skillRepo,
             experienceRepo,
@@ -74,7 +76,8 @@ object Program {
             experienceService,
             socialLinkService,
             contactService,
-            aboutService
+            aboutService,
+            feedService
           )
         }
         routesWithErrorHandling = ErrorHandler(routes.routes)

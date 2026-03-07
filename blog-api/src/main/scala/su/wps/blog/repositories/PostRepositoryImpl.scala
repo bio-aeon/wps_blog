@@ -37,6 +37,9 @@ final class PostRepositoryImpl[DB[_]] private (sql: PostSql[DB]) extends PostRep
 
   def findRecent(count: Int): DB[List[Post]] =
     sql.findRecent(count)
+
+  def findAllVisible: DB[List[Post]] =
+    sql.findAllVisible
 }
 
 object PostRepositoryImpl {

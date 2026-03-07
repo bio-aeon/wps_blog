@@ -29,4 +29,6 @@ trait PostSql[DB[_]] {
   def searchPostsCount(query: String): DB[Int]
 
   def findRecent(count: Int): DB[List[Post]]
+
+  def findAllVisible: DB[List[Post]]
 }

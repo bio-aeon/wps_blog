@@ -16,7 +16,8 @@ object PostRepositoryMock {
     incrementViewsResult: Int = 1,
     searchPostsResult: List[Post] = Nil,
     searchPostsCountResult: Int = 0,
-    findRecentResult: List[Post] = Nil
+    findRecentResult: List[Post] = Nil,
+    findAllVisibleResult: List[Post] = Nil
   )(implicit DB: Applicative[DB]): PostRepository[DB] = new PostRepository[DB] {
     def findAllWithLimitAndOffset(limit: Int, offset: Int): DB[List[Post]] =
       DB.pure(findAllResult)
@@ -43,5 +44,7 @@ object PostRepositoryMock {
     def searchPostsCount(query: String): DB[Int] = DB.pure(searchPostsCountResult)
 
     def findRecent(count: Int): DB[List[Post]] = DB.pure(findRecentResult)
+
+    def findAllVisible: DB[List[Post]] = DB.pure(findAllVisibleResult)
   }
 }

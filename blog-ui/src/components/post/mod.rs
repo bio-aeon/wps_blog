@@ -12,8 +12,14 @@ use chrono::{DateTime, FixedOffset};
 /// Formats an ISO 8601 date string into "Month DD, YYYY" display format.
 /// Returns the original string if parsing fails.
 pub fn format_date(iso_date: &str) -> String {
-    DateTime::parse_from_rfc3339(iso_date)
-        .or_else(|_| DateTime::parse_from_str(iso_date, "%Y-%m-%dT%H:%M:%S%.f%:z"))
+    // Strip Java/Scala ZonedDateTime zone annotation like "[Etc/UTC]"
+    let date_str = iso_date
+        .find('[')
+        .map(|i| &iso_date[..i])
+        .unwrap_or(iso_date);
+
+    DateTime::parse_from_rfc3339(date_str)
+        .or_else(|_| DateTime::parse_from_str(date_str, "%Y-%m-%dT%H:%M:%S%.f%:z"))
         .map(|dt: DateTime<FixedOffset>| dt.format("%B %d, %Y").to_string())
         .unwrap_or_else(|_| iso_date.to_string())
 }

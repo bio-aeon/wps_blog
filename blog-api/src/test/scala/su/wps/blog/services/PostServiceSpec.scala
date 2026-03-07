@@ -183,6 +183,39 @@ class PostServiceSpec extends Specification {
       service.recentPosts(5) must beRight.which(_.isEmpty)
     }
 
+    "maps non-empty SEO fields to Some" >> {
+      val post = random[Post].copy(
+        metaTitle = "Title",
+        metaDescription = "Description",
+        metaKeywords = "kw1, kw2"
+      )
+      val service = mkService(findByIdResult = Some(post))
+
+      service.postById(post.nonEmptyId) must beRight.which { r =>
+        r.metaTitle.contains("Title") &&
+        r.metaDescription.contains("Description") &&
+        r.metaKeywords.contains("kw1, kw2")
+      }
+    }
+
+    "maps empty SEO fields to None" >> {
+      val post = random[Post].copy(metaTitle = "", metaDescription = "", metaKeywords = "")
+      val service = mkService(findByIdResult = Some(post))
+
+      service.postById(post.nonEmptyId) must beRight.which { r =>
+        r.metaTitle.isEmpty && r.metaDescription.isEmpty && r.metaKeywords.isEmpty
+      }
+    }
+
+    "maps whitespace-only SEO fields to None" >> {
+      val post = random[Post].copy(metaTitle = "  ", metaDescription = " \t ", metaKeywords = "  ")
+      val service = mkService(findByIdResult = Some(post))
+
+      service.postById(post.nonEmptyId) must beRight.which { r =>
+        r.metaTitle.isEmpty && r.metaDescription.isEmpty && r.metaKeywords.isEmpty
+      }
+    }
+
     "handles recent posts with no tags" >> {
       val posts = random[Post](3)
       val service = mkService(findRecentResult = posts, findByPostIdsResult = Nil)

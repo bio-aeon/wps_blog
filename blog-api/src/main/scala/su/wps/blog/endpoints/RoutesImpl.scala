@@ -26,7 +26,8 @@ final class RoutesImpl[F[_]: Concurrent] private (
   experienceService: ExperienceService[F],
   socialLinkService: SocialLinkService[F],
   contactService: ContactService[F],
-  aboutService: AboutService[F]
+  aboutService: AboutService[F],
+  feedService: FeedService[F]
 ) extends Http4sDsl[F]
     with Routes[F] {
   import RoutesImpl._
@@ -115,6 +116,9 @@ final class RoutesImpl[F[_]: Concurrent] private (
 
     case GET -> Root / "about" =>
       aboutService.getAboutPage.map(_.asJson).flatMap(Ok(_))
+
+    case GET -> Root / "feed" =>
+      feedService.getFeed.map(_.asJson).flatMap(Ok(_))
   }
 
   private val systemRoutes: HttpRoutes[F] = HttpRoutes.of[F] { case GET -> Root / "health" =>
@@ -182,7 +186,8 @@ object RoutesImpl {
     experienceService: ExperienceService[F],
     socialLinkService: SocialLinkService[F],
     contactService: ContactService[F],
-    aboutService: AboutService[F]
+    aboutService: AboutService[F],
+    feedService: FeedService[F]
   ): RoutesImpl[F] =
     new RoutesImpl[F](
       postService,
@@ -194,6 +199,7 @@ object RoutesImpl {
       experienceService,
       socialLinkService,
       contactService,
-      aboutService
+      aboutService,
+      feedService
     )
 }

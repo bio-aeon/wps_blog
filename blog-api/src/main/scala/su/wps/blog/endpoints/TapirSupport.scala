@@ -34,7 +34,16 @@ object TapirSupport {
     Decoder.forProduct3("id", "name", "slug")(TagResult.apply)
 
   implicit val postResultDecoder: Decoder[PostResult] =
-    Decoder.forProduct4("name", "text", "created_at", "tags")(PostResult.apply)
+    Decoder.forProduct8(
+      "id",
+      "name",
+      "text",
+      "created_at",
+      "tags",
+      "meta_title",
+      "meta_description",
+      "meta_keywords"
+    )(PostResult.apply)
 
   implicit val listPostResultDecoder: Decoder[ListPostResult] =
     Decoder.forProduct5("id", "name", "short_text", "created_at", "tags")(ListPostResult.apply)
@@ -183,4 +192,24 @@ object TapirSupport {
 
   implicit val aboutResultDecoder: Decoder[AboutResult] =
     Decoder.forProduct4("profile", "skills", "experiences", "social_links")(AboutResult.apply)
+
+  // Feed schemas and decoders
+  implicit val feedPostItemSchema: Schema[FeedPostItem] = Schema.derived
+  implicit val feedPageItemSchema: Schema[FeedPageItem] = Schema.derived
+  implicit val feedTagItemSchema: Schema[FeedTagItem] = Schema.derived
+  implicit val feedResultSchema: Schema[FeedResult] = Schema.derived
+
+  implicit val feedPostItemDecoder: Decoder[FeedPostItem] =
+    Decoder.forProduct6("id", "name", "short_text", "meta_description", "created_at", "tags")(
+      FeedPostItem.apply
+    )
+
+  implicit val feedPageItemDecoder: Decoder[FeedPageItem] =
+    Decoder.forProduct3("url", "title", "created_at")(FeedPageItem.apply)
+
+  implicit val feedTagItemDecoder: Decoder[FeedTagItem] =
+    Decoder.forProduct2("name", "slug")(FeedTagItem.apply)
+
+  implicit val feedResultDecoder: Decoder[FeedResult] =
+    Decoder.forProduct3("posts", "pages", "tags")(FeedResult.apply)
 }

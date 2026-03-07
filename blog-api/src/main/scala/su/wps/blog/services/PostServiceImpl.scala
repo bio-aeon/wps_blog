@@ -20,7 +20,7 @@ final class PostServiceImpl[F[_]: Monad, DB[_]: Monad] private (
   xa: Txr[F, DB]
 )(implicit R: Raise[F, AppErr])
     extends PostService[F] {
-  import PostServiceImpl._
+  import ServiceHelpers._
 
   private def enrichPostsWithTags(posts: List[Post]): DB[(List[Post], Map[PostId, List[Tag]])] = {
     val postIds = posts.flatMap(_.id)
@@ -75,7 +75,11 @@ final class PostServiceImpl[F[_]: Monad, DB[_]: Monad] private (
           case Some(post) =>
             post
               .into[PostResult]
+              .withFieldComputed(_.id, _.nonEmptyId)
               .withFieldConst(_.tags, tagsToTagResults(tags))
+              .withFieldComputed(_.metaTitle, p => nonEmpty(p.metaTitle))
+              .withFieldComputed(_.metaDescription, p => nonEmpty(p.metaDescription))
+              .withFieldComputed(_.metaKeywords, p => nonEmpty(p.metaKeywords))
               .transform
               .pure[F]
           case None =>
@@ -103,9 +107,6 @@ final class PostServiceImpl[F[_]: Monad, DB[_]: Monad] private (
 }
 
 object PostServiceImpl {
-  private def tagsToTagResults(tags: List[Tag]): List[TagResult] =
-    tags.map(t => t.into[TagResult].withFieldComputed(_.id, _.nonEmptyId).transform)
-
   def create[F[_]: Monad: Raise[*[_], AppErr], DB[_]: Monad](
     postRepo: PostRepository[DB],
     tagRepo: TagRepository[DB],

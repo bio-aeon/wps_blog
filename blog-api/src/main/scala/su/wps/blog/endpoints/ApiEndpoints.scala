@@ -16,6 +16,7 @@ object ApiEndpoints {
   private val systemTag = "System"
   private val profileTag = "Profile"
   private val contactTag = "Contact"
+  private val feedTag = "Feed"
 
   val getPosts: AnyEndpoint =
     endpoint.get
@@ -192,6 +193,14 @@ object ApiEndpoints {
       .description("Get aggregated about page data: profile, skills, experiences, social links.")
       .tag(profileTag)
 
+  val getFeed: AnyEndpoint =
+    endpoint.get
+      .in(v1 / "feed")
+      .out(jsonBody[FeedResult])
+      .summary("Get feed data")
+      .description("Get all posts, pages, and tags for sitemap/RSS/feed generation.")
+      .tag(feedTag)
+
   val all: List[AnyEndpoint] = List(
     getPosts,
     searchPosts,
@@ -210,6 +219,7 @@ object ApiEndpoints {
     getExperiences,
     getSocialLinks,
     submitContact,
-    getAbout
+    getAbout,
+    getFeed
   )
 }
