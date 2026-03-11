@@ -5,11 +5,33 @@ import pureconfig.ConfigReader
 import pureconfig.error.CannotConvert
 import pureconfig.generic.auto.exportReader
 
-final case class AppConfig(db: DbConfig, httpServer: HttpServerConfig)
+final case class AppConfig(db: DbConfig, httpServer: HttpServerConfig, cache: CacheConfig)
 
-final case class DbConfig(driver: String, url: String, username: String, password: String)
+final case class DbConfig(
+  driver: String,
+  url: String,
+  username: String,
+  password: String,
+  pool: PoolConfig
+)
+
+final case class PoolConfig(
+  maximumPoolSize: Int,
+  minimumIdle: Int,
+  idleTimeoutMs: Long,
+  maxLifetimeMs: Long,
+  connectionTimeoutMs: Long,
+  leakDetectionThresholdMs: Long
+)
 
 final case class HttpServerConfig(interface: Ipv4Address, port: Port)
+
+final case class CacheConfig(
+  tagsTtlSeconds: Int,
+  aboutTtlSeconds: Int,
+  feedTtlSeconds: Int,
+  maxEntries: Long
+)
 
 object AppConfig {
   implicit val ipv4AddressReader: ConfigReader[Ipv4Address] = ConfigReader[String].emap(x =>

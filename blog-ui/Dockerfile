@@ -1,6 +1,8 @@
 FROM rust:1.92-bookworm AS builder
 
-RUN rustup target add wasm32-unknown-unknown && \
+RUN apt-get update && apt-get install -y --no-install-recommends binaryen && \
+    rm -rf /var/lib/apt/lists/* && \
+    rustup target add wasm32-unknown-unknown && \
     cargo install cargo-leptos --locked
 
 WORKDIR /app

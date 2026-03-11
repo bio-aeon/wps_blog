@@ -20,6 +20,8 @@ object Dependencies {
     val testcontainersScala = "0.44.1"
     val testcontainersPostgresql = "2.0.3"
     val tapir = "1.9.0"
+    val caffeine = "3.1.8"
+    val prometheusSimpleclient = "0.16.0"
   }
 
   val http4sEmberServer = "org.http4s" %% "http4s-ember-server" % Versions.http4s
@@ -47,6 +49,11 @@ object Dependencies {
   val testcontainersPostgresql =
     "org.testcontainers" % "testcontainers-postgresql" % Versions.testcontainersPostgresql
   val specs2 = "org.specs2" %% "specs2-core" % Versions.specs2
+  val caffeine = "com.github.ben-manes.caffeine" % "caffeine" % Versions.caffeine
+  val prometheusSimpleclient =
+    "io.prometheus" % "simpleclient" % Versions.prometheusSimpleclient
+  val prometheusCommon =
+    "io.prometheus" % "simpleclient_common" % Versions.prometheusSimpleclient
   val tapirJsonCirce = "com.softwaremill.sttp.tapir" %% "tapir-json-circe" % Versions.tapir
   val tapirHttp4sServer = "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % Versions.tapir
   val tapirSwaggerUiBundle =

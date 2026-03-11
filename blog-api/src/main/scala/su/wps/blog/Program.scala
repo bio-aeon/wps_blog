@@ -12,14 +12,14 @@ import doobie.util.ExecutionContexts
 import fly4s.*
 import fly4s.data.*
 import fs2.io.net.Network
-import org.http4s.HttpRoutes
+import org.http4s.{HttpApp, HttpRoutes}
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.server.Server
-import org.http4s.server.middleware.CORS
+import org.http4s.server.middleware.{CORS, GZip}
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 import pureconfig.ConfigSource
-import su.wps.blog.config.{AppConfig, DbConfig, HttpServerConfig}
-import su.wps.blog.endpoints.{ErrorHandler, RoutesImpl, SwaggerRoutes}
+import su.wps.blog.config.*
+import su.wps.blog.endpoints.*
 import su.wps.blog.repositories.*
 import su.wps.blog.repositories.sql.Slf4jDoobieLogHandler
 import su.wps.blog.services.*
@@ -35,7 +35,10 @@ object Program {
         appConfig <- parseAppConfig[F].toResource
         _ <- runMigrations[F](appConfig.db)
         xa <- mkTransactor[F](appConfig.db)
+        cacheService = CacheServiceImpl.create[F](appConfig.cache.maxEntries)
         routes = {
+          import scala.concurrent.duration.*
+
           val postRepo = PostRepositoryImpl.create[xa.DB]
           val tagRepo = TagRepositoryImpl.create[xa.DB]
           val commentRepo = CommentRepositoryImpl.create[xa.DB]
@@ -47,22 +50,33 @@ object Program {
           val configRepo = ConfigRepositoryImpl.create[xa.DB]
           val postService = PostServiceImpl.create[F, xa.DB](postRepo, tagRepo, xa)
           val commentService = CommentServiceImpl.create[F, xa.DB](commentRepo, xa)
-          val tagService = TagServiceImpl.create[F, xa.DB](tagRepo, xa)
+          val tagService: TagService[F] = CachingTagService.create[F](
+            TagServiceImpl.create[F, xa.DB](tagRepo, xa),
+            cacheService,
+            appConfig.cache.tagsTtlSeconds.seconds
+          )
           val pageService = PageServiceImpl.create[F, xa.DB](pageRepo, xa)
           val skillService = SkillServiceImpl.create[F, xa.DB](skillRepo, xa)
           val experienceService = ExperienceServiceImpl.create[F, xa.DB](experienceRepo, xa)
           val socialLinkService = SocialLinkServiceImpl.create[F, xa.DB](socialLinkRepo, xa)
           val contactService =
             ContactServiceImpl.create[F, xa.DB](contactRepo, configRepo, xa)
-          val feedService =
-            FeedServiceImpl.create[F, xa.DB](postRepo, tagRepo, pageRepo, xa)
-          val aboutService = AboutServiceImpl.create[F, xa.DB](
-            skillRepo,
-            experienceRepo,
-            socialLinkRepo,
-            configRepo,
-            pageRepo,
-            xa
+          val feedService: FeedService[F] = CachingFeedService.create[F](
+            FeedServiceImpl.create[F, xa.DB](postRepo, tagRepo, pageRepo, xa),
+            cacheService,
+            appConfig.cache.feedTtlSeconds.seconds
+          )
+          val aboutService: AboutService[F] = CachingAboutService.create[F](
+            AboutServiceImpl.create[F, xa.DB](
+              skillRepo,
+              experienceRepo,
+              socialLinkRepo,
+              configRepo,
+              pageRepo,
+              xa
+            ),
+            cacheService,
+            appConfig.cache.aboutTtlSeconds.seconds
           )
           val dbCheck = xa.trans(doobie.FC.isValid(1)).handleError(_ => false)
           val healthService = HealthServiceImpl.create[F](dbCheck)
@@ -81,8 +95,10 @@ object Program {
           )
         }
         routesWithErrorHandling = ErrorHandler(routes.routes)
+        routesWithCaching = CacheMiddleware(routesWithErrorHandling)
         swaggerRoutes = SwaggerRoutes.routes[F]
-        allRoutes = swaggerRoutes <+> routesWithErrorHandling
+        metricsRoutes = MetricsRoutes.routes[F]
+        allRoutes = metricsRoutes <+> swaggerRoutes <+> routesWithCaching
         _ <- mkHttpServer[F](appConfig.httpServer, allRoutes)
         _ <- Resource.make(F.unit)(_ => logger.info("Releasing application resources"))
       } yield ()
@@ -110,7 +126,7 @@ object Program {
     config: DbConfig
   )(implicit F: Async[F]): Resource[F, Txr.Plain[F]] =
     for {
-      ce <- ExecutionContexts.fixedThreadPool[F](32)
+      ce <- ExecutionContexts.fixedThreadPool[F](config.pool.maximumPoolSize)
       tr <- HikariTransactor
         .newHikariTransactor[F](
           config.driver,
@@ -121,9 +137,22 @@ object Program {
           Some(Slf4jDoobieLogHandler.create[F])
         )
       _ <- tr
-        .configure(ds => F.delay(ds.setAutoCommit(false)) *> F.delay(ds.setMaximumPoolSize(32)))
+        .configure { ds =>
+          F.delay {
+            ds.setAutoCommit(false)
+            ds.setMaximumPoolSize(config.pool.maximumPoolSize)
+            ds.setMinimumIdle(config.pool.minimumIdle)
+            ds.setIdleTimeout(config.pool.idleTimeoutMs)
+            ds.setMaxLifetime(config.pool.maxLifetimeMs)
+            ds.setConnectionTimeout(config.pool.connectionTimeoutMs)
+            ds.setLeakDetectionThreshold(config.pool.leakDetectionThresholdMs)
+          }
+        }
         .toResource
     } yield Txr.plain(tr)
+
+  @annotation.nowarn("msg=deprecated")
+  private def gzipApp[F[_]: Async](app: HttpApp[F]): HttpApp[F] = GZip(app)
 
   private def mkHttpServer[F[_]: Async: Network](
     serverConfig: HttpServerConfig,
@@ -133,6 +162,8 @@ object Program {
       .default[F]
       .withHost(serverConfig.interface)
       .withPort(serverConfig.port)
-      .withHttpApp(CORS.policy.withAllowOriginAll(routes.orNotFound))
+      .withHttpApp(
+        MetricsMiddleware(gzipApp(CORS.policy.withAllowOriginAll(routes.orNotFound)))
+      )
       .build
 }

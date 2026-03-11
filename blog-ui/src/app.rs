@@ -19,6 +19,10 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
                 <link rel="icon" type="image/x-icon" href="/assets/favicon.ico"/>
                 <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png"/>
                 <link rel="manifest" href="/assets/site.webmanifest"/>
+                <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com"/>
+                <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin="anonymous"/>
+                <link rel="preload" href="/pkg/blog-ui.css" as_="style"/>
+                <link rel="preload" href="/pkg/blog-ui.wasm" as_="fetch" type_="application/wasm" crossorigin="anonymous"/>
                 <link rel="stylesheet" href="/assets/vendor/tokyo-night.css"/>
                 <AutoReload options=options.clone()/>
                 <HydrationScripts options=options.clone()/>
@@ -26,19 +30,8 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
             </head>
             <body>
                 <App/>
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual defer></script>
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-rust.min.js" defer></script>
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-scala.min.js" defer></script>
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js" defer></script>
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-haskell.min.js" defer></script>
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-idris.min.js" defer></script>
+                <script>"if('serviceWorker' in navigator){navigator.serviceWorker.register('/assets/sw.js')}"</script>
+                <script src="/assets/rum.js" defer></script>
             </body>
         </html>
     }
