@@ -1,3 +1,5 @@
 Django==5.0.1
 psycopg2-binary==2.9.9
 model-bakery==1.20.4
+gunicorn==23.0.0
+whitenoise==6.8.2

@@ -98,7 +98,8 @@ object Program {
         routesWithCaching = CacheMiddleware(routesWithErrorHandling)
         swaggerRoutes = SwaggerRoutes.routes[F]
         metricsRoutes = MetricsRoutes.routes[F]
-        allRoutes = metricsRoutes <+> swaggerRoutes <+> routesWithCaching
+        livenessRoutes = LivenessRoutes.routes[F]
+        allRoutes = livenessRoutes <+> metricsRoutes <+> swaggerRoutes <+> routesWithCaching
         _ <- mkHttpServer[F](appConfig.httpServer, allRoutes)
         _ <- Resource.make(F.unit)(_ => logger.info("Releasing application resources"))
       } yield ()
@@ -163,7 +164,9 @@ object Program {
       .withHost(serverConfig.interface)
       .withPort(serverConfig.port)
       .withHttpApp(
-        MetricsMiddleware(gzipApp(CORS.policy.withAllowOriginAll(routes.orNotFound)))
+        CorrelationIdMiddleware(
+          MetricsMiddleware(gzipApp(CORS.policy.withAllowOriginAll(routes.orNotFound)))
+        )
       )
       .build
 }

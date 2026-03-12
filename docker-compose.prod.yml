@@ -1,0 +1,62 @@
+services:
+  postgres:
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+  blog-api:
+    image: ghcr.io/${GITHUB_REPOSITORY:-wps}/blog-api:latest
+    build: !reset null
+    restart: unless-stopped
+    environment:
+      DB_URL: "jdbc:postgresql://postgres:5432/wps_blog_db"
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      JAVA_OPTS: "-Dlogback.configurationFile=logback-prod.xml"
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  blog-ui:
+    image: ghcr.io/${GITHUB_REPOSITORY:-wps}/blog-ui:latest
+    build: !reset null
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  blog-admin:
+    image: ghcr.io/${GITHUB_REPOSITORY:-wps}/blog-admin:latest
+    build: !reset null
+    restart: unless-stopped
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS}
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  db-seed:
+    profiles: ["seed"]
+
+  db-backup:
+    image: postgres:18
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      DB_HOST: postgres
+    volumes:
+      - ./docker/backup.sh:/backup.sh:ro
+      - backups:/backups
+    entrypoint: ["/bin/bash", "/backup.sh"]
+    profiles: ["backup"]
+
+volumes:
+  pgdata:
+  backups:

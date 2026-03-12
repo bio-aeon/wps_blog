@@ -45,6 +45,7 @@ lazy val root = (project in file("."))
       caffeine,
       prometheusSimpleclient,
       prometheusCommon,
+      logstashLogbackEncoder,
       scalacheckShapeless % Test,
       testcontainersScala % Test,
       testcontainersPostgresql % Test,

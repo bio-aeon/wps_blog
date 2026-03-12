@@ -1,0 +1,65 @@
+name: Build & Publish Docker Images
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  build-api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: ./blog-api
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository }}/blog-api:latest
+            ${{ env.REGISTRY }}/${{ github.repository }}/blog-api:${{ github.sha }}
+
+  build-ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: ./blog-ui
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository }}/blog-ui:latest
+            ${{ env.REGISTRY }}/${{ github.repository }}/blog-ui:${{ github.sha }}
+
+  build-admin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: ./blog-admin
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository }}/blog-admin:latest
+            ${{ env.REGISTRY }}/${{ github.repository }}/blog-admin:${{ github.sha }}

@@ -22,6 +22,7 @@ object Dependencies {
     val tapir = "1.9.0"
     val caffeine = "3.1.8"
     val prometheusSimpleclient = "0.16.0"
+    val logstashLogbackEncoder = "8.0"
   }
 
   val http4sEmberServer = "org.http4s" %% "http4s-ember-server" % Versions.http4s
@@ -54,6 +55,8 @@ object Dependencies {
     "io.prometheus" % "simpleclient" % Versions.prometheusSimpleclient
   val prometheusCommon =
     "io.prometheus" % "simpleclient_common" % Versions.prometheusSimpleclient
+  val logstashLogbackEncoder =
+    "net.logstash.logback" % "logstash-logback-encoder" % Versions.logstashLogbackEncoder
   val tapirJsonCirce = "com.softwaremill.sttp.tapir" %% "tapir-json-circe" % Versions.tapir
   val tapirHttp4sServer = "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % Versions.tapir
   val tapirSwaggerUiBundle =
