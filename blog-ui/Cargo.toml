@@ -8,7 +8,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 leptos = { version = "0.8.5" }
-leptos_meta = { version = "0.8.5" }
+leptos_meta = { version = "0.8.6" }
 leptos_router = { version = "0.8.5" }
 leptos_actix = { version = "0.8.5", optional = true }
 actix-web = { version = "4", optional = true, features = ["macros", "compress-gzip", "compress-brotli"] }
