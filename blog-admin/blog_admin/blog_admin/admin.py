@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.db.models import Count
-from django.utils.html import format_html
+from django.utils.html import format_html, mark_safe
 
 from blog_admin.models import (
     User, Post, Tag, PostTag, Comment, Page, Config,
@@ -86,8 +86,8 @@ class PostAdmin(admin.ModelAdmin):
     @admin.display(description='Status', ordering='is_hidden')
     def publication_status(self, obj):
         if obj.is_hidden:
-            return format_html('<span style="color: #e74c3c;">Draft</span>')
-        return format_html('<span style="color: #27ae60;">Published</span>')
+            return mark_safe('<span style="color: #e74c3c;">Draft</span>')
+        return mark_safe('<span style="color: #27ae60;">Published</span>')
 
     @admin.display(description='Tags')
     def tag_list(self, obj):
