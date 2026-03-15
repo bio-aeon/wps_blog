@@ -54,14 +54,11 @@ impl BlogApiClient {
         offset: i32,
         tag: Option<&str>,
     ) -> Result<ListItemsResult<ListPostResult>, ApiError> {
-        let mut req = self
-            .client
-            .get(self.url("/v1/posts"))
-            .query(&[("limit", limit.to_string()), ("offset", offset.to_string())]);
+        let mut url = format!("{}/v1/posts?limit={}&offset={}", self.base_url, limit, offset);
         if let Some(tag) = tag {
-            req = req.query(&[("tag", tag)]);
+            url.push_str(&format!("&tag={}", urlencoding::encode(tag)));
         }
-        let resp = req.send().await?;
+        let resp = self.client.get(url).send().await?;
         self.handle_response(resp).await
     }
 
@@ -71,16 +68,14 @@ impl BlogApiClient {
         limit: i32,
         offset: i32,
     ) -> Result<ListItemsResult<ListPostResult>, ApiError> {
-        let resp = self
-            .client
-            .get(self.url("/v1/posts/search"))
-            .query(&[
-                ("q", query.to_string()),
-                ("limit", limit.to_string()),
-                ("offset", offset.to_string()),
-            ])
-            .send()
-            .await?;
+        let url = format!(
+            "{}/v1/posts/search?q={}&limit={}&offset={}",
+            self.base_url,
+            urlencoding::encode(query),
+            limit,
+            offset
+        );
+        let resp = self.client.get(url).send().await?;
         self.handle_response(resp).await
     }
 
@@ -88,12 +83,8 @@ impl BlogApiClient {
         &self,
         count: i32,
     ) -> Result<Vec<ListPostResult>, ApiError> {
-        let resp = self
-            .client
-            .get(self.url("/v1/posts/recent"))
-            .query(&[("count", count.to_string())])
-            .send()
-            .await?;
+        let url = format!("{}/v1/posts/recent?count={}", self.base_url, count);
+        let resp = self.client.get(url).send().await?;
         self.handle_response(resp).await
     }
 
