@@ -42,3 +42,8 @@ jobs:
     - name: Run tests
       working-directory: ./blog-ui
       run: cargo test
+    - name: Install cargo-audit
+      run: cargo install cargo-audit --locked || true
+    - name: Audit Rust dependencies
+      working-directory: ./blog-ui
+      run: cargo audit

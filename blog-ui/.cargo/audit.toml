@@ -1,0 +1,5 @@
+# Transitive dependency through actix-web -> cookie -> time.
+# Cannot be fixed until actix-web upgrades cookie to a version using time >=0.3.47.
+# DoS via stack exhaustion (medium severity) — acceptable risk for a personal blog.
+[advisories]
+ignore = ["RUSTSEC-2026-0009"]

@@ -5,7 +5,13 @@ import pureconfig.ConfigReader
 import pureconfig.error.CannotConvert
 import pureconfig.generic.auto.exportReader
 
-final case class AppConfig(db: DbConfig, httpServer: HttpServerConfig, cache: CacheConfig)
+final case class AppConfig(
+  db: DbConfig,
+  httpServer: HttpServerConfig,
+  cache: CacheConfig,
+  cors: CorsConfig,
+  rateLimit: RateLimitConfig
+)
 
 final case class DbConfig(
   driver: String,
@@ -33,6 +39,10 @@ final case class CacheConfig(
   maxEntries: Long
 )
 
+final case class CorsConfig(allowedOrigins: List[String])
+
+final case class RateLimitConfig(maxRequests: Int, windowSeconds: Long)
+
 object AppConfig {
   implicit val ipv4AddressReader: ConfigReader[Ipv4Address] = ConfigReader[String].emap(x =>
     Ipv4Address.fromString(x).toRight(CannotConvert(x, "Ipv4Address", "Incorrect interface"))
@@ -42,6 +52,11 @@ object AppConfig {
     ConfigReader[Int].emap(x =>
       Port.fromInt(x).toRight(CannotConvert(x.toString, "Port", "Incorrect port"))
     )
+
+  implicit val corsConfigReader: ConfigReader[CorsConfig] =
+    ConfigReader[String]
+      .map(s => CorsConfig(s.split(",").map(_.trim).filter(_.nonEmpty).toList))
+      .orElse(exportReader[CorsConfig].instance)
 
   implicit val reader: ConfigReader[AppConfig] = exportReader[AppConfig].instance
 }

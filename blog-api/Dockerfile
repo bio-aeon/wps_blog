@@ -12,11 +12,16 @@ RUN sbt stage
 FROM eclipse-temurin:17-jre-jammy
 
 RUN apt-get update && apt-get install -y --no-install-recommends curl && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    groupadd -r appgroup && useradd -r -g appgroup -s /usr/sbin/nologin appuser
 
 WORKDIR /app
 
 COPY --from=builder /app/target/universal/stage/ .
+
+RUN chown -R appuser:appgroup /app
+
+USER appuser
 
 EXPOSE 9000
 

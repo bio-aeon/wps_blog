@@ -31,19 +31,35 @@ pub fn PostContent(html_content: String) -> impl IntoView {
                     }
 
                     var prismBase = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0';
-                    var langs = [
-                        'rust','java','scala','python','sql','bash',
-                        'typescript','json','yaml','toml','haskell','idris'
-                    ];
+                    var langSri = {
+                        'rust':       'sha384-JyDgFjMbyrE/TGiEUSXW3CLjQOySrsoiUNAlXTFdIsr/XUfaB7E+eYlR+tGQ9bCO',
+                        'java':       'sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D',
+                        'scala':      'sha384-Ny05Z+BdncAWg13NKXaiXEbxcdi9Ej7lvfA0H405vGxx3gyoh1cc64pNrXx9jN/y',
+                        'python':     'sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m',
+                        'sql':        'sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp',
+                        'bash':       'sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15',
+                        'typescript': 'sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx',
+                        'json':       'sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY',
+                        'yaml':       'sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8',
+                        'toml':       'sha384-Uh6n44GRSQeQSMIIfAjlbqojWR7F5KALTHNsspuLDrNCsXpDPRdZbJ5A42AP/cA4',
+                        'haskell':    'sha384-sybwp8DLY2QpJ1Cwga2P6wyppZICCcuahD9IxUFS12CqhCOq2TIWUyd4BuD0MZgO',
+                        'idris':      'sha384-amoTET8h6aBgr1Anx3IeiOFml2EeQwNgTEYrLPJNnypbaA59whMmT5i7Lay9wgvw'
+                    };
+                    var coreSri = 'sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt';
 
                     var core = document.createElement('script');
                     core.src = prismBase + '/prism.min.js';
+                    core.integrity = coreSri;
+                    core.crossOrigin = 'anonymous';
                     core.setAttribute('data-manual', '');
                     core.onload = function() {
                         var loaded = 0;
+                        var langs = Object.keys(langSri);
                         langs.forEach(function(lang) {
                             var s = document.createElement('script');
                             s.src = prismBase + '/components/prism-' + lang + '.min.js';
+                            s.integrity = langSri[lang];
+                            s.crossOrigin = 'anonymous';
                             s.onload = function() {
                                 loaded++;
                                 if (loaded === langs.length) {

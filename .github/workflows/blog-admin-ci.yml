@@ -28,3 +28,8 @@ jobs:
     - name: Run tests
       working-directory: ./blog-admin/blog_admin
       run: python manage.py test blog_admin.tests --settings=blog_admin.test_settings
+    - name: Audit Python dependencies
+      working-directory: ./blog-admin
+      run: |
+        pip install pip-audit
+        pip-audit -r requirements.txt

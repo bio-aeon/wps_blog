@@ -12,10 +12,11 @@ import doobie.util.ExecutionContexts
 import fly4s.*
 import fly4s.data.*
 import fs2.io.net.Network
-import org.http4s.{HttpApp, HttpRoutes}
+import org.http4s.{HttpApp, HttpRoutes, Method}
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.server.Server
-import org.http4s.server.middleware.{CORS, GZip}
+import org.http4s.server.middleware.CORS
+import org.typelevel.ci.CIString
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 import pureconfig.ConfigSource
 import su.wps.blog.config.*
@@ -24,6 +25,8 @@ import su.wps.blog.repositories.*
 import su.wps.blog.repositories.sql.Slf4jDoobieLogHandler
 import su.wps.blog.services.*
 import tofu.doobie.transactor.Txr
+
+import scala.concurrent.duration.*
 
 object Program {
 
@@ -37,8 +40,6 @@ object Program {
         xa <- mkTransactor[F](appConfig.db)
         cacheService = CacheServiceImpl.create[F](appConfig.cache.maxEntries)
         routes = {
-          import scala.concurrent.duration.*
-
           val postRepo = PostRepositoryImpl.create[xa.DB]
           val tagRepo = TagRepositoryImpl.create[xa.DB]
           val commentRepo = CommentRepositoryImpl.create[xa.DB]
@@ -100,7 +101,8 @@ object Program {
         metricsRoutes = MetricsRoutes.routes[F]
         livenessRoutes = LivenessRoutes.routes[F]
         allRoutes = livenessRoutes <+> metricsRoutes <+> swaggerRoutes <+> routesWithCaching
-        _ <- mkHttpServer[F](appConfig.httpServer, allRoutes)
+        httpApp = mkHttpApp[F](appConfig, allRoutes)
+        _ <- mkHttpServer[F](appConfig.httpServer, httpApp)
         _ <- Resource.make(F.unit)(_ => logger.info("Releasing application resources"))
       } yield ()
       _ <- appResource.onError { case err =>
@@ -153,20 +155,57 @@ object Program {
     } yield Txr.plain(tr)
 
   @annotation.nowarn("msg=deprecated")
-  private def gzipApp[F[_]: Async](app: HttpApp[F]): HttpApp[F] = GZip(app)
+  private def gzipApp[F[_]: Async](app: HttpApp[F]): HttpApp[F] =
+    org.http4s.server.middleware.GZip(app)
+
+  private def mkHttpApp[F[_]: Async](
+    appConfig: AppConfig,
+    routes: HttpRoutes[F]
+  ): HttpApp[F] = {
+    val corsPolicy =
+      if (appConfig.cors.allowedOrigins.isEmpty) {
+        CORS.policy.withAllowOriginAll
+      } else {
+        val allowedSet = appConfig.cors.allowedOrigins.toSet
+        CORS.policy
+          .withAllowOriginHost { origin =>
+            val base = s"${origin.scheme.value}://${origin.host.renderString}"
+            val rendered = origin.port.fold(base)(p => s"$base:$p")
+            allowedSet.contains(rendered)
+          }
+          .withAllowMethodsIn(Set(Method.GET, Method.POST, Method.OPTIONS))
+          .withAllowHeadersIn(
+            Set(
+              CIString("Content-Type"),
+              CIString("Accept"),
+              CIString("X-Request-Id")
+            )
+          )
+          .withMaxAge(3600.seconds)
+      }
+
+    val corsApp: HttpApp[F] = corsPolicy(routes.orNotFound)
+    val applyRateLimit: HttpApp[F] => HttpApp[F] = RateLimitMiddleware[F](
+      appConfig.rateLimit.maxRequests,
+      appConfig.rateLimit.windowSeconds
+    )
+    val rateLimited: HttpApp[F] = applyRateLimit(corsApp)
+
+    CorrelationIdMiddleware(
+      SecurityHeadersMiddleware(
+        MetricsMiddleware(gzipApp(rateLimited))
+      )
+    )
+  }
 
   private def mkHttpServer[F[_]: Async: Network](
     serverConfig: HttpServerConfig,
-    routes: HttpRoutes[F]
+    app: HttpApp[F]
   ): Resource[F, Server] =
     EmberServerBuilder
       .default[F]
       .withHost(serverConfig.interface)
       .withPort(serverConfig.port)
-      .withHttpApp(
-        CorrelationIdMiddleware(
-          MetricsMiddleware(gzipApp(CORS.policy.withAllowOriginAll(routes.orNotFound)))
-        )
-      )
+      .withHttpApp(app)
       .build
 }
