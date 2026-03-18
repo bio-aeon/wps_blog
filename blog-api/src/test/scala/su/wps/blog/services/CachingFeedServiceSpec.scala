@@ -16,13 +16,13 @@ class CachingFeedServiceSpec extends Specification {
       "returns cached result on repeated calls" >> {
         var callCount = 0
         val underlying = new FeedService[IO] {
-          def getFeed: IO[FeedResult] = IO { callCount += 1; emptyFeed }
+          def getFeed(lang: String): IO[FeedResult] = IO { callCount += 1; emptyFeed }
         }
         val cache = CacheServiceImpl.create[IO](100)
         val cached = CachingFeedService.create[IO](underlying, cache, 60.seconds)
 
-        cached.getFeed.unsafeRunSync()
-        cached.getFeed.unsafeRunSync()
+        cached.getFeed("en").unsafeRunSync()
+        cached.getFeed("en").unsafeRunSync()
 
         callCount mustEqual 1
       }
@@ -30,14 +30,14 @@ class CachingFeedServiceSpec extends Specification {
       "returns fresh result after cache invalidation" >> {
         var callCount = 0
         val underlying = new FeedService[IO] {
-          def getFeed: IO[FeedResult] = IO { callCount += 1; emptyFeed }
+          def getFeed(lang: String): IO[FeedResult] = IO { callCount += 1; emptyFeed }
         }
         val cache = CacheServiceImpl.create[IO](100)
         val cached = CachingFeedService.create[IO](underlying, cache, 60.seconds)
 
-        cached.getFeed.unsafeRunSync()
-        cache.invalidate("feed:all").unsafeRunSync()
-        cached.getFeed.unsafeRunSync()
+        cached.getFeed("en").unsafeRunSync()
+        cache.invalidate("feed:all:en").unsafeRunSync()
+        cached.getFeed("en").unsafeRunSync()
 
         callCount mustEqual 2
       }

@@ -1,6 +1,7 @@
 use crate::api::get_posts;
 use crate::components::common::{ErrorDisplay, Pagination, PostListSkeleton};
 use crate::components::post::PostCard;
+use crate::i18n::{lang_href, use_language, use_translations};
 use leptos::prelude::*;
 use leptos_meta::Title;
 use leptos_router::hooks::{use_params_map, use_query_map};
@@ -9,6 +10,8 @@ const POSTS_PER_PAGE: i32 = 10;
 
 #[component]
 pub fn TagPostsPage() -> impl IntoView {
+    let lang = use_language();
+    let t = use_translations();
     let params = use_params_map();
     let query = use_query_map();
 
@@ -23,12 +26,17 @@ pub fn TagPostsPage() -> impl IntoView {
     };
 
     let posts_resource = Resource::new(
-        move || (slug(), page()),
-        |(slug, page)| async move {
+        {
+            let lang = lang.clone();
+            move || (lang.clone(), slug(), page())
+        },
+        |(lang, slug, page)| async move {
             let offset = (page - 1) * POSTS_PER_PAGE;
-            get_posts(POSTS_PER_PAGE, offset, Some(slug)).await
+            get_posts(lang, POSTS_PER_PAGE, offset, Some(slug)).await
         },
     );
+
+    let tags_href = lang_href(&lang, "/tags");
 
     view! {
         <Suspense fallback=move || {
@@ -37,16 +45,18 @@ pub fn TagPostsPage() -> impl IntoView {
             {move || {
                 let current_slug = slug();
                 let current_page = page();
-                let base_url = format!("/tags/{}", current_slug);
+                let base_url = lang_href(&lang, &format!("/tags/{}", current_slug));
+                let tags_href = tags_href.clone();
+                let all_tags_text = t.tag.all_tags;
                 Suspend::new(async move {
                     match posts_resource.await {
                         Ok(result) => {
-                            let title = format!("Posts tagged \"{}\" - WPS Blog", current_slug);
-                            let heading = format!("Posts tagged \"{}\"", current_slug);
+                            let title = format!("{} \"{}\" - WPS Blog", t.tag.posts_tagged, current_slug);
+                            let heading = format!("{} \"{}\"", t.tag.posts_tagged, current_slug);
                             view! {
                                 <Title text=title/>
                                 <h1>{heading}</h1>
-                                <a href="/tags" class="back-link">"← All tags"</a>
+                                <a href=tags_href class="back-link">{format!("← {}", all_tags_text)}</a>
                                 <div class="post-list">
                                     {result
                                         .items
@@ -68,8 +78,8 @@ pub fn TagPostsPage() -> impl IntoView {
                                 <ErrorDisplay
                                     title="Failed to load posts".to_string()
                                     message=e.to_string()
-                                    back_url="/tags".to_string()
-                                    back_label="← Back to tags".to_string()
+                                    back_url=tags_href.clone()
+                                    back_label=format!("← {}", all_tags_text)
                                 />
                             }
                             .into_any()

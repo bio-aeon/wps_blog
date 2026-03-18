@@ -7,6 +7,7 @@ from blog_admin.admin import PostAdmin, CommentAdmin, ExperienceAdmin
 from blog_admin.models import (
     User, Post, Tag, PostTag, Comment, Page,
     Skill, Experience, SocialLink, ContactSubmission,
+    Language, PostTranslation,
 )
 
 
@@ -85,6 +86,10 @@ class TagAdminTest(TestCase):
         response = self.client.post(reverse('admin:blog_admin_tag_add'), {
             'name': 'Scala',
             'slug': 'scala',
+            'translations-TOTAL_FORMS': '0',
+            'translations-INITIAL_FORMS': '0',
+            'translations-MIN_NUM_FORMS': '0',
+            'translations-MAX_NUM_FORMS': '1000',
         })
         self.assertEqual(response.status_code, 302)
         self.assertTrue(Tag.objects.filter(slug='scala').exists())
@@ -111,6 +116,10 @@ class PageAdminTest(TestCase):
             'url': 'about',
             'title': 'About Me',
             'content': '# About\n\nHello world.',
+            'translations-TOTAL_FORMS': '0',
+            'translations-INITIAL_FORMS': '0',
+            'translations-MIN_NUM_FORMS': '0',
+            'translations-MAX_NUM_FORMS': '1000',
         })
         self.assertEqual(response.status_code, 302)
         self.assertTrue(Page.objects.filter(url='about').exists())
@@ -225,4 +234,52 @@ class ContactSubmissionAdminTest(TestCase):
     def test_contactsubmission_add_permission_denied(self):
         response = self.client.get(reverse('admin:blog_admin_contactsubmission_add'))
         self.assertEqual(response.status_code, 403)
+
+
+class LanguageAdminTest(TestCase):
+    def setUp(self):
+        self.admin_user = User.objects.create_superuser('admin', 'a@b.com', 'pass')
+        self.client.force_login(self.admin_user)
+
+    def test_language_changelist_loads(self):
+        Language.objects.create(
+            code='en', name='English', native_name='English',
+            is_default=True, sort_order=1
+        )
+        response = self.client.get(reverse('admin:blog_admin_language_changelist'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_list_display_shows_native_name(self):
+        Language.objects.create(
+            code='ru', name='Russian', native_name='Русский',
+            is_default=False, sort_order=2
+        )
+        response = self.client.get(reverse('admin:blog_admin_language_changelist'))
+        self.assertContains(response, 'Русский')
+
+
+class PostTranslationInlineTest(TestCase):
+    def setUp(self):
+        self.admin_user = User.objects.create_superuser('admin', 'a@b.com', 'pass')
+        self.client.force_login(self.admin_user)
+        self.post = baker.make(Post, author=self.admin_user)
+
+    def test_translation_inline_on_post_change(self):
+        response = self.client.get(
+            reverse('admin:blog_admin_post_change', args=[self.post.pk])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'translations')
+
+    def test_translation_coverage_in_list(self):
+        lang = Language.objects.create(
+            code='en', name='English', native_name='English',
+            is_default=True, sort_order=1
+        )
+        PostTranslation.objects.create(
+            post=self.post, language=lang, name='Test',
+            translation_status='published'
+        )
+        response = self.client.get(reverse('admin:blog_admin_post_changelist'))
+        self.assertContains(response, 'en')
 

@@ -1,0 +1,73 @@
+use super::*;
+
+pub static TRANSLATIONS: Translations = Translations {
+    nav: NavStrings {
+        home: "Home",
+        posts: "Posts",
+        tags: "Tags",
+        about: "About",
+        contact: "Contact",
+        search_placeholder: "Search posts...",
+    },
+    post: PostStrings {
+        read_more: "Read more",
+        published_on: "Published on",
+        reading_time: "min read",
+        views: "views",
+        table_of_contents: "Table of Contents",
+        back_to_posts: "Back to posts",
+    },
+    comment: CommentStrings {
+        title: "Comments",
+        leave_comment: "Leave a comment",
+        name_label: "Name",
+        email_label: "Email",
+        text_label: "Comment",
+        submit: "Submit",
+        reply: "Reply",
+        no_comments: "No comments yet. Be the first!",
+    },
+    tag: TagStrings {
+        all_tags: "All Tags",
+        posts_tagged: "Posts tagged",
+    },
+    search: SearchStrings {
+        title: "Search",
+        placeholder: "Search posts...",
+        results_for: "Results for",
+        no_results: "No results found.",
+    },
+    common: CommonStrings {
+        loading: "Loading...",
+        error_title: "Error",
+        error_message: "Something went wrong.",
+        not_found: "Page Not Found",
+        not_found_message: "The page you are looking for does not exist.",
+        retry: "Retry",
+        back_home: "Back to Home",
+        page: "Page",
+        previous: "Previous",
+        next: "Next",
+        recent_posts: "Recent Posts",
+        view_all_posts: "View all posts \u{2192}",
+    },
+    contact: ContactStrings {
+        title: "Contact",
+        name_label: "Name",
+        email_label: "Email",
+        subject_label: "Subject",
+        message_label: "Message",
+        submit: "Send Message",
+        success: "Your message has been sent successfully!",
+    },
+    about: AboutStrings {
+        title: "About",
+        skills: "Skills",
+        experience: "Experience",
+        present: "Present",
+    },
+    footer: FooterStrings {
+        copyright: "All rights reserved.",
+        rss_feed: "RSS Feed",
+    },
+};

@@ -11,10 +11,10 @@ final case class PostResult(
   name: String,
   text: String,
   createdAt: ZonedDateTime,
+  language: String,
   tags: List[TagResult],
-  metaTitle: Option[String],
-  metaDescription: Option[String],
-  metaKeywords: Option[String]
+  seo: Option[SeoResult],
+  availableLanguages: List[String]
 )
 
 object PostResult {
@@ -26,9 +26,9 @@ object PostResult {
       "name",
       "text",
       "created_at",
+      "language",
       "tags",
-      "meta_title",
-      "meta_description",
-      "meta_keywords"
+      "seo",
+      "available_languages"
     )(PostResult.unapply(_).get)
 }

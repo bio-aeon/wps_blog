@@ -50,11 +50,15 @@ impl BlogApiClient {
 
     pub async fn get_posts(
         &self,
+        lang: &str,
         limit: i32,
         offset: i32,
         tag: Option<&str>,
     ) -> Result<ListItemsResult<ListPostResult>, ApiError> {
-        let mut url = format!("{}/v1/posts?limit={}&offset={}", self.base_url, limit, offset);
+        let mut url = format!(
+            "{}/v1/posts?limit={}&offset={}&lang={}",
+            self.base_url, limit, offset, lang
+        );
         if let Some(tag) = tag {
             url.push_str(&format!("&tag={}", urlencoding::encode(tag)));
         }
@@ -64,16 +68,18 @@ impl BlogApiClient {
 
     pub async fn search_posts(
         &self,
+        lang: &str,
         query: &str,
         limit: i32,
         offset: i32,
     ) -> Result<ListItemsResult<ListPostResult>, ApiError> {
         let url = format!(
-            "{}/v1/posts/search?q={}&limit={}&offset={}",
+            "{}/v1/posts/search?q={}&limit={}&offset={}&lang={}",
             self.base_url,
             urlencoding::encode(query),
             limit,
-            offset
+            offset,
+            lang
         );
         let resp = self.client.get(url).send().await?;
         self.handle_response(resp).await
@@ -81,17 +87,21 @@ impl BlogApiClient {
 
     pub async fn get_recent_posts(
         &self,
+        lang: &str,
         count: i32,
     ) -> Result<Vec<ListPostResult>, ApiError> {
-        let url = format!("{}/v1/posts/recent?count={}", self.base_url, count);
+        let url = format!(
+            "{}/v1/posts/recent?count={}&lang={}",
+            self.base_url, count, lang
+        );
         let resp = self.client.get(url).send().await?;
         self.handle_response(resp).await
     }
 
-    pub async fn get_post(&self, id: i32) -> Result<PostResult, ApiError> {
+    pub async fn get_post(&self, lang: &str, id: i32) -> Result<PostResult, ApiError> {
         let resp = self
             .client
-            .get(self.url(&format!("/v1/posts/{}", id)))
+            .get(self.url(&format!("/v1/posts/{}?lang={}", id, lang)))
             .send()
             .await?;
         self.handle_response(resp).await
@@ -156,25 +166,37 @@ impl BlogApiClient {
         }
     }
 
-    pub async fn get_tags(&self) -> Result<ListItemsResult<TagWithCountResult>, ApiError> {
-        let resp = self.client.get(self.url("/v1/tags")).send().await?;
-        self.handle_response(resp).await
-    }
-
-    pub async fn get_tag_cloud(&self) -> Result<TagCloudResult, ApiError> {
-        let resp = self.client.get(self.url("/v1/tags/cloud")).send().await?;
-        self.handle_response(resp).await
-    }
-
-    pub async fn get_pages(&self) -> Result<ListItemsResult<ListPageResult>, ApiError> {
-        let resp = self.client.get(self.url("/v1/pages")).send().await?;
-        self.handle_response(resp).await
-    }
-
-    pub async fn get_page(&self, url: &str) -> Result<PageResult, ApiError> {
+    pub async fn get_tags(&self, lang: &str) -> Result<ListItemsResult<TagWithCountResult>, ApiError> {
         let resp = self
             .client
-            .get(self.url(&format!("/v1/pages/{}", url)))
+            .get(self.url(&format!("/v1/tags?lang={}", lang)))
+            .send()
+            .await?;
+        self.handle_response(resp).await
+    }
+
+    pub async fn get_tag_cloud(&self, lang: &str) -> Result<TagCloudResult, ApiError> {
+        let resp = self
+            .client
+            .get(self.url(&format!("/v1/tags/cloud?lang={}", lang)))
+            .send()
+            .await?;
+        self.handle_response(resp).await
+    }
+
+    pub async fn get_pages(&self, lang: &str) -> Result<ListItemsResult<ListPageResult>, ApiError> {
+        let resp = self
+            .client
+            .get(self.url(&format!("/v1/pages?lang={}", lang)))
+            .send()
+            .await?;
+        self.handle_response(resp).await
+    }
+
+    pub async fn get_page(&self, lang: &str, url: &str) -> Result<PageResult, ApiError> {
+        let resp = self
+            .client
+            .get(self.url(&format!("/v1/pages/{}?lang={}", url, lang)))
             .send()
             .await?;
         self.handle_response(resp).await
@@ -218,6 +240,11 @@ impl BlogApiClient {
 
     pub async fn get_about(&self) -> Result<AboutResult, ApiError> {
         let resp = self.client.get(self.url("/v1/about")).send().await?;
+        self.handle_response(resp).await
+    }
+
+    pub async fn get_languages(&self) -> Result<Vec<LanguageInfo>, ApiError> {
+        let resp = self.client.get(self.url("/v1/languages")).send().await?;
         self.handle_response(resp).await
     }
 }

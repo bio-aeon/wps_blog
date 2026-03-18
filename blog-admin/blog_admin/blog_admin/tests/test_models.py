@@ -1,9 +1,11 @@
 from django.apps import apps
 from django.test import TestCase
+from model_bakery import baker
 
 from blog_admin.models import (
     User, Post, Tag, PostTag, Comment, CommentRater, Page, Config,
     Skill, Experience, SocialLink, ContactSubmission,
+    Language, PostTranslation, PageTranslation, TagTranslation,
 )
 
 
@@ -109,6 +111,87 @@ class ContactSubmissionModelTest(TestCase):
         )
         self.assertEqual(str(submission), 'Hello (from Alice)')
 
+
+
+class LanguageModelTest(TestCase):
+    def test_str_representation(self):
+        lang = Language(code='ru', name='Russian', native_name='Русский')
+        self.assertEqual(str(lang), 'Русский (ru)')
+
+    def test_ordering(self):
+        self.assertEqual(Language._meta.ordering, ['sort_order'])
+
+
+class PostTranslationModelTest(TestCase):
+    def test_str_representation(self):
+        user = baker.make('blog_admin.User')
+        post = baker.make(Post, author=user)
+        lang = Language.objects.create(
+            code='en', name='English', native_name='English',
+            is_default=True, sort_order=1
+        )
+        translation = PostTranslation.objects.create(
+            post=post, language=lang, name='Test Post',
+            translation_status='draft'
+        )
+        self.assertIn('[en]', str(translation))
+        self.assertIn('Test Post', str(translation))
+
+    def test_unique_together_constraint(self):
+        user = baker.make('blog_admin.User')
+        post = baker.make(Post, author=user)
+        lang = Language.objects.create(
+            code='en', name='English', native_name='English',
+            is_default=True, sort_order=1
+        )
+        PostTranslation.objects.create(
+            post=post, language=lang, name='First',
+            translation_status='draft'
+        )
+        from django.db import IntegrityError
+        with self.assertRaises(IntegrityError):
+            PostTranslation.objects.create(
+                post=post, language=lang, name='Duplicate',
+                translation_status='draft'
+            )
+
+
+class PageTranslationModelTest(TestCase):
+    def test_str_representation(self):
+        page = baker.make(Page)
+        lang = Language.objects.create(
+            code='en', name='English', native_name='English',
+            is_default=True, sort_order=1
+        )
+        translation = PageTranslation.objects.create(
+            page=page, language=lang, title='About',
+            translation_status='draft'
+        )
+        self.assertIn('[en]', str(translation))
+        self.assertIn('About', str(translation))
+
+
+class TagTranslationModelTest(TestCase):
+    def test_str_representation(self):
+        tag = baker.make(Tag)
+        lang = Language.objects.create(
+            code='en', name='English', native_name='English',
+            is_default=True, sort_order=1
+        )
+        translation = TagTranslation.objects.create(
+            tag=tag, language=lang, name='Rust'
+        )
+        self.assertIn('[en]', str(translation))
+        self.assertIn('Rust', str(translation))
+
+
+class TranslationModelsUnmanagedTest(TestCase):
+    def test_all_translation_models_unmanaged(self):
+        for model in [Language, PostTranslation, PageTranslation, TagTranslation]:
+            self.assertFalse(
+                model._meta.managed,
+                f"{model.__name__} must have managed=False"
+            )
 
 
 class AllModelsUnmanagedTest(TestCase):

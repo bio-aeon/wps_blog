@@ -1,0 +1,73 @@
+use super::*;
+
+pub static TRANSLATIONS: Translations = Translations {
+    nav: NavStrings {
+        home: "Αρχική",
+        posts: "Ιστολόγιο",
+        tags: "Ετικέτες",
+        about: "Σχετικά",
+        contact: "Επικοινωνία",
+        search_placeholder: "Αναζήτηση...",
+    },
+    post: PostStrings {
+        read_more: "Διαβάστε περισσότερα",
+        published_on: "Δημοσιεύτηκε στις",
+        reading_time: "λεπτά ανάγνωσης",
+        views: "προβολές",
+        table_of_contents: "Πίνακας Περιεχομένων",
+        back_to_posts: "Πίσω στα άρθρα",
+    },
+    comment: CommentStrings {
+        title: "Σχόλια",
+        leave_comment: "Αφήστε ένα σχόλιο",
+        name_label: "Όνομα",
+        email_label: "Email",
+        text_label: "Σχόλιο",
+        submit: "Υποβολή",
+        reply: "Απάντηση",
+        no_comments: "Δεν υπάρχουν σχόλια ακόμα. Γίνετε ο πρώτος!",
+    },
+    tag: TagStrings {
+        all_tags: "Όλες οι Ετικέτες",
+        posts_tagged: "Άρθρα με ετικέτα",
+    },
+    search: SearchStrings {
+        title: "Αναζήτηση",
+        placeholder: "Αναζήτηση...",
+        results_for: "Αποτελέσματα για",
+        no_results: "Δεν βρέθηκαν αποτελέσματα.",
+    },
+    common: CommonStrings {
+        loading: "Φόρτωση...",
+        error_title: "Σφάλμα",
+        error_message: "Κάτι πήγε στραβά.",
+        not_found: "Η σελίδα δεν βρέθηκε",
+        not_found_message: "Η σελίδα που αναζητάτε δεν υπάρχει.",
+        retry: "Επανάληψη",
+        back_home: "Πίσω στην Αρχική",
+        page: "Σελίδα",
+        previous: "Προηγούμενο",
+        next: "Επόμενο",
+        recent_posts: "Πρόσφατα Άρθρα",
+        view_all_posts: "Όλα τα άρθρα \u{2192}",
+    },
+    contact: ContactStrings {
+        title: "Επικοινωνία",
+        name_label: "Όνομα",
+        email_label: "Email",
+        subject_label: "Θέμα",
+        message_label: "Μήνυμα",
+        submit: "Αποστολή",
+        success: "Το μήνυμά σας εστάλη επιτυχώς!",
+    },
+    about: AboutStrings {
+        title: "Σχετικά",
+        skills: "Δεξιότητες",
+        experience: "Εμπειρία",
+        present: "Σήμερα",
+    },
+    footer: FooterStrings {
+        copyright: "Με επιφύλαξη παντός δικαιώματος.",
+        rss_feed: "Ροή RSS",
+    },
+};

@@ -8,6 +8,6 @@ import su.wps.blog.services.FeedService
 object FeedServiceMock {
   def create[F[_]: Applicative](result: FeedResult = FeedResult(Nil, Nil, Nil)): FeedService[F] =
     new FeedService[F] {
-      def getFeed: F[FeedResult] = result.pure[F]
+      def getFeed(lang: String): F[FeedResult] = result.pure[F]
     }
 }

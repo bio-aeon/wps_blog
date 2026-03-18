@@ -11,10 +11,10 @@ object TagServiceMock {
     getTagCloudResult: TagCloudResult = TagCloudResult(Nil)
   ): TagService[F] =
     new TagService[F] {
-      def getAllTags: F[ListItemsResult[TagWithCountResult]] =
+      def getAllTags(lang: String): F[ListItemsResult[TagWithCountResult]] =
         ListItemsResult(getAllTagsResult, getAllTagsResult.length).pure[F]
 
-      def getTagCloud: F[TagCloudResult] =
+      def getTagCloud(lang: String): F[TagCloudResult] =
         getTagCloudResult.pure[F]
     }
 }

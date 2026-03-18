@@ -5,83 +5,93 @@ import cats.syntax.applicative.*
 import cats.syntax.flatMap.*
 import cats.syntax.functor.*
 import cats.Monad
-import io.scalaland.chimney.dsl.*
 import mouse.anyf.*
-import su.wps.blog.models.api.{ListItemsResult, ListPostResult, PostResult, TagResult}
+import su.wps.blog.models.api.*
 import su.wps.blog.models.domain.AppErr.PostNotFound
-import su.wps.blog.models.domain.{AppErr, Post, PostId, Tag}
-import su.wps.blog.repositories.{PostRepository, TagRepository}
+import su.wps.blog.models.domain.*
+import su.wps.blog.repositories.*
 import tofu.Raise
 import tofu.doobie.transactor.Txr
 
 final class PostServiceImpl[F[_]: Monad, DB[_]: Monad] private (
   postRepo: PostRepository[DB],
   tagRepo: TagRepository[DB],
+  postTranslationRepo: PostTranslationRepository[DB],
+  tagTranslationRepo: TagTranslationRepository[DB],
   xa: Txr[F, DB]
 )(implicit R: Raise[F, AppErr])
     extends PostService[F] {
   import ServiceHelpers._
 
-  private def enrichPostsWithTags(posts: List[Post]): DB[(List[Post], Map[PostId, List[Tag]])] = {
-    val postIds = posts.flatMap(_.id)
-    tagRepo.findByPostIds(postIds).map { tagsByPost =>
-      val tagsByPostId = tagsByPost.groupBy(_._1).map { case (pid, tags) => pid -> tags.map(_._2) }
-      (posts, tagsByPostId)
-    }
-  }
-
-  private def toListPostResults(
-    posts: List[Post],
-    tagsByPostId: Map[PostId, List[Tag]]
-  ): List[ListPostResult] =
-    posts.map { post =>
-      val tags = tagsByPostId.getOrElse(post.nonEmptyId, Nil)
-      post
-        .into[ListPostResult]
-        .withFieldComputed(_.id, _.nonEmptyId)
-        .withFieldConst(_.tags, tagsToTagResults(tags))
-        .transform
-    }
-
-  private def fetchPostsWithCount(
+  private def fetchAndEnrichPosts(
     fetchPosts: DB[List[Post]],
-    fetchCount: DB[Int]
+    fetchCount: DB[Int],
+    lang: String
   ): F[ListItemsResult[ListPostResult]] =
     (fetchPosts, fetchCount)
       .mapN((_, _))
       .flatMap { case (posts, count) =>
-        enrichPostsWithTags(posts).map((_, count))
+        val postIds = posts.flatMap(_.id)
+        (
+          postTranslationRepo.findAvailableLanguagesByPostIds(postIds),
+          tagRepo.findByPostIds(postIds)
+        ).mapN { case (langsByPost, tagsByPost) =>
+          val tagsByPostId =
+            tagsByPost.groupBy(_._1).map { case (pid, tags) => pid -> tags.map(_._2) }
+          val items = posts.map { post =>
+            val pid = post.nonEmptyId
+            val tags = tagsByPostId.getOrElse(pid, Nil)
+            ListPostResult(
+              id = pid,
+              name = post.name,
+              shortText = nonEmpty(post.shortText),
+              createdAt = post.createdAt,
+              language = lang,
+              tags = tagsToTagResults(tags),
+              availableLanguages = langsByPost.getOrElse(pid, List(lang))
+            )
+          }
+          ListItemsResult(items, count)
+        }
       }
       .thrushK(xa.trans)
-      .map { case ((posts, tagsByPostId), total) =>
-        ListItemsResult(toListPostResults(posts, tagsByPostId), total)
-      }
 
-  def allPosts(limit: Int, offset: Int): F[ListItemsResult[ListPostResult]] =
-    fetchPostsWithCount(postRepo.findAllWithLimitAndOffset(limit, offset), postRepo.findCount)
-
-  def postsByTag(tagSlug: String, limit: Int, offset: Int): F[ListItemsResult[ListPostResult]] =
-    fetchPostsWithCount(
-      postRepo.findByTagSlug(tagSlug, limit, offset),
-      postRepo.findCountByTagSlug(tagSlug)
+  def allPosts(lang: String, limit: Int, offset: Int): F[ListItemsResult[ListPostResult]] =
+    fetchAndEnrichPosts(
+      postRepo.findAllWithLimitAndOffset(limit, offset),
+      postRepo.findCount,
+      lang
     )
 
-  def postById(id: PostId): F[PostResult] =
-    (postRepo.findById(id), tagRepo.findByPostId(id))
-      .mapN((_, _))
+  def postsByTag(
+    lang: String,
+    tagSlug: String,
+    limit: Int,
+    offset: Int
+  ): F[ListItemsResult[ListPostResult]] =
+    fetchAndEnrichPosts(
+      postRepo.findByTagSlug(tagSlug, limit, offset),
+      postRepo.findCountByTagSlug(tagSlug),
+      lang
+    )
+
+  def postById(lang: String, id: PostId): F[PostResult] =
+    (postRepo.findById(id), tagRepo.findByPostId(id), postTranslationRepo.findAvailableLanguages(id))
+      .mapN((_, _, _))
       .thrushK(xa.trans)
-      .flatMap { case (postOpt, tags) =>
+      .flatMap { case (postOpt, tags, availLangs) =>
         postOpt match {
           case Some(post) =>
-            post
-              .into[PostResult]
-              .withFieldComputed(_.id, _.nonEmptyId)
-              .withFieldConst(_.tags, tagsToTagResults(tags))
-              .withFieldComputed(_.metaTitle, p => nonEmpty(p.metaTitle))
-              .withFieldComputed(_.metaDescription, p => nonEmpty(p.metaDescription))
-              .withFieldComputed(_.metaKeywords, p => nonEmpty(p.metaKeywords))
-              .transform
-              .pure[F]
+            PostResult(
+              id = post.nonEmptyId,
+              name = post.name,
+              text = post.text,
+              createdAt = post.createdAt,
+              language = lang,
+              tags = tagsToTagResults(tags),
+              seo = buildSeo(post.metaTitle, post.metaDescription, post.metaKeywords),
+              availableLanguages = if (availLangs.isEmpty) List(lang) else availLangs
+            ).pure[F]
           case None =>
             R.raise(PostNotFound(id))
         }
@@ -90,27 +100,64 @@ final class PostServiceImpl[F[_]: Monad, DB[_]: Monad] private (
   def incrementViewCount(id: PostId): F[Unit] =
     postRepo.incrementViews(id).thrushK(xa.trans).void
 
-  def searchPosts(query: String, limit: Int, offset: Int): F[ListItemsResult[ListPostResult]] =
-    fetchPostsWithCount(
+  def searchPosts(
+    lang: String,
+    query: String,
+    limit: Int,
+    offset: Int
+  ): F[ListItemsResult[ListPostResult]] =
+    fetchAndEnrichPosts(
       postRepo.searchPosts(query, limit, offset),
-      postRepo.searchPostsCount(query)
+      postRepo.searchPostsCount(query),
+      lang
     )
 
-  def recentPosts(count: Int): F[List[ListPostResult]] =
+  def recentPosts(lang: String, count: Int): F[List[ListPostResult]] =
     postRepo
       .findRecent(count)
-      .flatMap(enrichPostsWithTags)
-      .thrushK(xa.trans)
-      .map { case (posts, tagsByPostId) =>
-        toListPostResults(posts, tagsByPostId)
+      .flatMap { posts =>
+        val postIds = posts.flatMap(_.id)
+        (
+          tagRepo.findByPostIds(postIds),
+          postTranslationRepo.findAvailableLanguagesByPostIds(postIds)
+        ).mapN { case (tagsByPost, langsByPost) =>
+          val tagsByPostId =
+            tagsByPost.groupBy(_._1).map { case (pid, tags) => pid -> tags.map(_._2) }
+          posts.map { post =>
+            val pid = post.nonEmptyId
+            val tags = tagsByPostId.getOrElse(pid, Nil)
+            ListPostResult(
+              id = pid,
+              name = post.name,
+              shortText = nonEmpty(post.shortText),
+              createdAt = post.createdAt,
+              language = lang,
+              tags = tagsToTagResults(tags),
+              availableLanguages = langsByPost.getOrElse(pid, List(lang))
+            )
+          }
+        }
       }
+      .thrushK(xa.trans)
+
+  private def buildSeo(
+    title: String,
+    description: String,
+    keywords: String
+  ): Option[SeoResult] = {
+    val seo = SeoResult(nonEmpty(title), nonEmpty(description), nonEmpty(keywords))
+    if (seo.title.isDefined || seo.description.isDefined || seo.keywords.isDefined) Some(seo)
+    else None
+  }
 }
 
 object PostServiceImpl {
   def create[F[_]: Monad: Raise[*[_], AppErr], DB[_]: Monad](
     postRepo: PostRepository[DB],
     tagRepo: TagRepository[DB],
+    postTranslationRepo: PostTranslationRepository[DB],
+    tagTranslationRepo: TagTranslationRepository[DB],
     xa: Txr[F, DB]
   ): PostServiceImpl[F, DB] =
-    new PostServiceImpl(postRepo, tagRepo, xa)
+    new PostServiceImpl(postRepo, tagRepo, postTranslationRepo, tagTranslationRepo, xa)
 }

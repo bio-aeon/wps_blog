@@ -9,6 +9,7 @@ from django.utils import timezone
 from blog_admin.models import (
     Post, Comment, Tag, Page, User,
     Skill, Experience, SocialLink, ContactSubmission,
+    Language, PostTranslation,
 )
 
 
@@ -39,6 +40,18 @@ def dashboard_view(request):
     unread_contacts = ContactSubmission.objects.filter(is_read=False).count()
     recent_contacts = ContactSubmission.objects.order_by('-created_at')[:5]
 
+    active_languages = Language.objects.filter(is_active=True)
+    translation_stats = {
+        'total_posts': total_posts,
+        'languages': list(active_languages.values('code', 'native_name')),
+        'coverage_by_language': {
+            lang.code: PostTranslation.objects.filter(
+                language=lang, translation_status='published'
+            ).count()
+            for lang in active_languages
+        },
+    }
+
     context = {
         'title': 'Dashboard',
         'total_posts': total_posts,
@@ -59,6 +72,7 @@ def dashboard_view(request):
         'social_link_count': social_link_count,
         'unread_contacts': unread_contacts,
         'recent_contacts': recent_contacts,
+        'translation_stats': translation_stats,
     }
     return render(request, 'admin/dashboard.html', context)
 

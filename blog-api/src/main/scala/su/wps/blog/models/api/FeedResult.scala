@@ -9,19 +9,28 @@ import java.time.format.DateTimeFormatter
 final case class FeedPostItem(
   id: PostId,
   name: String,
-  shortText: String,
+  shortText: Option[String],
   metaDescription: Option[String],
   createdAt: ZonedDateTime,
-  tags: List[TagResult]
+  language: String,
+  tags: List[TagResult],
+  availableLanguages: List[String]
 )
 
 object FeedPostItem {
   implicit val zonedDtEncoder: Encoder[ZonedDateTime] =
     Encoder[String].contramap(_.format(DateTimeFormatter.ISO_DATE_TIME))
   implicit val encoder: Encoder[FeedPostItem] =
-    Encoder.forProduct6("id", "name", "short_text", "meta_description", "created_at", "tags")(
-      FeedPostItem.unapply(_).get
-    )
+    Encoder.forProduct8(
+      "id",
+      "name",
+      "short_text",
+      "meta_description",
+      "created_at",
+      "language",
+      "tags",
+      "available_languages"
+    )(FeedPostItem.unapply(_).get)
 }
 
 final case class FeedPageItem(url: String, title: String, createdAt: ZonedDateTime)

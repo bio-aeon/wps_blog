@@ -113,4 +113,10 @@ object Validation {
       .replace(">", "&gt;")
       .replace("\"", "&quot;")
       .replace("'", "&#x27;")
+
+  val SupportedLanguages: Set[String] = Set("en", "ru", "el")
+
+  def validateLanguageCode(code: String): ValidatedNec[FieldError, String] =
+    if (SupportedLanguages.contains(code)) code.validNec
+    else ("lang" -> s"Unsupported language code: $code").invalidNec
 }

@@ -33,20 +33,31 @@ object TapirSupport {
   implicit val tagResultDecoder: Decoder[TagResult] =
     Decoder.forProduct3("id", "name", "slug")(TagResult.apply)
 
+  implicit val seoResultDecoder: Decoder[SeoResult] =
+    Decoder.forProduct3("title", "description", "keywords")(SeoResult.apply)
+
   implicit val postResultDecoder: Decoder[PostResult] =
     Decoder.forProduct8(
       "id",
       "name",
       "text",
       "created_at",
+      "language",
       "tags",
-      "meta_title",
-      "meta_description",
-      "meta_keywords"
+      "seo",
+      "available_languages"
     )(PostResult.apply)
 
   implicit val listPostResultDecoder: Decoder[ListPostResult] =
-    Decoder.forProduct5("id", "name", "short_text", "created_at", "tags")(ListPostResult.apply)
+    Decoder.forProduct7(
+      "id",
+      "name",
+      "short_text",
+      "created_at",
+      "language",
+      "tags",
+      "available_languages"
+    )(ListPostResult.apply)
 
   implicit def listItemsResultDecoder[T: Decoder]: Decoder[ListItemsResult[T]] =
     Decoder.forProduct2("items", "total")(ListItemsResult.apply[T])
@@ -75,10 +86,19 @@ object TapirSupport {
     Decoder.forProduct1("tags")(TagCloudResult.apply)
 
   implicit val pageResultDecoder: Decoder[PageResult] =
-    Decoder.forProduct5("id", "url", "title", "content", "created_at")(PageResult.apply)
+    Decoder.forProduct8(
+      "id",
+      "url",
+      "title",
+      "content",
+      "created_at",
+      "language",
+      "seo",
+      "available_languages"
+    )(PageResult.apply)
 
   implicit val listPageResultDecoder: Decoder[ListPageResult] =
-    Decoder.forProduct2("url", "title")(ListPageResult.apply)
+    Decoder.forProduct3("url", "title", "language")(ListPageResult.apply)
 
   implicit val healthResponseDecoder: Decoder[HealthResponse] =
     Decoder.forProduct3("status", "database", "timestamp")(HealthResponse.apply)
@@ -88,6 +108,8 @@ object TapirSupport {
 
   implicit val tagResultSchema: Schema[TagResult] =
     Schema.derived[TagResult]
+
+  implicit val seoResultSchema: Schema[SeoResult] = Schema.derived
 
   implicit val postResultSchema: Schema[PostResult] =
     Schema.derived[PostResult]
@@ -200,9 +222,16 @@ object TapirSupport {
   implicit val feedResultSchema: Schema[FeedResult] = Schema.derived
 
   implicit val feedPostItemDecoder: Decoder[FeedPostItem] =
-    Decoder.forProduct6("id", "name", "short_text", "meta_description", "created_at", "tags")(
-      FeedPostItem.apply
-    )
+    Decoder.forProduct8(
+      "id",
+      "name",
+      "short_text",
+      "meta_description",
+      "created_at",
+      "language",
+      "tags",
+      "available_languages"
+    )(FeedPostItem.apply)
 
   implicit val feedPageItemDecoder: Decoder[FeedPageItem] =
     Decoder.forProduct3("url", "title", "created_at")(FeedPageItem.apply)
@@ -212,4 +241,8 @@ object TapirSupport {
 
   implicit val feedResultDecoder: Decoder[FeedResult] =
     Decoder.forProduct3("posts", "pages", "tags")(FeedResult.apply)
+
+  implicit val languageResultDecoder: Decoder[LanguageResult] =
+    Decoder.forProduct4("code", "name", "native_name", "is_default")(LanguageResult.apply)
+  implicit val languageResultSchema: Schema[LanguageResult] = Schema.derived
 }

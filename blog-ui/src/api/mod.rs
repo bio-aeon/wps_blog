@@ -13,44 +13,46 @@ fn api_client() -> client::BlogApiClient {
 
 #[server]
 pub async fn get_posts(
+    lang: String,
     limit: i32,
     offset: i32,
     tag: Option<String>,
 ) -> Result<ListItemsResult<ListPostResult>, ServerFnError> {
     let client = api_client();
     client
-        .get_posts(limit, offset, tag.as_deref())
+        .get_posts(&lang, limit, offset, tag.as_deref())
         .await
         .map_err(|e| ServerFnError::new(e.to_string()))
 }
 
 #[server]
 pub async fn search_posts(
+    lang: String,
     query: String,
     limit: i32,
     offset: i32,
 ) -> Result<ListItemsResult<ListPostResult>, ServerFnError> {
     let client = api_client();
     client
-        .search_posts(&query, limit, offset)
+        .search_posts(&lang, &query, limit, offset)
         .await
         .map_err(|e| ServerFnError::new(e.to_string()))
 }
 
 #[server]
-pub async fn get_recent_posts(count: i32) -> Result<Vec<ListPostResult>, ServerFnError> {
+pub async fn get_recent_posts(lang: String, count: i32) -> Result<Vec<ListPostResult>, ServerFnError> {
     let client = api_client();
     client
-        .get_recent_posts(count)
+        .get_recent_posts(&lang, count)
         .await
         .map_err(|e| ServerFnError::new(e.to_string()))
 }
 
 #[server]
-pub async fn get_post(id: i32) -> Result<PostResult, ServerFnError> {
+pub async fn get_post(lang: String, id: i32) -> Result<PostResult, ServerFnError> {
     let client = api_client();
     client
-        .get_post(id)
+        .get_post(&lang, id)
         .await
         .map_err(|e| ServerFnError::new(e.to_string()))
 }
@@ -104,37 +106,37 @@ pub async fn rate_comment(comment_id: i32, is_upvote: bool) -> Result<(), Server
 }
 
 #[server]
-pub async fn get_tags() -> Result<ListItemsResult<TagWithCountResult>, ServerFnError> {
+pub async fn get_tags(lang: String) -> Result<ListItemsResult<TagWithCountResult>, ServerFnError> {
     let client = api_client();
     client
-        .get_tags()
+        .get_tags(&lang)
         .await
         .map_err(|e| ServerFnError::new(e.to_string()))
 }
 
 #[server]
-pub async fn get_tag_cloud() -> Result<TagCloudResult, ServerFnError> {
+pub async fn get_tag_cloud(lang: String) -> Result<TagCloudResult, ServerFnError> {
     let client = api_client();
     client
-        .get_tag_cloud()
+        .get_tag_cloud(&lang)
         .await
         .map_err(|e| ServerFnError::new(e.to_string()))
 }
 
 #[server]
-pub async fn get_pages() -> Result<ListItemsResult<ListPageResult>, ServerFnError> {
+pub async fn get_pages(lang: String) -> Result<ListItemsResult<ListPageResult>, ServerFnError> {
     let client = api_client();
     client
-        .get_pages()
+        .get_pages(&lang)
         .await
         .map_err(|e| ServerFnError::new(e.to_string()))
 }
 
 #[server]
-pub async fn get_page(url: String) -> Result<PageResult, ServerFnError> {
+pub async fn get_page(lang: String, url: String) -> Result<PageResult, ServerFnError> {
     let client = api_client();
     client
-        .get_page(&url)
+        .get_page(&lang, &url)
         .await
         .map_err(|e| ServerFnError::new(e.to_string()))
 }
@@ -171,6 +173,15 @@ pub async fn get_social_links() -> Result<Vec<SocialLinkResult>, ServerFnError> 
     let client = api_client();
     client
         .get_social_links()
+        .await
+        .map_err(|e| ServerFnError::new(e.to_string()))
+}
+
+#[server]
+pub async fn get_languages() -> Result<Vec<LanguageInfo>, ServerFnError> {
+    let client = api_client();
+    client
+        .get_languages()
         .await
         .map_err(|e| ServerFnError::new(e.to_string()))
 }

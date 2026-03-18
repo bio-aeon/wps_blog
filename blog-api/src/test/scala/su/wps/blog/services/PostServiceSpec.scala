@@ -7,7 +7,7 @@ import org.scalacheck.ScalacheckShapeless.*
 import org.specs2.mutable.Specification
 import su.wps.blog.models.domain.AppErr.PostNotFound
 import su.wps.blog.models.domain.{Post, PostId, Tag, TagId}
-import su.wps.blog.services.mocks.{PostRepositoryMock, TagRepositoryMock, TxrMock}
+import su.wps.blog.services.mocks.*
 import su.wps.blog.tools.scalacheck.*
 import tofu.doobie.transactor.Txr
 
@@ -33,7 +33,7 @@ class PostServiceSpec extends Specification {
     "returns posts with total count by limit and offset" >> {
       val service = mkService(random[Post](5), 10)
 
-      service.allPosts(5, 10) must beRight.which(r => r.items.length == 5 && r.total == 10)
+      service.allPosts("en", 5, 10) must beRight.which(r => r.items.length == 5 && r.total == 10)
     }
 
     "includes tags in post list results" >> {
@@ -43,7 +43,7 @@ class PostServiceSpec extends Specification {
       val tagsByPost = posts.flatMap(p => p.id.map(id => List((id, tag1), (id, tag2)))).flatten
       val service = mkService(posts, 2, findByPostIdsResult = tagsByPost)
 
-      service.allPosts(10, 0) must beRight.which { r =>
+      service.allPosts("en", 10, 0) must beRight.which { r =>
         r.items.forall(_.tags.length == 2) && r.items.forall(_.tags.exists(_.name == "scala"))
       }
     }
@@ -52,7 +52,7 @@ class PostServiceSpec extends Specification {
       val post = random[Post]
       val service = mkService(findByIdResult = Some(post))
 
-      service.postById(post.nonEmptyId) must beRight.which(_.name == post.name)
+      service.postById("en", post.nonEmptyId) must beRight.which(_.name == post.name)
     }
 
     "includes tags in single post result" >> {
@@ -60,7 +60,7 @@ class PostServiceSpec extends Specification {
       val tags = List(Tag("scala", "scala", Some(TagId(1))), Tag("fp", "fp", Some(TagId(2))))
       val service = mkService(findByIdResult = Some(post), findByPostIdResult = tags)
 
-      service.postById(post.nonEmptyId) must beRight.which { r =>
+      service.postById("en", post.nonEmptyId) must beRight.which { r =>
         r.tags.length == 2 && r.tags.exists(_.name == "scala")
       }
     }
@@ -68,14 +68,14 @@ class PostServiceSpec extends Specification {
     "returns an error if post doesn't exist" >> {
       val service = mkService()
 
-      service.postById(PostId(1)) must beLeft(PostNotFound(PostId(1)))
+      service.postById("en", PostId(1)) must beLeft(PostNotFound(PostId(1)))
     }
 
     "handles posts with no tags" >> {
       val posts = random[Post](2)
       val service = mkService(posts, 2, findByPostIdsResult = Nil)
 
-      service.allPosts(10, 0) must beRight.which { r =>
+      service.allPosts("en", 10, 0) must beRight.which { r =>
         r.items.forall(_.tags.isEmpty)
       }
     }
@@ -84,7 +84,7 @@ class PostServiceSpec extends Specification {
       val posts = random[Post](3)
       val service = mkService(findByTagSlugResult = posts, findCountByTagSlugResult = 10)
 
-      service.postsByTag("scala", 3, 0) must beRight.which { r =>
+      service.postsByTag("en", "scala", 3, 0) must beRight.which { r =>
         r.items.length == 3 && r.total == 10
       }
     }
@@ -100,7 +100,7 @@ class PostServiceSpec extends Specification {
         findByPostIdsResult = tagsByPost
       )
 
-      service.postsByTag("scala", 10, 0) must beRight.which { r =>
+      service.postsByTag("en", "scala", 10, 0) must beRight.which { r =>
         r.items.forall(_.tags.length == 2) && r.items.forall(_.tags.exists(_.slug == "scala"))
       }
     }
@@ -108,7 +108,7 @@ class PostServiceSpec extends Specification {
     "returns empty result for non-existent tag" >> {
       val service = mkService(findByTagSlugResult = Nil, findCountByTagSlugResult = 0)
 
-      service.postsByTag("nonexistent", 10, 0) must beRight.which { r =>
+      service.postsByTag("en", "nonexistent", 10, 0) must beRight.which { r =>
         r.items.isEmpty && r.total == 0
       }
     }
@@ -129,7 +129,7 @@ class PostServiceSpec extends Specification {
       val posts = random[Post](3)
       val service = mkService(searchPostsResult = posts, searchPostsCountResult = 10)
 
-      service.searchPosts("scala", 3, 0) must beRight.which { r =>
+      service.searchPosts("en", "scala", 3, 0) must beRight.which { r =>
         r.items.length == 3 && r.total == 10
       }
     }
@@ -145,7 +145,7 @@ class PostServiceSpec extends Specification {
         findByPostIdsResult = tagsByPost
       )
 
-      service.searchPosts("scala", 10, 0) must beRight.which { r =>
+      service.searchPosts("en", "scala", 10, 0) must beRight.which { r =>
         r.items.forall(_.tags.length == 2) && r.items.forall(_.tags.exists(_.name == "scala"))
       }
     }
@@ -153,7 +153,7 @@ class PostServiceSpec extends Specification {
     "returns empty result for search with no matches" >> {
       val service = mkService(searchPostsResult = Nil, searchPostsCountResult = 0)
 
-      service.searchPosts("nonexistent", 10, 0) must beRight.which { r =>
+      service.searchPosts("en", "nonexistent", 10, 0) must beRight.which { r =>
         r.items.isEmpty && r.total == 0
       }
     }
@@ -162,7 +162,7 @@ class PostServiceSpec extends Specification {
       val posts = random[Post](5)
       val service = mkService(findRecentResult = posts)
 
-      service.recentPosts(5) must beRight.which(_.length == 5)
+      service.recentPosts("en", 5) must beRight.which(_.length == 5)
     }
 
     "includes tags in recent posts results" >> {
@@ -172,7 +172,7 @@ class PostServiceSpec extends Specification {
       val tagsByPost = posts.flatMap(p => p.id.map(id => List((id, tag1), (id, tag2)))).flatten
       val service = mkService(findRecentResult = posts, findByPostIdsResult = tagsByPost)
 
-      service.recentPosts(5) must beRight.which { r =>
+      service.recentPosts("en", 5) must beRight.which { r =>
         r.forall(_.tags.length == 2) && r.forall(_.tags.exists(_.name == "scala"))
       }
     }
@@ -180,7 +180,7 @@ class PostServiceSpec extends Specification {
     "returns empty list when no recent posts exist" >> {
       val service = mkService(findRecentResult = Nil)
 
-      service.recentPosts(5) must beRight.which(_.isEmpty)
+      service.recentPosts("en", 5) must beRight.which(_.isEmpty)
     }
 
     "maps non-empty SEO fields to Some" >> {
@@ -191,10 +191,12 @@ class PostServiceSpec extends Specification {
       )
       val service = mkService(findByIdResult = Some(post))
 
-      service.postById(post.nonEmptyId) must beRight.which { r =>
-        r.metaTitle.contains("Title") &&
-        r.metaDescription.contains("Description") &&
-        r.metaKeywords.contains("kw1, kw2")
+      service.postById("en", post.nonEmptyId) must beRight.which { r =>
+        r.seo.exists(s =>
+          s.title.contains("Title") &&
+          s.description.contains("Description") &&
+          s.keywords.contains("kw1, kw2")
+        )
       }
     }
 
@@ -202,8 +204,8 @@ class PostServiceSpec extends Specification {
       val post = random[Post].copy(metaTitle = "", metaDescription = "", metaKeywords = "")
       val service = mkService(findByIdResult = Some(post))
 
-      service.postById(post.nonEmptyId) must beRight.which { r =>
-        r.metaTitle.isEmpty && r.metaDescription.isEmpty && r.metaKeywords.isEmpty
+      service.postById("en", post.nonEmptyId) must beRight.which { r =>
+        r.seo.isEmpty
       }
     }
 
@@ -211,8 +213,8 @@ class PostServiceSpec extends Specification {
       val post = random[Post].copy(metaTitle = "  ", metaDescription = " \t ", metaKeywords = "  ")
       val service = mkService(findByIdResult = Some(post))
 
-      service.postById(post.nonEmptyId) must beRight.which { r =>
-        r.metaTitle.isEmpty && r.metaDescription.isEmpty && r.metaKeywords.isEmpty
+      service.postById("en", post.nonEmptyId) must beRight.which { r =>
+        r.seo.isEmpty
       }
     }
 
@@ -220,7 +222,7 @@ class PostServiceSpec extends Specification {
       val posts = random[Post](3)
       val service = mkService(findRecentResult = posts, findByPostIdsResult = Nil)
 
-      service.recentPosts(5) must beRight.which { r =>
+      service.recentPosts("en", 5) must beRight.which { r =>
         r.length == 3 && r.forall(_.tags.isEmpty)
       }
     }
@@ -254,6 +256,8 @@ class PostServiceSpec extends Specification {
       findByPostIdResult = findByPostIdResult,
       findByPostIdsResult = findByPostIdsResult
     )
-    PostServiceImpl.create[RunF, Id](postRepo, tagRepo, xa)
+    val postTranslationRepo = PostTranslationRepositoryMock.create[Id]()
+    val tagTranslationRepo = TagTranslationRepositoryMock.create[Id]()
+    PostServiceImpl.create[RunF, Id](postRepo, tagRepo, postTranslationRepo, tagTranslationRepo, xa)
   }
 }

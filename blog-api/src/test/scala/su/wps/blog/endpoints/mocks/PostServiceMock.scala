@@ -18,22 +18,32 @@ object PostServiceMock {
     recentPostsResult: List[ListPostResult] = Nil
   )(implicit R: Raise[F, AppErr]): PostService[F] =
     new PostService[F] {
-      def allPosts(limit: Int, offset: Int): F[ListItemsResult[ListPostResult]] =
+      def allPosts(lang: String, limit: Int, offset: Int): F[ListItemsResult[ListPostResult]] =
         ListItemsResult(allPostsResult, allPostsResult.length).pure[F]
 
-      def postsByTag(tagSlug: String, limit: Int, offset: Int): F[ListItemsResult[ListPostResult]] =
+      def postsByTag(
+        lang: String,
+        tagSlug: String,
+        limit: Int,
+        offset: Int
+      ): F[ListItemsResult[ListPostResult]] =
         ListItemsResult(postsByTagResult, postsByTagResult.length).pure[F]
 
-      def postById(id: PostId): F[PostResult] =
+      def postById(lang: String, id: PostId): F[PostResult] =
         postByIdResult.map(_.pure[F]).getOrElse(R.raise(PostNotFound(id)))
 
       def incrementViewCount(id: PostId): F[Unit] =
         ().pure[F]
 
-      def searchPosts(query: String, limit: Int, offset: Int): F[ListItemsResult[ListPostResult]] =
+      def searchPosts(
+        lang: String,
+        query: String,
+        limit: Int,
+        offset: Int
+      ): F[ListItemsResult[ListPostResult]] =
         ListItemsResult(searchPostsResult, searchPostsResult.length).pure[F]
 
-      def recentPosts(count: Int): F[List[ListPostResult]] =
+      def recentPosts(lang: String, count: Int): F[List[ListPostResult]] =
         recentPostsResult.pure[F]
     }
 }

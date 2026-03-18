@@ -9,16 +9,24 @@ import java.time.format.DateTimeFormatter
 final case class ListPostResult(
   id: PostId,
   name: String,
-  shortText: String,
+  shortText: Option[String],
   createdAt: ZonedDateTime,
-  tags: List[TagResult]
+  language: String,
+  tags: List[TagResult],
+  availableLanguages: List[String]
 )
 
 object ListPostResult {
   implicit val zonedDtEncoder: Encoder[ZonedDateTime] =
     Encoder[String].contramap(_.format(DateTimeFormatter.ISO_DATE_TIME))
   implicit val encoder: Encoder[ListPostResult] =
-    Encoder.forProduct5("id", "name", "short_text", "created_at", "tags")(
-      ListPostResult.unapply(_).get
-    )
+    Encoder.forProduct7(
+      "id",
+      "name",
+      "short_text",
+      "created_at",
+      "language",
+      "tags",
+      "available_languages"
+    )(ListPostResult.unapply(_).get)
 }

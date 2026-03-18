@@ -2,10 +2,10 @@
 
 .tag-badge {
     display: inline-block;
-    padding: $space-1 $space-2 + $space-1;
+    padding: 0.15rem 0.55rem;
     background: $color-bg;
     border: 1px solid $color-border;
-    border-radius: $border-radius-sm;
+    border-radius: 3px;
     color: $color-primary;
     font-size: 0.75rem;
     text-decoration: none;
@@ -61,19 +61,10 @@
 .tag-cloud {
     display: flex;
     flex-wrap: wrap;
-    align-items: baseline;
-    gap: $space-1 + $space-1;
-}
+    gap: 0.4rem;
 
-.tag-cloud-item {
-    text-decoration: none;
-    color: $color-text-muted;
-    line-height: $line-height-tight;
-    font-size: 0.78rem;
-    transition: color $transition-fast;
-
-    &:hover {
-        color: $color-primary;
+    .tag-badge {
+        font-size: 0.78rem;
     }
 }
 

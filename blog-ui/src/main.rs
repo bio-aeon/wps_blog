@@ -16,6 +16,7 @@ async fn main() -> std::io::Result<()> {
         let site_root = leptos_options.site_root.clone().to_string();
 
         App::new()
+            .wrap(actix_web::middleware::NormalizePath::trim())
             .wrap(actix_web::middleware::Compress::default())
             .service(Files::new("/pkg", format!("{site_root}/pkg")))
             .service(Files::new("/assets", &site_root))

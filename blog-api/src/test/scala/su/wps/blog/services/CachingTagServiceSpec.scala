@@ -17,8 +17,8 @@ class CachingTagServiceSpec extends Specification {
         val cache = CacheServiceImpl.create[IO](100)
         val cached = CachingTagService.create[IO](underlying, cache, 60.seconds)
 
-        cached.getAllTags.unsafeRunSync()
-        cached.getAllTags.unsafeRunSync()
+        cached.getAllTags("en").unsafeRunSync()
+        cached.getAllTags("en").unsafeRunSync()
 
         callCount mustEqual 1
       }
@@ -29,9 +29,9 @@ class CachingTagServiceSpec extends Specification {
         val cache = CacheServiceImpl.create[IO](100)
         val cached = CachingTagService.create[IO](underlying, cache, 60.seconds)
 
-        cached.getAllTags.unsafeRunSync()
-        cache.invalidate("tags:all").unsafeRunSync()
-        cached.getAllTags.unsafeRunSync()
+        cached.getAllTags("en").unsafeRunSync()
+        cache.invalidate("tags:all:en").unsafeRunSync()
+        cached.getAllTags("en").unsafeRunSync()
 
         callCount mustEqual 2
       }
@@ -42,19 +42,19 @@ class CachingTagServiceSpec extends Specification {
         var listCalls = 0
         var cloudCalls = 0
         val underlying = new TagService[IO] {
-          def getAllTags: IO[ListItemsResult[TagWithCountResult]] =
+          def getAllTags(lang: String): IO[ListItemsResult[TagWithCountResult]] =
             IO { listCalls += 1; ListItemsResult(Nil, 0) }
 
-          def getTagCloud: IO[TagCloudResult] =
+          def getTagCloud(lang: String): IO[TagCloudResult] =
             IO { cloudCalls += 1; TagCloudResult(Nil) }
         }
         val cache = CacheServiceImpl.create[IO](100)
         val cached = CachingTagService.create[IO](underlying, cache, 60.seconds)
 
-        cached.getAllTags.unsafeRunSync()
-        cached.getTagCloud.unsafeRunSync()
-        cached.getAllTags.unsafeRunSync()
-        cached.getTagCloud.unsafeRunSync()
+        cached.getAllTags("en").unsafeRunSync()
+        cached.getTagCloud("en").unsafeRunSync()
+        cached.getAllTags("en").unsafeRunSync()
+        cached.getTagCloud("en").unsafeRunSync()
 
         listCalls mustEqual 1
         cloudCalls mustEqual 1
@@ -64,10 +64,10 @@ class CachingTagServiceSpec extends Specification {
 
   private def countingTagService(counter: () => Int): TagService[IO] =
     new TagService[IO] {
-      def getAllTags: IO[ListItemsResult[TagWithCountResult]] =
+      def getAllTags(lang: String): IO[ListItemsResult[TagWithCountResult]] =
         IO { counter(); ListItemsResult(Nil, 0) }
 
-      def getTagCloud: IO[TagCloudResult] =
+      def getTagCloud(lang: String): IO[TagCloudResult] =
         IO { counter(); TagCloudResult(Nil) }
     }
 }

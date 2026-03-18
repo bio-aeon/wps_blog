@@ -1,6 +1,7 @@
 use crate::api::get_recent_posts;
 use crate::components::common::{ErrorDisplay, PostListSkeleton};
 use crate::components::post::PostCard;
+use crate::i18n::{lang_href, use_language, use_translations};
 use leptos::prelude::*;
 use leptos_meta::Title;
 
@@ -8,22 +9,27 @@ const RECENT_POSTS_COUNT: i32 = 5;
 
 #[component]
 pub fn HomePage() -> impl IntoView {
-    let recent_posts = Resource::new(|| (), |_| get_recent_posts(RECENT_POSTS_COUNT));
+    let lang = use_language();
+    let t = use_translations();
+    let recent_posts = Resource::new(
+        {
+            let lang = lang.clone();
+            move || lang.clone()
+        },
+        |lang| get_recent_posts(lang, RECENT_POSTS_COUNT),
+    );
+
+    let posts_href = lang_href(&lang, "/posts");
 
     view! {
         <Title text="WPS Blog"/>
-        <section class="home-hero">
-            <h1>"WPS Blog"</h1>
-            <p class="home-subtitle">
-                "A personal blog about software engineering, technology, and more."
-            </p>
-        </section>
-        <section class="home-recent">
-            <h2>"Recent Posts"</h2>
-            <Suspense fallback=move || {
-                view! { <PostListSkeleton count=RECENT_POSTS_COUNT as usize/> }
-            }>
-                {move || Suspend::new(async move {
+        <Suspense fallback=move || {
+            view! { <PostListSkeleton count=RECENT_POSTS_COUNT as usize/> }
+        }>
+            {move || {
+                let posts_href = posts_href.clone();
+                let view_all = t.common.view_all_posts;
+                Suspend::new(async move {
                     match recent_posts.await {
                         Ok(posts) => {
                             view! {
@@ -33,7 +39,7 @@ pub fn HomePage() -> impl IntoView {
                                         .map(|post| view! { <PostCard post=post/> })
                                         .collect_view()}
                                 </div>
-                                <a href="/posts" class="view-all-link">"View all posts →"</a>
+                                <a href=posts_href class="view-all-link">{view_all}</a>
                             }
                             .into_any()
                         }
@@ -47,8 +53,8 @@ pub fn HomePage() -> impl IntoView {
                             .into_any()
                         }
                     }
-                })}
-            </Suspense>
-        </section>
+                })
+            }}
+        </Suspense>
     }
 }

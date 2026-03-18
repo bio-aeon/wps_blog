@@ -10,17 +10,23 @@ pub struct ListItemsResult<T> {
 pub struct ListPostResult {
     pub id: i32,
     pub name: String,
-    pub short_text: String,
+    pub short_text: Option<String>,
     pub created_at: String,
+    pub language: String,
     pub tags: Vec<TagResult>,
+    pub available_languages: Vec<String>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct PostResult {
+    pub id: i32,
     pub name: String,
     pub text: String,
     pub created_at: String,
+    pub language: String,
     pub tags: Vec<TagResult>,
+    pub seo: Option<SeoInfo>,
+    pub available_languages: Vec<String>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -72,14 +78,18 @@ pub struct PageResult {
     pub id: i32,
     pub url: String,
     pub title: String,
-    pub content: String,
+    pub content: Option<String>,
     pub created_at: String,
+    pub language: String,
+    pub seo: Option<SeoInfo>,
+    pub available_languages: Vec<String>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct ListPageResult {
     pub url: String,
     pub title: String,
+    pub language: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -107,6 +117,23 @@ pub struct HealthResponse {
     pub status: String,
     pub database: String,
     pub timestamp: String,
+}
+
+// --- Languages ---
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct LanguageInfo {
+    pub code: String,
+    pub name: String,
+    pub native_name: String,
+    pub is_default: bool,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct SeoInfo {
+    pub title: Option<String>,
+    pub description: Option<String>,
+    pub keywords: Option<String>,
 }
 
 // --- Skills ---

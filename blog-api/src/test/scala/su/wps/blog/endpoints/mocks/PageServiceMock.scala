@@ -13,10 +13,10 @@ object PageServiceMock {
     getPageByUrlResult: Option[PageResult] = None,
     getAllPagesResult: ListItemsResult[ListPageResult] = ListItemsResult(Nil, 0)
   )(implicit R: Raise[F, AppErr]): PageService[F] = new PageService[F] {
-    def getPageByUrl(url: String): F[PageResult] =
+    def getPageByUrl(lang: String, url: String): F[PageResult] =
       getPageByUrlResult.map(_.pure[F]).getOrElse(R.raise(PageNotFound(url)))
 
-    def getAllPages: F[ListItemsResult[ListPageResult]] =
+    def getAllPages(lang: String): F[ListItemsResult[ListPageResult]] =
       getAllPagesResult.pure[F]
   }
 }

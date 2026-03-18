@@ -27,7 +27,8 @@ final class RoutesImpl[F[_]: Concurrent] private (
   socialLinkService: SocialLinkService[F],
   contactService: ContactService[F],
   aboutService: AboutService[F],
-  feedService: FeedService[F]
+  feedService: FeedService[F],
+  languageService: LanguageService[F]
 ) extends Http4sDsl[F]
     with Routes[F] {
   import RoutesImpl._
@@ -37,34 +38,52 @@ final class RoutesImpl[F[_]: Concurrent] private (
   private object TagParamMatcher extends OptionalQueryParamDecoderMatcher[String]("tag")
   private object QueryParamMatcher extends QueryParamDecoderMatcher[String]("q")
   private object CountParamMatcher extends OptionalQueryParamDecoderMatcher[Int]("count")
+  private object LangParamMatcher extends OptionalQueryParamDecoderMatcher[String]("lang")
+
+  private def resolveLang(req: Request[F], explicit: Option[String]): F[String] = {
+    val acceptLang = req.headers
+      .get(org.typelevel.ci.CIString("Accept-Language"))
+      .map(_.head.value)
+    languageService.resolveLanguage(explicit, acceptLang)
+  }
 
   private val apiRoutes: HttpRoutes[F] = HttpRoutes.of[F] {
-    case GET -> Root / "posts" :? LimitParamMatcher(limit) +& OffsetParamMatcher(offset)
-        +& TagParamMatcher(maybeTag) =>
+    case req @ GET -> Root / "posts" :? LimitParamMatcher(limit) +& OffsetParamMatcher(offset)
+        +& TagParamMatcher(maybeTag) +& LangParamMatcher(maybeLang) =>
       withValidPagination(limit, offset) { (l, o) =>
-        maybeTag match {
-          case Some(tagSlug) =>
-            postService.postsByTag(tagSlug, l, o).map(_.asJson).flatMap(Ok(_))
-          case None =>
-            postService.allPosts(l, o).map(_.asJson).flatMap(Ok(_))
+        resolveLang(req, maybeLang).flatMap { lang =>
+          maybeTag match {
+            case Some(tagSlug) =>
+              postService.postsByTag(lang, tagSlug, l, o).map(_.asJson).flatMap(Ok(_))
+            case None =>
+              postService.allPosts(lang, l, o).map(_.asJson).flatMap(Ok(_))
+          }
         }
       }
 
-    case GET -> Root / "posts" / "search" :? QueryParamMatcher(query) +& LimitParamMatcher(limit)
-        +& OffsetParamMatcher(offset) =>
+    case req @ GET -> Root / "posts" / "search" :? QueryParamMatcher(query)
+        +& LimitParamMatcher(limit) +& OffsetParamMatcher(offset)
+        +& LangParamMatcher(maybeLang) =>
       withValidPagination(limit, offset) { (l, o) =>
-        postService.searchPosts(query, l, o).map(_.asJson).flatMap(Ok(_))
+        resolveLang(req, maybeLang).flatMap { lang =>
+          postService.searchPosts(lang, query, l, o).map(_.asJson).flatMap(Ok(_))
+        }
       }
 
-    case GET -> Root / "posts" / "recent" :? CountParamMatcher(maybeCount) =>
+    case req @ GET -> Root / "posts" / "recent" :? CountParamMatcher(maybeCount)
+        +& LangParamMatcher(maybeLang) =>
       val count = maybeCount
         .getOrElse(DefaultRecentPostsCount)
         .min(MaxRecentPostsCount)
         .max(MinRecentPostsCount)
-      postService.recentPosts(count).map(_.asJson).flatMap(Ok(_))
+      resolveLang(req, maybeLang).flatMap { lang =>
+        postService.recentPosts(lang, count).map(_.asJson).flatMap(Ok(_))
+      }
 
-    case GET -> Root / "posts" / IntVar(id) =>
-      postService.postById(PostId(id)).map(_.asJson).flatMap(Ok(_))
+    case req @ GET -> Root / "posts" / IntVar(id) :? LangParamMatcher(maybeLang) =>
+      resolveLang(req, maybeLang).flatMap { lang =>
+        postService.postById(lang, PostId(id)).map(_.asJson).flatMap(Ok(_))
+      }
 
     case POST -> Root / "posts" / IntVar(id) / "view" =>
       postService.incrementViewCount(PostId(id)) *> NoContent()
@@ -85,17 +104,25 @@ final class RoutesImpl[F[_]: Concurrent] private (
         commentService.rateComment(CommentId(id), request.isUpvote, ip) *> NoContent()
       }
 
-    case GET -> Root / "tags" / "cloud" =>
-      tagService.getTagCloud.map(_.asJson).flatMap(Ok(_))
+    case req @ GET -> Root / "tags" / "cloud" :? LangParamMatcher(maybeLang) =>
+      resolveLang(req, maybeLang).flatMap { lang =>
+        tagService.getTagCloud(lang).map(_.asJson).flatMap(Ok(_))
+      }
 
-    case GET -> Root / "tags" =>
-      tagService.getAllTags.map(_.asJson).flatMap(Ok(_))
+    case req @ GET -> Root / "tags" :? LangParamMatcher(maybeLang) =>
+      resolveLang(req, maybeLang).flatMap { lang =>
+        tagService.getAllTags(lang).map(_.asJson).flatMap(Ok(_))
+      }
 
-    case GET -> Root / "pages" =>
-      pageService.getAllPages.map(_.asJson).flatMap(Ok(_))
+    case req @ GET -> Root / "pages" :? LangParamMatcher(maybeLang) =>
+      resolveLang(req, maybeLang).flatMap { lang =>
+        pageService.getAllPages(lang).map(_.asJson).flatMap(Ok(_))
+      }
 
-    case GET -> Root / "pages" / url =>
-      pageService.getPageByUrl(url).map(_.asJson).flatMap(Ok(_))
+    case req @ GET -> Root / "pages" / url :? LangParamMatcher(maybeLang) =>
+      resolveLang(req, maybeLang).flatMap { lang =>
+        pageService.getPageByUrl(lang, url).map(_.asJson).flatMap(Ok(_))
+      }
 
     case GET -> Root / "skills" =>
       skillService.getSkillsByCategory.map(_.asJson).flatMap(Ok(_))
@@ -117,8 +144,13 @@ final class RoutesImpl[F[_]: Concurrent] private (
     case GET -> Root / "about" =>
       aboutService.getAboutPage.map(_.asJson).flatMap(Ok(_))
 
-    case GET -> Root / "feed" =>
-      feedService.getFeed.map(_.asJson).flatMap(Ok(_))
+    case req @ GET -> Root / "feed" :? LangParamMatcher(maybeLang) =>
+      resolveLang(req, maybeLang).flatMap { lang =>
+        feedService.getFeed(lang).map(_.asJson).flatMap(Ok(_))
+      }
+
+    case GET -> Root / "languages" =>
+      languageService.getActiveLanguages.map(_.asJson).flatMap(Ok(_))
   }
 
   private val systemRoutes: HttpRoutes[F] = HttpRoutes.of[F] { case GET -> Root / "health" =>
@@ -187,7 +219,8 @@ object RoutesImpl {
     socialLinkService: SocialLinkService[F],
     contactService: ContactService[F],
     aboutService: AboutService[F],
-    feedService: FeedService[F]
+    feedService: FeedService[F],
+    languageService: LanguageService[F]
   ): RoutesImpl[F] =
     new RoutesImpl[F](
       postService,
@@ -200,6 +233,7 @@ object RoutesImpl {
       socialLinkService,
       contactService,
       aboutService,
-      feedService
+      feedService,
+      languageService
     )
 }

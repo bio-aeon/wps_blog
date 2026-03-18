@@ -1,4 +1,5 @@
 use crate::api::types::TagResult;
+use crate::i18n::{lang_href, use_language};
 use leptos::prelude::*;
 
 fn tag_color_class(slug: &str) -> &'static str {
@@ -14,7 +15,8 @@ fn tag_color_class(slug: &str) -> &'static str {
 
 #[component]
 pub fn TagBadge(tag: TagResult) -> impl IntoView {
-    let href = format!("/tags/{}", tag.slug);
+    let lang = use_language();
+    let href = lang_href(&lang, &format!("/tags/{}", tag.slug));
     let color_class = tag_color_class(&tag.slug);
     let class = if color_class.is_empty() {
         "tag-badge".to_string()

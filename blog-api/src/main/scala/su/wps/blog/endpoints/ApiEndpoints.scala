@@ -17,6 +17,7 @@ object ApiEndpoints {
   private val profileTag = "Profile"
   private val contactTag = "Contact"
   private val feedTag = "Feed"
+  private val languagesTag = "Languages"
 
   val getPosts: AnyEndpoint =
     endpoint.get
@@ -27,6 +28,7 @@ object ApiEndpoints {
         query[Option[String]]("tag")
           .description("Filter by tag slug. When provided, returns only posts with this tag")
       )
+      .in(query[Option[String]]("lang").description("Language code (en, ru, el)"))
       .out(jsonBody[ListItemsResult[ListPostResult]])
       .errorOut(jsonBody[ErrorResponse])
       .summary("List posts")
@@ -39,6 +41,7 @@ object ApiEndpoints {
       .in(query[String]("q").description("Full-text search query"))
       .in(query[Int]("limit").description("Number of results per page"))
       .in(query[Int]("offset").description("Pagination offset"))
+      .in(query[Option[String]]("lang").description("Language code (en, ru, el)"))
       .out(jsonBody[ListItemsResult[ListPostResult]])
       .errorOut(jsonBody[ErrorResponse])
       .summary("Search posts")
@@ -52,6 +55,7 @@ object ApiEndpoints {
         query[Option[Int]]("count")
           .description("Number of recent posts to return (default 5, max 20)")
       )
+      .in(query[Option[String]]("lang").description("Language code (en, ru, el)"))
       .out(jsonBody[List[ListPostResult]])
       .summary("Recent posts")
       .description("Get the most recent blog posts.")
@@ -60,6 +64,7 @@ object ApiEndpoints {
   val getPostById: AnyEndpoint =
     endpoint.get
       .in(v1 / "posts" / path[Int]("id").description("Post ID"))
+      .in(query[Option[String]]("lang").description("Language code (en, ru, el)"))
       .out(jsonBody[PostResult])
       .errorOut(jsonBody[ErrorResponse])
       .summary("Get post by ID")
@@ -113,6 +118,7 @@ object ApiEndpoints {
   val getAllTags: AnyEndpoint =
     endpoint.get
       .in(v1 / "tags")
+      .in(query[Option[String]]("lang").description("Language code (en, ru, el)"))
       .out(jsonBody[ListItemsResult[TagWithCountResult]])
       .summary("List all tags")
       .description("Get all tags with their associated post counts.")
@@ -121,6 +127,7 @@ object ApiEndpoints {
   val getTagCloud: AnyEndpoint =
     endpoint.get
       .in(v1 / "tags" / "cloud")
+      .in(query[Option[String]]("lang").description("Language code (en, ru, el)"))
       .out(jsonBody[TagCloudResult])
       .summary("Tag cloud")
       .description("Get tag cloud data with normalized weights for visualization.")
@@ -129,6 +136,7 @@ object ApiEndpoints {
   val getAllPages: AnyEndpoint =
     endpoint.get
       .in(v1 / "pages")
+      .in(query[Option[String]]("lang").description("Language code (en, ru, el)"))
       .out(jsonBody[ListItemsResult[ListPageResult]])
       .summary("List all pages")
       .description("Get all static pages (URL and title) for navigation menus.")
@@ -137,6 +145,7 @@ object ApiEndpoints {
   val getPageByUrl: AnyEndpoint =
     endpoint.get
       .in(v1 / "pages" / path[String]("url").description("Page URL slug"))
+      .in(query[Option[String]]("lang").description("Language code (en, ru, el)"))
       .out(jsonBody[PageResult])
       .errorOut(jsonBody[ErrorResponse])
       .summary("Get page by URL")
@@ -196,10 +205,19 @@ object ApiEndpoints {
   val getFeed: AnyEndpoint =
     endpoint.get
       .in(v1 / "feed")
+      .in(query[Option[String]]("lang").description("Language code (en, ru, el)"))
       .out(jsonBody[FeedResult])
       .summary("Get feed data")
       .description("Get all posts, pages, and tags for sitemap/RSS/feed generation.")
       .tag(feedTag)
+
+  val getLanguages: AnyEndpoint =
+    endpoint.get
+      .in(v1 / "languages")
+      .out(jsonBody[List[LanguageResult]])
+      .summary("List active languages")
+      .description("Get all active languages with their native names.")
+      .tag(languagesTag)
 
   val all: List[AnyEndpoint] = List(
     getPosts,
@@ -220,6 +238,7 @@ object ApiEndpoints {
     getSocialLinks,
     submitContact,
     getAbout,
-    getFeed
+    getFeed,
+    getLanguages
   )
 }

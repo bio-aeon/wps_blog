@@ -11,15 +11,14 @@ final class CachingTagService[F[_]: Monad] private (
   ttl: FiniteDuration
 ) extends TagService[F] {
 
-  def getAllTags: F[ListItemsResult[TagWithCountResult]] =
-    cache.getOrLoad("tags:all", ttl)(underlying.getAllTags)
+  def getAllTags(lang: String): F[ListItemsResult[TagWithCountResult]] =
+    cache.getOrLoad(s"tags:all:$lang", ttl)(underlying.getAllTags(lang))
 
-  def getTagCloud: F[TagCloudResult] =
-    cache.getOrLoad("tags:cloud", ttl)(underlying.getTagCloud)
+  def getTagCloud(lang: String): F[TagCloudResult] =
+    cache.getOrLoad(s"tags:cloud:$lang", ttl)(underlying.getTagCloud(lang))
 }
 
 object CachingTagService {
-
   def create[F[_]: Monad](
     underlying: TagService[F],
     cache: CacheService[F],

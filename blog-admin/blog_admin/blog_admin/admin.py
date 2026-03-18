@@ -5,6 +5,7 @@ from django.utils.html import format_html, mark_safe
 from blog_admin.models import (
     User, Post, Tag, PostTag, Comment, Page, Config,
     Skill, Experience, SocialLink, ContactSubmission,
+    Language, PostTranslation, PageTranslation, TagTranslation,
 )
 from blog_admin.forms import PostAdminForm, PageAdminForm
 
@@ -27,6 +28,45 @@ class CommentInline(admin.TabularInline):
 
     def has_add_permission(self, request, obj=None):
         return False
+
+
+class PostTranslationInline(admin.StackedInline):
+    model = PostTranslation
+    extra = 0
+    fields = [
+        'language', 'name', 'short_text', 'text',
+        'seo_title', 'seo_description', 'seo_keywords', 'translation_status',
+    ]
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'language':
+            kwargs['queryset'] = Language.objects.filter(is_active=True).order_by('sort_order')
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+
+class PageTranslationInline(admin.StackedInline):
+    model = PageTranslation
+    extra = 0
+    fields = [
+        'language', 'title', 'content',
+        'seo_title', 'seo_description', 'translation_status',
+    ]
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'language':
+            kwargs['queryset'] = Language.objects.filter(is_active=True).order_by('sort_order')
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+
+class TagTranslationInline(admin.TabularInline):
+    model = TagTranslation
+    extra = 0
+    fields = ['language', 'name']
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'language':
+            kwargs['queryset'] = Language.objects.filter(is_active=True).order_by('sort_order')
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 # -- User Admin --------------------------------------------------------------
@@ -54,13 +94,16 @@ class UserAdmin(admin.ModelAdmin):
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
     form = PostAdminForm
-    list_display = ('name', 'author', 'publication_status', 'views', 'tag_list', 'created_at')
+    list_display = (
+        'name', 'author', 'publication_status', 'views', 'tag_list',
+        'translation_coverage', 'created_at',
+    )
     list_filter = ('is_hidden', 'author', 'created_at')
     search_fields = ('name', 'short_text', 'text')
     readonly_fields = ('views', 'created_at')
     date_hierarchy = 'created_at'
     ordering = ('-created_at',)
-    inlines = [PostTagInline, CommentInline]
+    inlines = [PostTagInline, CommentInline, PostTranslationInline]
     actions = ['publish_posts', 'unpublish_posts']
 
     fieldsets = (
@@ -93,6 +136,12 @@ class PostAdmin(admin.ModelAdmin):
     def tag_list(self, obj):
         return ', '.join(tag.name for tag in obj.tags.all())
 
+    def translation_coverage(self, obj):
+        translations = obj.translations.filter(translation_status='published')
+        langs = sorted([t.language_id for t in translations])
+        return ', '.join(langs) if langs else '—'
+    translation_coverage.short_description = 'Translations'
+
     @admin.action(description='Publish selected posts')
     def publish_posts(self, request, queryset):
         updated = queryset.update(is_hidden=False)
@@ -112,6 +161,7 @@ class TagAdmin(admin.ModelAdmin):
     search_fields = ('name', 'slug')
     prepopulated_fields = {'slug': ('name',)}
     ordering = ('name',)
+    inlines = [TagTranslationInline]
 
     def get_queryset(self, request):
         return super().get_queryset(request).annotate(
@@ -174,6 +224,7 @@ class PageAdmin(admin.ModelAdmin):
     search_fields = ('title', 'url', 'content')
     readonly_fields = ('created_at',)
     ordering = ('title',)
+    inlines = [PageTranslationInline]
 
     fieldsets = (
         (None, {
@@ -193,6 +244,15 @@ class ConfigAdmin(admin.ModelAdmin):
     search_fields = ('name', 'value', 'comment')
     readonly_fields = ('created_at',)
     ordering = ('name',)
+
+
+# -- Language Admin ------------------------------------------------------------
+
+@admin.register(Language)
+class LanguageAdmin(admin.ModelAdmin):
+    list_display = ['code', 'name', 'native_name', 'is_default', 'is_active', 'sort_order']
+    list_editable = ['is_active', 'sort_order']
+    ordering = ['sort_order']
 
 
 # -- Skill Admin --------------------------------------------------------------

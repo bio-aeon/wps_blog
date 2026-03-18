@@ -6,12 +6,7 @@ import org.scalacheck.Gen
 import org.scalacheck.ScalacheckShapeless.*
 import org.specs2.mutable.Specification
 import su.wps.blog.models.domain.*
-import su.wps.blog.services.mocks.{
-  PageRepositoryMock,
-  PostRepositoryMock,
-  TagRepositoryMock,
-  TxrMock
-}
+import su.wps.blog.services.mocks.*
 import su.wps.blog.tools.scalacheck.*
 import tofu.doobie.transactor.Txr
 
@@ -41,14 +36,14 @@ class FeedServiceSpec extends Specification {
         val posts = random[Post](3)
         val service = mkService(findAllVisibleResult = posts)
 
-        service.getFeed must beRight.which(_.posts.length == 3)
+        service.getFeed("en") must beRight.which(_.posts.length == 3)
       }
 
       "returns all pages" >> {
         val pages = random[Page](2)
         val service = mkService(findAllResult = pages)
 
-        service.getFeed must beRight.which(_.pages.length == 2)
+        service.getFeed("en") must beRight.which(_.pages.length == 2)
       }
 
       "returns tags with post counts excluding empty tags" >> {
@@ -58,14 +53,14 @@ class FeedServiceSpec extends Specification {
         val tagsWithCounts = List((tag1, 5), (tag2, 3), (tag3, 0))
         val service = mkService(findAllWithPostCountsResult = tagsWithCounts)
 
-        service.getFeed must beRight.which(_.tags.length == 2)
+        service.getFeed("en") must beRight.which(_.tags.length == 2)
       }
 
       "maps non-empty metaDescription to Some" >> {
         val post = random[Post].copy(metaDescription = "Description")
         val service = mkService(findAllVisibleResult = List(post))
 
-        service.getFeed must beRight.which { r =>
+        service.getFeed("en") must beRight.which { r =>
           r.posts.head.metaDescription.contains("Description")
         }
       }
@@ -74,7 +69,7 @@ class FeedServiceSpec extends Specification {
         val post = random[Post].copy(metaDescription = "")
         val service = mkService(findAllVisibleResult = List(post))
 
-        service.getFeed must beRight.which(_.posts.head.metaDescription.isEmpty)
+        service.getFeed("en") must beRight.which(_.posts.head.metaDescription.isEmpty)
       }
 
       "includes tags per post" >> {
@@ -84,7 +79,7 @@ class FeedServiceSpec extends Specification {
         val tagsByPost = List((PostId(1), tag))
         val service = mkService(findAllVisibleResult = posts, findByPostIdsResult = tagsByPost)
 
-        service.getFeed must beRight.which { r =>
+        service.getFeed("en") must beRight.which { r =>
           r.posts.head.tags.length == 1 && r.posts(1).tags.isEmpty
         }
       }
@@ -92,7 +87,7 @@ class FeedServiceSpec extends Specification {
       "returns empty feed when no data exists" >> {
         val service = mkService()
 
-        service.getFeed must beRight.which { r =>
+        service.getFeed("en") must beRight.which { r =>
           r.posts.isEmpty && r.pages.isEmpty && r.tags.isEmpty
         }
       }
@@ -112,6 +107,7 @@ class FeedServiceSpec extends Specification {
       findByPostIdsResult = findByPostIdsResult
     )
     val pageRepo = PageRepositoryMock.create[Id](findAllResult = findAllResult)
-    FeedServiceImpl.create[RunF, Id](postRepo, tagRepo, pageRepo, xa)
+    val postTranslationRepo = PostTranslationRepositoryMock.create[Id]()
+    FeedServiceImpl.create[RunF, Id](postRepo, tagRepo, pageRepo, postTranslationRepo, xa)
   }
 }

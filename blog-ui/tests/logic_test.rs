@@ -9,7 +9,6 @@ use blog_ui::components::contact::contact_form::{
 };
 use blog_ui::components::post::toc::{extract_headings, inject_heading_ids, slugify, TocEntry};
 use blog_ui::components::post::{estimate_reading_time, format_date, strip_html_tags};
-use blog_ui::components::tag::tag_cloud::{tag_font_size, MAX_FONT_SIZE_REM, MIN_FONT_SIZE_REM};
 
 // --- format_date ---
 
@@ -177,27 +176,6 @@ fn validation_all_fields_invalid() {
     assert!(result.name_error.is_some());
     assert!(result.email_error.is_some());
     assert!(result.text_error.is_some());
-}
-
-// --- tag_font_size ---
-
-#[test]
-fn tag_font_size_at_zero_weight() {
-    let size = tag_font_size(0.0);
-    assert!((size - MIN_FONT_SIZE_REM).abs() < f64::EPSILON);
-}
-
-#[test]
-fn tag_font_size_at_full_weight() {
-    let size = tag_font_size(1.0);
-    assert!((size - MAX_FONT_SIZE_REM).abs() < f64::EPSILON);
-}
-
-#[test]
-fn tag_font_size_at_half_weight() {
-    let size = tag_font_size(0.5);
-    let expected = (MIN_FONT_SIZE_REM + MAX_FONT_SIZE_REM) / 2.0;
-    assert!((size - expected).abs() < f64::EPSILON);
 }
 
 // --- format_experience_date ---

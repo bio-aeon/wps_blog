@@ -9,10 +9,7 @@ pub use post_meta::PostMeta;
 
 use chrono::{DateTime, FixedOffset};
 
-/// Formats an ISO 8601 date string into "Month DD, YYYY" display format.
-/// Returns the original string if parsing fails.
-pub fn format_date(iso_date: &str) -> String {
-    // Strip Java/Scala ZonedDateTime zone annotation like "[Etc/UTC]"
+fn parse_date(iso_date: &str) -> Option<DateTime<FixedOffset>> {
     let date_str = iso_date
         .find('[')
         .map(|i| &iso_date[..i])
@@ -20,8 +17,22 @@ pub fn format_date(iso_date: &str) -> String {
 
     DateTime::parse_from_rfc3339(date_str)
         .or_else(|_| DateTime::parse_from_str(date_str, "%Y-%m-%dT%H:%M:%S%.f%:z"))
-        .map(|dt: DateTime<FixedOffset>| dt.format("%B %d, %Y").to_string())
-        .unwrap_or_else(|_| iso_date.to_string())
+        .ok()
+}
+
+/// Formats an ISO 8601 date string into "Month DD, YYYY" display format.
+/// Returns the original string if parsing fails.
+pub fn format_date(iso_date: &str) -> String {
+    parse_date(iso_date)
+        .map(|dt| dt.format("%B %d, %Y").to_string())
+        .unwrap_or_else(|| iso_date.to_string())
+}
+
+/// Formats an ISO 8601 date string into "Mon DD, YYYY" short display format.
+pub fn format_date_short(iso_date: &str) -> String {
+    parse_date(iso_date)
+        .map(|dt| dt.format("%b %-d, %Y").to_string())
+        .unwrap_or_else(|| iso_date.to_string())
 }
 
 /// Average words per minute for reading speed estimation.

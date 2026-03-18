@@ -1,0 +1,32 @@
+.language-switcher {
+    display: flex;
+    gap: 0.25rem;
+    align-items: center;
+
+    a {
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: color 0.15s ease, background-color 0.15s ease;
+        border: 1px solid transparent;
+
+        &:hover {
+            color: var(--text);
+            background: var(--surface);
+        }
+
+        &.active {
+            color: var(--blue);
+            border-color: var(--blue);
+            background: rgba(122, 162, 247, 0.1);
+        }
+
+        &.unavailable {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+    }
+}

@@ -1,0 +1,73 @@
+use super::*;
+
+pub static TRANSLATIONS: Translations = Translations {
+    nav: NavStrings {
+        home: "Главная",
+        posts: "Блог",
+        tags: "Теги",
+        about: "Обо мне",
+        contact: "Контакт",
+        search_placeholder: "Поиск...",
+    },
+    post: PostStrings {
+        read_more: "Читать далее",
+        published_on: "Опубликовано",
+        reading_time: "мин чтения",
+        views: "просмотров",
+        table_of_contents: "Содержание",
+        back_to_posts: "Назад к постам",
+    },
+    comment: CommentStrings {
+        title: "Комментарии",
+        leave_comment: "Оставить комментарий",
+        name_label: "Имя",
+        email_label: "Email",
+        text_label: "Комментарий",
+        submit: "Отправить",
+        reply: "Ответить",
+        no_comments: "Комментариев пока нет. Будьте первым!",
+    },
+    tag: TagStrings {
+        all_tags: "Все теги",
+        posts_tagged: "Посты с тегом",
+    },
+    search: SearchStrings {
+        title: "Поиск",
+        placeholder: "Поиск...",
+        results_for: "Результаты по запросу",
+        no_results: "Ничего не найдено.",
+    },
+    common: CommonStrings {
+        loading: "Загрузка...",
+        error_title: "Ошибка",
+        error_message: "Что-то пошло не так.",
+        not_found: "Страница не найдена",
+        not_found_message: "Запрашиваемая страница не существует.",
+        retry: "Повторить",
+        back_home: "На главную",
+        page: "Страница",
+        previous: "Назад",
+        next: "Вперёд",
+        recent_posts: "Последние записи",
+        view_all_posts: "Все записи \u{2192}",
+    },
+    contact: ContactStrings {
+        title: "Контакт",
+        name_label: "Имя",
+        email_label: "Email",
+        subject_label: "Тема",
+        message_label: "Сообщение",
+        submit: "Отправить",
+        success: "Ваше сообщение успешно отправлено!",
+    },
+    about: AboutStrings {
+        title: "Обо мне",
+        skills: "Навыки",
+        experience: "Опыт работы",
+        present: "По настоящее время",
+    },
+    footer: FooterStrings {
+        copyright: "Все права защищены.",
+        rss_feed: "RSS-лента",
+    },
+};

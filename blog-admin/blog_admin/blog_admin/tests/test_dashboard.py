@@ -5,6 +5,7 @@ from model_bakery import baker
 from blog_admin.models import (
     User, Post, Tag, PostTag, Comment,
     Skill, Experience, SocialLink, ContactSubmission,
+    Language, PostTranslation,
 )
 
 
@@ -154,3 +155,32 @@ class AnalyticsViewTest(TestCase):
     def test_analytics_handles_empty_data(self):
         response = self.client.get(reverse('admin-analytics'))
         self.assertEqual(response.status_code, 200)
+
+
+class TranslationDashboardTest(TestCase):
+    def setUp(self):
+        self.admin_user = User.objects.create_superuser('admin', 'a@b.com', 'pass')
+        self.client.force_login(self.admin_user)
+
+    def test_dashboard_includes_translation_stats(self):
+        Language.objects.create(
+            code='en', name='English', native_name='English',
+            is_default=True, sort_order=1
+        )
+        response = self.client.get(reverse('admin-dashboard'))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('translation_stats', response.context)
+
+    def test_translation_coverage_counts(self):
+        lang = Language.objects.create(
+            code='en', name='English', native_name='English',
+            is_default=True, sort_order=1
+        )
+        post = baker.make(Post, author=self.admin_user)
+        PostTranslation.objects.create(
+            post=post, language=lang, name='Test',
+            translation_status='published'
+        )
+        response = self.client.get(reverse('admin-dashboard'))
+        stats = response.context['translation_stats']
+        self.assertEqual(stats['coverage_by_language']['en'], 1)

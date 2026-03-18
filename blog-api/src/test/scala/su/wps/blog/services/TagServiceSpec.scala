@@ -3,7 +3,7 @@ package su.wps.blog.services
 import cats.Id
 import org.specs2.mutable.Specification
 import su.wps.blog.models.domain.{Tag, TagId}
-import su.wps.blog.services.mocks.{TagRepositoryMock, TxrMock}
+import su.wps.blog.services.mocks.*
 import tofu.doobie.transactor.Txr
 
 class TagServiceSpec extends Specification {
@@ -21,7 +21,7 @@ class TagServiceSpec extends Specification {
       val tagsWithCounts = tags.map(t => (t, 5))
       val service = mkService(tagsWithCounts)
 
-      service.getAllTags must beRight.which { r =>
+      service.getAllTags("en") must beRight.which { r =>
         r.items.length == 3 && r.total == 3
       }
     }
@@ -34,7 +34,7 @@ class TagServiceSpec extends Specification {
       )
       val service = mkService(tags)
 
-      service.getAllTags must beRight.which { r =>
+      service.getAllTags("en") must beRight.which { r =>
         r.items.find(_.slug == "scala").exists(_.postCount == 10) &&
         r.items.find(_.slug == "rust").exists(_.postCount == 5) &&
         r.items.find(_.slug == "fp").exists(_.postCount == 0)
@@ -44,7 +44,7 @@ class TagServiceSpec extends Specification {
     "returns empty list when no tags exist" >> {
       val service = mkService(Nil)
 
-      service.getAllTags must beRight.which { r =>
+      service.getAllTags("en") must beRight.which { r =>
         r.items.isEmpty && r.total == 0
       }
     }
@@ -57,7 +57,7 @@ class TagServiceSpec extends Specification {
       )
       val service = mkService(tags)
 
-      service.getAllTags must beRight.which { r =>
+      service.getAllTags("en") must beRight.which { r =>
         r.items.map(_.name) == List("alpha", "beta", "gamma")
       }
     }
@@ -66,7 +66,7 @@ class TagServiceSpec extends Specification {
       val tag = Tag("scala", "scala-lang", Some(TagId(42)))
       val service = mkService(List((tag, 7)))
 
-      service.getAllTags must beRight.which { r =>
+      service.getAllTags("en") must beRight.which { r =>
         r.items.headOption.exists { t =>
           t.id == TagId(42) &&
           t.name == "scala" &&
@@ -86,7 +86,7 @@ class TagServiceSpec extends Specification {
       )
       val service = mkService(tags)
 
-      service.getTagCloud must beRight.which { r =>
+      service.getTagCloud("en") must beRight.which { r =>
         r.tags.find(_.slug == "scala").exists(_.weight == 1.0) &&
         r.tags.find(_.slug == "rust").exists(_.weight == 0.5) &&
         r.tags.find(_.slug == "fp").exists(_.weight == 0.2)
@@ -96,7 +96,7 @@ class TagServiceSpec extends Specification {
     "returns empty tag cloud when no tags exist" >> {
       val service = mkService(Nil)
 
-      service.getTagCloud must beRight.which { r =>
+      service.getTagCloud("en") must beRight.which { r =>
         r.tags.isEmpty
       }
     }
@@ -105,7 +105,7 @@ class TagServiceSpec extends Specification {
       val tags = List((Tag("scala", "scala", Some(TagId(1))), 5))
       val service = mkService(tags)
 
-      service.getTagCloud must beRight.which { r =>
+      service.getTagCloud("en") must beRight.which { r =>
         r.tags.length == 1 && r.tags.head.weight == 1.0
       }
     }
@@ -115,7 +115,7 @@ class TagServiceSpec extends Specification {
         List((Tag("scala", "scala", Some(TagId(1))), 10), (Tag("rust", "rust", Some(TagId(2))), 5))
       val service = mkService(tags)
 
-      service.getTagCloud must beRight.which { r =>
+      service.getTagCloud("en") must beRight.which { r =>
         r.tags.find(_.slug == "scala").exists(_.count == 10) &&
         r.tags.find(_.slug == "rust").exists(_.count == 5)
       }
@@ -126,7 +126,7 @@ class TagServiceSpec extends Specification {
         List((Tag("scala", "scala", Some(TagId(1))), 10), (Tag("rust", "rust", Some(TagId(2))), 0))
       val service = mkService(tags)
 
-      service.getTagCloud must beRight.which { r =>
+      service.getTagCloud("en") must beRight.which { r =>
         r.tags.find(_.slug == "rust").exists(_.weight == 0.0) &&
         r.tags.find(_.slug == "rust").exists(_.count == 0)
       }
@@ -136,6 +136,7 @@ class TagServiceSpec extends Specification {
   private def mkService(findAllWithPostCountsResult: List[(Tag, Int)] = Nil): TagService[RunF] = {
     val tagRepo =
       TagRepositoryMock.create[Id](findAllWithPostCountsResult = findAllWithPostCountsResult)
-    TagServiceImpl.create[RunF, Id](tagRepo, xa)
+    val tagTranslationRepo = TagTranslationRepositoryMock.create[Id]()
+    TagServiceImpl.create[RunF, Id](tagRepo, tagTranslationRepo, xa)
   }
 }

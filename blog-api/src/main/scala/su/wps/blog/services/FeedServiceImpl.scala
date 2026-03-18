@@ -4,49 +4,57 @@ import cats.Monad
 import cats.syntax.apply.*
 import cats.syntax.flatMap.*
 import cats.syntax.functor.*
-import io.scalaland.chimney.dsl.*
 import mouse.anyf.*
 import su.wps.blog.models.api.*
-import su.wps.blog.models.domain.{PostId, Tag}
-import su.wps.blog.repositories.{PageRepository, PostRepository, TagRepository}
+import su.wps.blog.models.domain.PostId
+import su.wps.blog.repositories.*
 import tofu.doobie.transactor.Txr
 
 final class FeedServiceImpl[F[_]: Monad, DB[_]: Monad] private (
   postRepo: PostRepository[DB],
   tagRepo: TagRepository[DB],
   pageRepo: PageRepository[DB],
+  postTranslationRepo: PostTranslationRepository[DB],
   xa: Txr[F, DB]
 ) extends FeedService[F] {
   import ServiceHelpers._
 
-  def getFeed: F[FeedResult] =
+  def getFeed(lang: String): F[FeedResult] =
     (postRepo.findAllVisible, tagRepo.findAllWithPostCounts, pageRepo.findAll)
       .mapN((_, _, _))
       .flatMap { case (posts, tagsWithCounts, pages) =>
         val postIds = posts.flatMap(_.id)
-        tagRepo.findByPostIds(postIds).map { tagsByPost =>
+        (
+          tagRepo.findByPostIds(postIds),
+          postTranslationRepo.findAvailableLanguagesByPostIds(postIds)
+        ).mapN { case (tagsByPost, langsByPost) =>
           val tagsByPostId =
             tagsByPost.groupBy(_._1).map { case (pid, tags) => pid -> tags.map(_._2) }
-          (posts, tagsWithCounts, pages, tagsByPostId)
+          (posts, tagsWithCounts, pages, tagsByPostId, langsByPost)
         }
       }
       .thrushK(xa.trans)
-      .map { case (posts, tagsWithCounts, pages, tagsByPostId) =>
+      .map { case (posts, tagsWithCounts, pages, tagsByPostId, langsByPost) =>
         val feedPosts = posts.map { post =>
-          val tags = tagsByPostId.getOrElse(post.nonEmptyId, Nil)
-          post
-            .into[FeedPostItem]
-            .withFieldComputed(_.id, _.nonEmptyId)
-            .withFieldComputed(_.metaDescription, p => nonEmpty(p.metaDescription))
-            .withFieldConst(_.tags, tagsToTagResults(tags))
-            .transform
+          val pid = post.nonEmptyId
+          val tags = tagsByPostId.getOrElse(pid, Nil)
+          FeedPostItem(
+            id = pid,
+            name = post.name,
+            shortText = nonEmpty(post.shortText),
+            metaDescription = nonEmpty(post.metaDescription),
+            createdAt = post.createdAt,
+            language = lang,
+            tags = tagsToTagResults(tags),
+            availableLanguages = langsByPost.getOrElse(pid, List(lang))
+          )
         }
 
-        val feedPages = pages.map(_.into[FeedPageItem].transform)
-
+        val feedPages = pages.map(p => FeedPageItem(p.url, p.title, p.createdAt))
         val feedTags = tagsWithCounts
           .filter(_._2 > 0)
-          .map(_._1.into[FeedTagItem].transform)
+          .map(_._1)
+          .map(t => FeedTagItem(t.name, t.slug))
 
         FeedResult(feedPosts, feedPages, feedTags)
       }
@@ -57,7 +65,8 @@ object FeedServiceImpl {
     postRepo: PostRepository[DB],
     tagRepo: TagRepository[DB],
     pageRepo: PageRepository[DB],
+    postTranslationRepo: PostTranslationRepository[DB],
     xa: Txr[F, DB]
   ): FeedServiceImpl[F, DB] =
-    new FeedServiceImpl(postRepo, tagRepo, pageRepo, xa)
+    new FeedServiceImpl(postRepo, tagRepo, pageRepo, postTranslationRepo, xa)
 }

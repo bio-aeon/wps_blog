@@ -60,3 +60,14 @@ small {
   font-size: $font-size-sm;
   color: $color-text-muted;
 }
+
+// Language-specific quotation marks
+:lang(en) {
+    q { quotes: "\201C" "\201D" "\2018" "\2019"; }
+}
+:lang(ru) {
+    q { quotes: "\00AB" "\00BB" "\201E" "\201C"; }
+}
+:lang(el) {
+    q { quotes: "\00AB" "\00BB" "\201C" "\201D"; }
+}

@@ -10,3 +10,7 @@ from blog_admin.models.skill import Skill
 from blog_admin.models.experience import Experience
 from blog_admin.models.social_link import SocialLink
 from blog_admin.models.contact_submission import ContactSubmission
+from blog_admin.models.language import Language
+from blog_admin.models.post_translation import PostTranslation
+from blog_admin.models.page_translation import PageTranslation
+from blog_admin.models.tag_translation import TagTranslation

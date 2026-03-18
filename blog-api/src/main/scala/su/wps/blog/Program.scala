@@ -49,21 +49,27 @@ object Program {
           val socialLinkRepo = SocialLinkRepositoryImpl.create[xa.DB]
           val contactRepo = ContactSubmissionRepositoryImpl.create[xa.DB]
           val configRepo = ConfigRepositoryImpl.create[xa.DB]
-          val postService = PostServiceImpl.create[F, xa.DB](postRepo, tagRepo, xa)
+          val languageRepo = LanguageRepositoryImpl.create[xa.DB]
+          val postTranslationRepo = PostTranslationRepositoryImpl.create[xa.DB]
+          val pageTranslationRepo = PageTranslationRepositoryImpl.create[xa.DB]
+          val tagTranslationRepo = TagTranslationRepositoryImpl.create[xa.DB]
+          val postService = PostServiceImpl.create[F, xa.DB](
+            postRepo, tagRepo, postTranslationRepo, tagTranslationRepo, xa
+          )
           val commentService = CommentServiceImpl.create[F, xa.DB](commentRepo, xa)
           val tagService: TagService[F] = CachingTagService.create[F](
-            TagServiceImpl.create[F, xa.DB](tagRepo, xa),
+            TagServiceImpl.create[F, xa.DB](tagRepo, tagTranslationRepo, xa),
             cacheService,
             appConfig.cache.tagsTtlSeconds.seconds
           )
-          val pageService = PageServiceImpl.create[F, xa.DB](pageRepo, xa)
+          val pageService = PageServiceImpl.create[F, xa.DB](pageRepo, pageTranslationRepo, xa)
           val skillService = SkillServiceImpl.create[F, xa.DB](skillRepo, xa)
           val experienceService = ExperienceServiceImpl.create[F, xa.DB](experienceRepo, xa)
           val socialLinkService = SocialLinkServiceImpl.create[F, xa.DB](socialLinkRepo, xa)
           val contactService =
             ContactServiceImpl.create[F, xa.DB](contactRepo, configRepo, xa)
           val feedService: FeedService[F] = CachingFeedService.create[F](
-            FeedServiceImpl.create[F, xa.DB](postRepo, tagRepo, pageRepo, xa),
+            FeedServiceImpl.create[F, xa.DB](postRepo, tagRepo, pageRepo, postTranslationRepo, xa),
             cacheService,
             appConfig.cache.feedTtlSeconds.seconds
           )
@@ -79,6 +85,11 @@ object Program {
             cacheService,
             appConfig.cache.aboutTtlSeconds.seconds
           )
+          val languageService: LanguageService[F] = CachingLanguageService.create[F](
+            LanguageServiceImpl.create[F, xa.DB](languageRepo, xa),
+            cacheService,
+            appConfig.cache.tagsTtlSeconds.seconds
+          )
           val dbCheck = xa.trans(doobie.FC.isValid(1)).handleError(_ => false)
           val healthService = HealthServiceImpl.create[F](dbCheck)
           RoutesImpl.create[F](
@@ -92,7 +103,8 @@ object Program {
             socialLinkService,
             contactService,
             aboutService,
-            feedService
+            feedService,
+            languageService
           )
         }
         routesWithErrorHandling = ErrorHandler(routes.routes)

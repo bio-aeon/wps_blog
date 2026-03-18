@@ -13,6 +13,12 @@ object AppErr {
     override def toString: String = s"Page with url '$url' not found"
   }
 
+  final case class TranslationNotFound(entityType: String, id: String, language: String)
+      extends AppErr {
+    override def toString: String =
+      s"$entityType translation not found for id '$id' in language '$language'"
+  }
+
   final case class ValidationFailed(errors: Map[String, String]) extends AppErr {
     override def toString: String =
       s"Validation failed: ${errors.map { case (k, v) => s"$k: $v" }.mkString(", ")}"

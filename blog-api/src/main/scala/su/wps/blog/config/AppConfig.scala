@@ -53,10 +53,13 @@ object AppConfig {
       Port.fromInt(x).toRight(CannotConvert(x.toString, "Port", "Incorrect port"))
     )
 
-  implicit val corsConfigReader: ConfigReader[CorsConfig] =
+  private implicit val allowedOriginsReader: ConfigReader[List[String]] =
     ConfigReader[String]
-      .map(s => CorsConfig(s.split(",").map(_.trim).filter(_.nonEmpty).toList))
-      .orElse(exportReader[CorsConfig].instance)
+      .map(s => s.split(",").map(_.trim).filter(_.nonEmpty).toList)
+      .orElse(ConfigReader[List[String]])
+
+  implicit val corsConfigReader: ConfigReader[CorsConfig] =
+    exportReader[CorsConfig].instance
 
   implicit val reader: ConfigReader[AppConfig] = exportReader[AppConfig].instance
 }

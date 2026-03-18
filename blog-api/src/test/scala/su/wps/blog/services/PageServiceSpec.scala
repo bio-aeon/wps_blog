@@ -4,7 +4,7 @@ import cats.Id
 import org.specs2.mutable.Specification
 import su.wps.blog.models.domain.AppErr.PageNotFound
 import su.wps.blog.models.domain.{Page, PageId}
-import su.wps.blog.services.mocks.{PageRepositoryMock, TxrMock}
+import su.wps.blog.services.mocks.*
 import tofu.doobie.transactor.Txr
 
 import java.time.ZonedDateTime
@@ -19,7 +19,7 @@ class PageServiceSpec extends Specification {
       val page = Page("about", "About Us", "About content", ZonedDateTime.now(), Some(PageId(1)))
       val service = mkService(Some(page))
 
-      service.getPageByUrl("about") must beRight.which { r =>
+      service.getPageByUrl("en", "about") must beRight.which { r =>
         r.url == "about" && r.title == "About Us" && r.id == 1
       }
     }
@@ -27,7 +27,7 @@ class PageServiceSpec extends Specification {
     "raises PageNotFound error when page does not exist" >> {
       val service = mkService(None)
 
-      service.getPageByUrl("non-existent") must beLeft.which {
+      service.getPageByUrl("en", "non-existent") must beLeft.which {
         case PageNotFound(url) => url == "non-existent"
         case _ => false
       }
@@ -38,11 +38,11 @@ class PageServiceSpec extends Specification {
       val page = Page("contact", "Contact", "Contact us here", createdAt, Some(PageId(42)))
       val service = mkService(Some(page))
 
-      service.getPageByUrl("contact") must beRight.which { r =>
+      service.getPageByUrl("en", "contact") must beRight.which { r =>
         r.id == 42 &&
         r.url == "contact" &&
         r.title == "Contact" &&
-        r.content == "Contact us here" &&
+        r.content.contains("Contact us here") &&
         r.createdAt == createdAt
       }
     }
@@ -56,7 +56,7 @@ class PageServiceSpec extends Specification {
       )
       val service = mkService(findAllResult = pages)
 
-      service.getAllPages must beRight.which { r =>
+      service.getAllPages("en") must beRight.which { r =>
         r.items.size == 2 &&
         r.total == 2 &&
         r.items.map(_.url) == List("about", "contact")
@@ -66,7 +66,7 @@ class PageServiceSpec extends Specification {
     "returns empty list when no pages exist" >> {
       val service = mkService(findAllResult = Nil)
 
-      service.getAllPages must beRight.which { r =>
+      service.getAllPages("en") must beRight.which { r =>
         r.items.isEmpty && r.total == 0
       }
     }
@@ -83,7 +83,7 @@ class PageServiceSpec extends Specification {
       )
       val service = mkService(findAllResult = pages)
 
-      service.getAllPages must beRight.which { r =>
+      service.getAllPages("en") must beRight.which { r =>
         r.items.head.url == "privacy" &&
         r.items.head.title == "Privacy Policy"
       }
@@ -96,6 +96,7 @@ class PageServiceSpec extends Specification {
   ): PageService[RunF] = {
     val pageRepo = PageRepositoryMock
       .create[Id](findByUrlResult = findByUrlResult, findAllResult = findAllResult)
-    PageServiceImpl.create[RunF, Id](pageRepo, xa)
+    val pageTranslationRepo = PageTranslationRepositoryMock.create[Id]()
+    PageServiceImpl.create[RunF, Id](pageRepo, pageTranslationRepo, xa)
   }
 }

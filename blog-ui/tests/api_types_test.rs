@@ -8,7 +8,9 @@ fn deserialize_list_posts() {
             "name": "Test Post",
             "short_text": "A short excerpt",
             "created_at": "2024-01-15T10:00:00+00:00",
-            "tags": [{"id": 1, "name": "Rust", "slug": "rust"}]
+            "language": "en",
+            "tags": [{"id": 1, "name": "Rust", "slug": "rust"}],
+            "available_languages": ["en", "ru"]
         }],
         "total": 1
     }"#;
@@ -16,7 +18,7 @@ fn deserialize_list_posts() {
     assert_eq!(result.total, 1);
     assert_eq!(result.items.len(), 1);
     assert_eq!(result.items[0].id, 1);
-    assert_eq!(result.items[0].short_text, "A short excerpt");
+    assert_eq!(result.items[0].short_text, Some("A short excerpt".to_string()));
     assert_eq!(result.items[0].tags[0].slug, "rust");
 }
 
@@ -31,13 +33,17 @@ fn deserialize_list_posts_empty() {
 #[test]
 fn deserialize_post_result() {
     let json = r#"{
+        "id": 1,
         "name": "Full Post",
         "text": "<p>Post body HTML</p>",
         "created_at": "2024-01-15T10:00:00+00:00",
+        "language": "en",
         "tags": [
             {"id": 1, "name": "Rust", "slug": "rust"},
             {"id": 2, "name": "Web", "slug": "web"}
-        ]
+        ],
+        "seo": null,
+        "available_languages": ["en"]
     }"#;
     let result: PostResult = serde_json::from_str(json).unwrap();
     assert_eq!(result.name, "Full Post");
@@ -101,7 +107,10 @@ fn deserialize_page_result() {
         "url": "about",
         "title": "About Me",
         "content": "<p>About page content</p>",
-        "created_at": "2024-01-10T08:00:00+00:00"
+        "created_at": "2024-01-10T08:00:00+00:00",
+        "language": "en",
+        "seo": null,
+        "available_languages": ["en"]
     }"#;
     let result: PageResult = serde_json::from_str(json).unwrap();
     assert_eq!(result.url, "about");
@@ -111,7 +120,7 @@ fn deserialize_page_result() {
 #[test]
 fn deserialize_list_page_result() {
     let json = r#"{
-        "items": [{"url": "about", "title": "About"}],
+        "items": [{"url": "about", "title": "About", "language": "en"}],
         "total": 1
     }"#;
     let result: ListItemsResult<ListPageResult> = serde_json::from_str(json).unwrap();

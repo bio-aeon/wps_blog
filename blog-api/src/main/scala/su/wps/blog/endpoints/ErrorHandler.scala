@@ -45,6 +45,13 @@ object ErrorHandler {
       case AppErr.PageNotFound(url) =>
         NotFound(ErrorResponse.notFound("Page", url).asJson)
 
+      case AppErr.TranslationNotFound(entityType, id, language) =>
+        NotFound(
+          ErrorResponse
+            .notFound(s"$entityType translation", s"$id (lang: $language)")
+            .asJson
+        )
+
       case AppErr.ValidationFailed(errors) =>
         BadRequest(ErrorResponse.validationError(errors).asJson)
 

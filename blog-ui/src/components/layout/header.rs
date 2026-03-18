@@ -1,3 +1,5 @@
+use crate::components::layout::LanguageSwitcher;
+use crate::i18n::{lang_href, use_language, use_translations};
 use leptos::prelude::*;
 use leptos_router::hooks::use_location;
 
@@ -15,10 +17,20 @@ pub fn Header() -> impl IntoView {
         mobile_menu_open.set(false);
     };
 
+    let t = use_translations();
+    let lang = use_language();
+
+    let home_href = lang_href(&lang, "/");
+    let posts_href = lang_href(&lang, "/posts");
+    let tags_href = lang_href(&lang, "/tags");
+    let about_href = lang_href(&lang, "/about");
+    let contact_href = lang_href(&lang, "/contact");
+    let lang_prefix = format!("/{}", lang);
+
     view! {
         <header class="site-header">
             <div class="header-inner">
-                <a class="logo" href="/">"WPS Blog"</a>
+                <a class="logo" href=home_href.clone()>"WPS Blog"</a>
                 <nav
                     class="header-nav"
                     id="main-nav"
@@ -31,47 +43,66 @@ pub fn Header() -> impl IntoView {
                     }
                 >
                     <a
-                        href="/"
-                        class:active=move || pathname() == "/"
+                        href=home_href
+                        class:active={
+                            let lang_prefix = lang_prefix.clone();
+                            move || {
+                                let p = pathname();
+                                p == format!("{}/", lang_prefix) || p == lang_prefix.clone()
+                            }
+                        }
                         on:click=close_menu
                     >
-                        "Home"
+                        {t.nav.home}
                     </a>
                     <a
-                        href="/posts"
-                        class:active=move || pathname().starts_with("/posts")
+                        href=posts_href
+                        class:active={
+                            let lang_prefix = lang_prefix.clone();
+                            move || pathname().starts_with(&format!("{}/posts", lang_prefix))
+                        }
                         on:click=close_menu
                     >
-                        "Posts"
+                        {t.nav.posts}
                     </a>
                     <a
-                        href="/tags"
-                        class:active=move || pathname().starts_with("/tags")
+                        href=tags_href
+                        class:active={
+                            let lang_prefix = lang_prefix.clone();
+                            move || pathname().starts_with(&format!("{}/tags", lang_prefix))
+                        }
                         on:click=close_menu
                     >
-                        "Tags"
+                        {t.nav.tags}
                     </a>
                     <a
-                        href="/about"
-                        class:active=move || pathname() == "/about"
+                        href=about_href
+                        class:active={
+                            let lang_prefix = lang_prefix.clone();
+                            move || pathname() == format!("{}/about", lang_prefix)
+                        }
                         on:click=close_menu
                     >
-                        "About"
+                        {t.nav.about}
                     </a>
                     <a
-                        href="/contact"
-                        class:active=move || pathname() == "/contact"
+                        href=contact_href
+                        class:active={
+                            let lang_prefix = lang_prefix.clone();
+                            move || pathname() == format!("{}/contact", lang_prefix)
+                        }
                         on:click=close_menu
                     >
-                        "Contact"
+                        {t.nav.contact}
                     </a>
                     <div class="header-search" role="search">
                         <input
                             type="search"
-                            placeholder="Search..."
-                            aria-label="Search posts"
+                            placeholder=t.nav.search_placeholder
+                            aria-label=t.nav.search_placeholder
                         />
                     </div>
+                    <LanguageSwitcher/>
                 </nav>
                 <button
                     class="mobile-menu-toggle"

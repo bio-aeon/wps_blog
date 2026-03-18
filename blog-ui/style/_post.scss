@@ -115,6 +115,8 @@
 .post-content {
     margin-top: $space-6;
     line-height: 1.8;
+    hyphens: auto;
+    -webkit-hyphens: auto;
 
     h2, h3, h4 {
         margin: $space-8 0 $space-3;
