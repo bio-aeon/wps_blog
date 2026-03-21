@@ -49,7 +49,8 @@ lazy val root = (project in file("."))
       scalacheckShapeless % Test,
       testcontainersScala % Test,
       testcontainersPostgresql % Test,
-      specs2 % Test
+      specs2 % Test,
+      catsEffectTestingSpecs2 % Test
     ),
     addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.13.3" cross CrossVersion.patch),
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")

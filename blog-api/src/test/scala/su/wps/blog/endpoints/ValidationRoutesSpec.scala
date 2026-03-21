@@ -1,7 +1,7 @@
 package su.wps.blog.endpoints
 
 import cats.effect.IO
-import cats.effect.unsafe.implicits.global
+import cats.effect.testing.specs2.CatsEffect
 import io.circe.syntax.*
 import org.http4s.*
 import org.http4s.circe.*
@@ -9,7 +9,7 @@ import org.http4s.implicits.*
 import org.specs2.mutable.Specification
 import su.wps.blog.models.api.*
 
-class ValidationRoutesSpec extends Specification with RoutesSpecSupport {
+class ValidationRoutesSpec extends Specification with RoutesSpecSupport with CatsEffect {
 
   "validation" >> {
     "GET /posts" >> {
@@ -20,13 +20,14 @@ class ValidationRoutesSpec extends Specification with RoutesSpecSupport {
           Uri.unsafeFromString(s"$v1/posts").withQueryParams(Map("limit" -> "0", "offset" -> "0"))
         )
 
-        val resp =
-          ErrorHandler(routes.routes).run(request).value.map(_.get).unsafeRunSync()
-
-        resp.status mustEqual Status.BadRequest
-        val body = resp.as[String].unsafeRunSync()
-        body must contain("\"code\":\"VALIDATION_ERROR\"")
-        body must contain("\"limit\"")
+        for {
+          resp <- ErrorHandler(routes.routes).run(request).value.map(_.get)
+          body <- resp.as[String]
+        } yield {
+          resp.status mustEqual Status.BadRequest
+          body must contain("\"code\":\"VALIDATION_ERROR\"")
+          body must contain("\"limit\"")
+        }
       }
 
       "rejects negative pagination offset" >> {
@@ -36,13 +37,14 @@ class ValidationRoutesSpec extends Specification with RoutesSpecSupport {
           Uri.unsafeFromString(s"$v1/posts").withQueryParams(Map("limit" -> "10", "offset" -> "-1"))
         )
 
-        val resp =
-          ErrorHandler(routes.routes).run(request).value.map(_.get).unsafeRunSync()
-
-        resp.status mustEqual Status.BadRequest
-        val body = resp.as[String].unsafeRunSync()
-        body must contain("\"code\":\"VALIDATION_ERROR\"")
-        body must contain("\"offset\"")
+        for {
+          resp <- ErrorHandler(routes.routes).run(request).value.map(_.get)
+          body <- resp.as[String]
+        } yield {
+          resp.status mustEqual Status.BadRequest
+          body must contain("\"code\":\"VALIDATION_ERROR\"")
+          body must contain("\"offset\"")
+        }
       }
 
       "rejects limit exceeding maximum" >> {
@@ -52,10 +54,9 @@ class ValidationRoutesSpec extends Specification with RoutesSpecSupport {
           Uri.unsafeFromString(s"$v1/posts").withQueryParams(Map("limit" -> "101", "offset" -> "0"))
         )
 
-        val resp =
-          ErrorHandler(routes.routes).run(request).value.map(_.get).unsafeRunSync()
-
-        resp.status mustEqual Status.BadRequest
+        ErrorHandler(routes.routes).run(request).value.map(_.get).map { resp =>
+          resp.status mustEqual Status.BadRequest
+        }
       }
     }
 
@@ -69,10 +70,9 @@ class ValidationRoutesSpec extends Specification with RoutesSpecSupport {
             .withQueryParams(Map("q" -> "scala", "limit" -> "-1", "offset" -> "0"))
         )
 
-        val resp =
-          ErrorHandler(routes.routes).run(request).value.map(_.get).unsafeRunSync()
-
-        resp.status mustEqual Status.BadRequest
+        ErrorHandler(routes.routes).run(request).value.map(_.get).map { resp =>
+          resp.status mustEqual Status.BadRequest
+        }
       }
     }
 
@@ -83,13 +83,14 @@ class ValidationRoutesSpec extends Specification with RoutesSpecSupport {
         val request = Request[IO](Method.POST, Uri.unsafeFromString(s"$v1/posts/1/comments"))
           .withEntity(body.asJson)
 
-        val resp =
-          ErrorHandler(routes.routes).run(request).value.map(_.get).unsafeRunSync()
-
-        resp.status mustEqual Status.BadRequest
-        val respBody = resp.as[String].unsafeRunSync()
-        respBody must contain("\"code\":\"VALIDATION_ERROR\"")
-        respBody must contain("\"name\"")
+        for {
+          resp <- ErrorHandler(routes.routes).run(request).value.map(_.get)
+          respBody <- resp.as[String]
+        } yield {
+          resp.status mustEqual Status.BadRequest
+          respBody must contain("\"code\":\"VALIDATION_ERROR\"")
+          respBody must contain("\"name\"")
+        }
       }
 
       "rejects invalid email" >> {
@@ -98,12 +99,13 @@ class ValidationRoutesSpec extends Specification with RoutesSpecSupport {
         val request = Request[IO](Method.POST, Uri.unsafeFromString(s"$v1/posts/1/comments"))
           .withEntity(body.asJson)
 
-        val resp =
-          ErrorHandler(routes.routes).run(request).value.map(_.get).unsafeRunSync()
-
-        resp.status mustEqual Status.BadRequest
-        val respBody = resp.as[String].unsafeRunSync()
-        respBody must contain("\"email\"")
+        for {
+          resp <- ErrorHandler(routes.routes).run(request).value.map(_.get)
+          respBody <- resp.as[String]
+        } yield {
+          resp.status mustEqual Status.BadRequest
+          respBody must contain("\"email\"")
+        }
       }
 
       "rejects empty text" >> {
@@ -112,12 +114,13 @@ class ValidationRoutesSpec extends Specification with RoutesSpecSupport {
         val request = Request[IO](Method.POST, Uri.unsafeFromString(s"$v1/posts/1/comments"))
           .withEntity(body.asJson)
 
-        val resp =
-          ErrorHandler(routes.routes).run(request).value.map(_.get).unsafeRunSync()
-
-        resp.status mustEqual Status.BadRequest
-        val respBody = resp.as[String].unsafeRunSync()
-        respBody must contain("\"text\"")
+        for {
+          resp <- ErrorHandler(routes.routes).run(request).value.map(_.get)
+          respBody <- resp.as[String]
+        } yield {
+          resp.status mustEqual Status.BadRequest
+          respBody must contain("\"text\"")
+        }
       }
 
       "sanitizes HTML in text" >> {
@@ -127,11 +130,13 @@ class ValidationRoutesSpec extends Specification with RoutesSpecSupport {
         val request = Request[IO](Method.POST, Uri.unsafeFromString(s"$v1/posts/1/comments"))
           .withEntity(body.asJson)
 
-        val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
-
-        resp.status mustEqual Status.Created
-        val respBody = resp.as[String].unsafeRunSync()
-        respBody must not contain "<script>"
+        for {
+          resp <- routes.routes.run(request).value.map(_.get)
+          respBody <- resp.as[String]
+        } yield {
+          resp.status mustEqual Status.Created
+          respBody must not contain "<script>"
+        }
       }
 
       "accumulates multiple errors" >> {
@@ -140,14 +145,15 @@ class ValidationRoutesSpec extends Specification with RoutesSpecSupport {
         val request = Request[IO](Method.POST, Uri.unsafeFromString(s"$v1/posts/1/comments"))
           .withEntity(body.asJson)
 
-        val resp =
-          ErrorHandler(routes.routes).run(request).value.map(_.get).unsafeRunSync()
-
-        resp.status mustEqual Status.BadRequest
-        val respBody = resp.as[String].unsafeRunSync()
-        respBody must contain("\"name\"")
-        respBody must contain("\"email\"")
-        respBody must contain("\"text\"")
+        for {
+          resp <- ErrorHandler(routes.routes).run(request).value.map(_.get)
+          respBody <- resp.as[String]
+        } yield {
+          resp.status mustEqual Status.BadRequest
+          respBody must contain("\"name\"")
+          respBody must contain("\"email\"")
+          respBody must contain("\"text\"")
+        }
       }
     }
 
@@ -158,12 +164,13 @@ class ValidationRoutesSpec extends Specification with RoutesSpecSupport {
         val request =
           Request[IO](Method.POST, Uri.unsafeFromString(s"$v1/contact")).withEntity(body.asJson)
 
-        val resp =
-          ErrorHandler(routes.routes).run(request).value.map(_.get).unsafeRunSync()
-
-        resp.status mustEqual Status.BadRequest
-        val respBody = resp.as[String].unsafeRunSync()
-        respBody must contain("\"code\":\"VALIDATION_ERROR\"")
+        for {
+          resp <- ErrorHandler(routes.routes).run(request).value.map(_.get)
+          respBody <- resp.as[String]
+        } yield {
+          resp.status mustEqual Status.BadRequest
+          respBody must contain("\"code\":\"VALIDATION_ERROR\"")
+        }
       }
     }
   }

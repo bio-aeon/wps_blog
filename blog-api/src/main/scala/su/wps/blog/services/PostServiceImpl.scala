@@ -57,11 +57,7 @@ final class PostServiceImpl[F[_]: Monad, DB[_]: Monad] private (
       .thrushK(xa.trans)
 
   def allPosts(lang: String, limit: Int, offset: Int): F[ListItemsResult[ListPostResult]] =
-    fetchAndEnrichPosts(
-      postRepo.findAllWithLimitAndOffset(limit, offset),
-      postRepo.findCount,
-      lang
-    )
+    fetchAndEnrichPosts(postRepo.findAllWithLimitAndOffset(limit, offset), postRepo.findCount, lang)
 
   def postsByTag(
     lang: String,
@@ -76,7 +72,11 @@ final class PostServiceImpl[F[_]: Monad, DB[_]: Monad] private (
     )
 
   def postById(lang: String, id: PostId): F[PostResult] =
-    (postRepo.findById(id), tagRepo.findByPostId(id), postTranslationRepo.findAvailableLanguages(id))
+    (
+      postRepo.findById(id),
+      tagRepo.findByPostId(id),
+      postTranslationRepo.findAvailableLanguages(id)
+    )
       .mapN((_, _, _))
       .thrushK(xa.trans)
       .flatMap { case (postOpt, tags, availLangs) =>
@@ -140,11 +140,7 @@ final class PostServiceImpl[F[_]: Monad, DB[_]: Monad] private (
       }
       .thrushK(xa.trans)
 
-  private def buildSeo(
-    title: String,
-    description: String,
-    keywords: String
-  ): Option[SeoResult] = {
+  private def buildSeo(title: String, description: String, keywords: String): Option[SeoResult] = {
     val seo = SeoResult(nonEmpty(title), nonEmpty(description), nonEmpty(keywords))
     if (seo.title.isDefined || seo.description.isDefined || seo.keywords.isDefined) Some(seo)
     else None

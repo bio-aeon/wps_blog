@@ -47,7 +47,7 @@ final class PageServiceImpl[F[_]: Monad, DB[_]: Monad] private (
       .thrushK(xa.trans)
       .flatMap {
         case Some(result) => result.pure[F]
-        case None         => R.raise(PageNotFound(url))
+        case None => R.raise(PageNotFound(url))
       }
 
   def getAllPages(lang: String): F[ListItemsResult[ListPageResult]] =

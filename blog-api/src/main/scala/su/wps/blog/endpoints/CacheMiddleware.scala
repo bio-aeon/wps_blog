@@ -32,15 +32,15 @@ object CacheMiddleware {
   }
 
   private def resolveCachePolicy(path: String): Header.Raw = path match {
-    case "/health"                                 => NoCache
+    case "/health" => NoCache
     case p if p.matches(".*/posts/\\d+/comments$") => ShortLivedCache
-    case p if p.matches(".*/posts/\\d+$")          => PostDetailCache
-    case p if p.contains("/tags")                  => StaticDataCache
-    case p if p.contains("/about")                 => StaticDataCache
-    case p if p.contains("/pages")                 => StaticDataCache
-    case p if p.contains("/skills")                => StaticDataCache
-    case p if p.contains("/experiences")           => StaticDataCache
-    case p if p.contains("/social-links")          => StaticDataCache
-    case _                                         => PostListCache
+    case p if p.matches(".*/posts/\\d+$") => PostDetailCache
+    case p if p.contains("/tags") => StaticDataCache
+    case p if p.contains("/about") => StaticDataCache
+    case p if p.contains("/pages") => StaticDataCache
+    case p if p.contains("/skills") => StaticDataCache
+    case p if p.contains("/experiences") => StaticDataCache
+    case p if p.contains("/social-links") => StaticDataCache
+    case _ => PostListCache
   }
 }

@@ -1,13 +1,13 @@
 package su.wps.blog.services
 
 import cats.effect.IO
-import cats.effect.unsafe.implicits.global
+import cats.effect.testing.specs2.CatsEffect
 import org.specs2.mutable.Specification
 import su.wps.blog.models.api.FeedResult
 
 import scala.concurrent.duration.*
 
-class CachingFeedServiceSpec extends Specification {
+class CachingFeedServiceSpec extends Specification with CatsEffect {
 
   private val emptyFeed = FeedResult(Nil, Nil, Nil)
 
@@ -21,10 +21,10 @@ class CachingFeedServiceSpec extends Specification {
         val cache = CacheServiceImpl.create[IO](100)
         val cached = CachingFeedService.create[IO](underlying, cache, 60.seconds)
 
-        cached.getFeed("en").unsafeRunSync()
-        cached.getFeed("en").unsafeRunSync()
-
-        callCount mustEqual 1
+        for {
+          _ <- cached.getFeed("en")
+          _ <- cached.getFeed("en")
+        } yield callCount mustEqual 1
       }
 
       "returns fresh result after cache invalidation" >> {
@@ -35,11 +35,11 @@ class CachingFeedServiceSpec extends Specification {
         val cache = CacheServiceImpl.create[IO](100)
         val cached = CachingFeedService.create[IO](underlying, cache, 60.seconds)
 
-        cached.getFeed("en").unsafeRunSync()
-        cache.invalidate("feed:all:en").unsafeRunSync()
-        cached.getFeed("en").unsafeRunSync()
-
-        callCount mustEqual 2
+        for {
+          _ <- cached.getFeed("en")
+          _ <- cache.invalidate("feed:all:en")
+          _ <- cached.getFeed("en")
+        } yield callCount mustEqual 2
       }
     }
   }

@@ -1,13 +1,13 @@
 package su.wps.blog.services
 
 import cats.effect.IO
-import cats.effect.unsafe.implicits.global
+import cats.effect.testing.specs2.CatsEffect
 import org.specs2.mutable.Specification
 import su.wps.blog.models.api.*
 
 import scala.concurrent.duration.*
 
-class CachingAboutServiceSpec extends Specification {
+class CachingAboutServiceSpec extends Specification with CatsEffect {
 
   private val emptyAbout =
     AboutResult(ProfileResult("", "", "", "", ""), Nil, Nil, Nil)
@@ -22,10 +22,10 @@ class CachingAboutServiceSpec extends Specification {
         val cache = CacheServiceImpl.create[IO](100)
         val cached = CachingAboutService.create[IO](underlying, cache, 60.seconds)
 
-        cached.getAboutPage.unsafeRunSync()
-        cached.getAboutPage.unsafeRunSync()
-
-        callCount mustEqual 1
+        for {
+          _ <- cached.getAboutPage
+          _ <- cached.getAboutPage
+        } yield callCount mustEqual 1
       }
 
       "returns fresh result after cache invalidation" >> {
@@ -36,11 +36,11 @@ class CachingAboutServiceSpec extends Specification {
         val cache = CacheServiceImpl.create[IO](100)
         val cached = CachingAboutService.create[IO](underlying, cache, 60.seconds)
 
-        cached.getAboutPage.unsafeRunSync()
-        cache.invalidate("about:page").unsafeRunSync()
-        cached.getAboutPage.unsafeRunSync()
-
-        callCount mustEqual 2
+        for {
+          _ <- cached.getAboutPage
+          _ <- cache.invalidate("about:page")
+          _ <- cached.getAboutPage
+        } yield callCount mustEqual 2
       }
     }
   }

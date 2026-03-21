@@ -31,7 +31,16 @@ trait RoutesSpecSupport {
   )
 
   protected val testSinglePost =
-    PostResult(PostId(1), "name", "text", testTimestamp, testLang, testTags, None, testAvailableLangs)
+    PostResult(
+      PostId(1),
+      "name",
+      "text",
+      testTimestamp,
+      testLang,
+      testTags,
+      None,
+      testAvailableLangs
+    )
 
   protected val testTaggedPosts = List(
     ListPostResult(

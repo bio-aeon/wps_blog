@@ -21,10 +21,7 @@ object RateLimitMiddleware {
   private val RemainingHeader = CIString("X-RateLimit-Remaining")
   private val RetryAfterHeader = CIString("Retry-After")
 
-  def apply[F[_]: Sync](
-    maxRequests: Int,
-    windowSeconds: Long
-  ): HttpApp[F] => HttpApp[F] = { app =>
+  def apply[F[_]: Sync](maxRequests: Int, windowSeconds: Long): HttpApp[F] => HttpApp[F] = { app =>
     val cache: Cache[String, AtomicInteger] = Caffeine
       .newBuilder()
       .expireAfterWrite(windowSeconds, TimeUnit.SECONDS)
@@ -35,34 +32,38 @@ object RateLimitMiddleware {
       if (req.method == Method.GET || req.method == Method.HEAD || req.method == Method.OPTIONS) {
         app.run(req)
       } else {
-        Sync[F].delay {
-          val ip = extractIp(req)
-          val counter = cache.get(ip, _ => new AtomicInteger(0))
-          counter.incrementAndGet()
-        }.flatMap { count =>
-          if (count > maxRequests) {
-            Sync[F].pure(
-              Response[F](Status.TooManyRequests)
-                .withEntity(
-                  ErrorResponse
-                    .tooManyRequests("Rate limit exceeded. Please try again later.")
-                    .asJson
-                )
-                .putHeaders(
-                  Header.Raw(RateLimitHeader, maxRequests.toString),
-                  Header.Raw(RemainingHeader, "0"),
-                  Header.Raw(RetryAfterHeader, windowSeconds.toString)
-                )
-            )
-          } else {
-            app.run(req).map(
-              _.putHeaders(
-                Header.Raw(RateLimitHeader, maxRequests.toString),
-                Header.Raw(RemainingHeader, (maxRequests - count).max(0).toString)
-              )
-            )
+        Sync[F]
+          .delay {
+            val ip = extractIp(req)
+            val counter = cache.get(ip, _ => new AtomicInteger(0))
+            counter.incrementAndGet()
           }
-        }
+          .flatMap { count =>
+            if (count > maxRequests) {
+              Sync[F].pure(
+                Response[F](Status.TooManyRequests)
+                  .withEntity(
+                    ErrorResponse
+                      .tooManyRequests("Rate limit exceeded. Please try again later.")
+                      .asJson
+                  )
+                  .putHeaders(
+                    Header.Raw(RateLimitHeader, maxRequests.toString),
+                    Header.Raw(RemainingHeader, "0"),
+                    Header.Raw(RetryAfterHeader, windowSeconds.toString)
+                  )
+              )
+            } else {
+              app
+                .run(req)
+                .map(
+                  _.putHeaders(
+                    Header.Raw(RateLimitHeader, maxRequests.toString),
+                    Header.Raw(RemainingHeader, (maxRequests - count).max(0).toString)
+                  )
+                )
+            }
+          }
       }
     }
   }

@@ -41,7 +41,7 @@ final class LanguageServiceImpl[F[_]: Monad, DB[_]: Monad] private (
           case None =>
             acceptHeader.flatMap(parseAcceptLanguage(_, activeCodes)) match {
               case Some(lang) => lang
-              case None       => defaultCode
+              case None => defaultCode
             }
         }
       }

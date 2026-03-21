@@ -1,39 +1,43 @@
 package su.wps.blog.services
 
 import cats.effect.IO
-import cats.effect.unsafe.implicits.global
+import cats.effect.testing.specs2.CatsEffect
 import org.specs2.mutable.Specification
 import su.wps.blog.models.api.*
 
 import scala.concurrent.duration.*
 
-class CachingTagServiceSpec extends Specification {
+class CachingTagServiceSpec extends Specification with CatsEffect {
 
   "CachingTagService" >> {
     "getAllTags" >> {
       "returns cached result on repeated calls" >> {
         var callCount = 0
-        val underlying = countingTagService(() => { callCount += 1; callCount })
+        val underlying = countingTagService { () =>
+          callCount += 1; callCount
+        }
         val cache = CacheServiceImpl.create[IO](100)
         val cached = CachingTagService.create[IO](underlying, cache, 60.seconds)
 
-        cached.getAllTags("en").unsafeRunSync()
-        cached.getAllTags("en").unsafeRunSync()
-
-        callCount mustEqual 1
+        for {
+          _ <- cached.getAllTags("en")
+          _ <- cached.getAllTags("en")
+        } yield callCount mustEqual 1
       }
 
       "returns fresh result after cache invalidation" >> {
         var callCount = 0
-        val underlying = countingTagService(() => { callCount += 1; callCount })
+        val underlying = countingTagService { () =>
+          callCount += 1; callCount
+        }
         val cache = CacheServiceImpl.create[IO](100)
         val cached = CachingTagService.create[IO](underlying, cache, 60.seconds)
 
-        cached.getAllTags("en").unsafeRunSync()
-        cache.invalidate("tags:all:en").unsafeRunSync()
-        cached.getAllTags("en").unsafeRunSync()
-
-        callCount mustEqual 2
+        for {
+          _ <- cached.getAllTags("en")
+          _ <- cache.invalidate("tags:all:en")
+          _ <- cached.getAllTags("en")
+        } yield callCount mustEqual 2
       }
     }
 
@@ -51,13 +55,15 @@ class CachingTagServiceSpec extends Specification {
         val cache = CacheServiceImpl.create[IO](100)
         val cached = CachingTagService.create[IO](underlying, cache, 60.seconds)
 
-        cached.getAllTags("en").unsafeRunSync()
-        cached.getTagCloud("en").unsafeRunSync()
-        cached.getAllTags("en").unsafeRunSync()
-        cached.getTagCloud("en").unsafeRunSync()
-
-        listCalls mustEqual 1
-        cloudCalls mustEqual 1
+        for {
+          _ <- cached.getAllTags("en")
+          _ <- cached.getTagCloud("en")
+          _ <- cached.getAllTags("en")
+          _ <- cached.getTagCloud("en")
+        } yield {
+          listCalls mustEqual 1
+          cloudCalls mustEqual 1
+        }
       }
     }
   }

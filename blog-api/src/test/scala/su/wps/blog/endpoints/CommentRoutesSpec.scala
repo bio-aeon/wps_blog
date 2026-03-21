@@ -1,7 +1,7 @@
 package su.wps.blog.endpoints
 
 import cats.effect.IO
-import cats.effect.unsafe.implicits.global
+import cats.effect.testing.specs2.CatsEffect
 import io.circe.syntax.*
 import org.http4s.*
 import org.http4s.circe.*
@@ -9,7 +9,7 @@ import org.http4s.implicits.*
 import org.specs2.mutable.Specification
 import su.wps.blog.models.api.*
 
-class CommentRoutesSpec extends Specification with RoutesSpecSupport {
+class CommentRoutesSpec extends Specification with RoutesSpecSupport with CatsEffect {
 
   "Comment routes" >> {
     "GET /posts/{id}/comments" >> {
@@ -17,42 +17,48 @@ class CommentRoutesSpec extends Specification with RoutesSpecSupport {
         val routes = buildRoutes[IO](commentsResult = testCommentsResult)
         val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/posts/1/comments"))
 
-        val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
-
-        resp.status mustEqual Status.Ok
+        routes.routes.run(request).value.map(_.get).map { resp =>
+          resp.status mustEqual Status.Ok
+        }
       }
 
       "returns comments array and total" >> {
         val routes = buildRoutes[IO](commentsResult = testCommentsResult)
         val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/posts/1/comments"))
 
-        val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
-        val respBody = resp.as[String].unsafeRunSync()
-
-        respBody must contain("\"comments\":")
-        respBody must contain("\"total\":2")
+        for {
+          resp <- routes.routes.run(request).value.map(_.get)
+          respBody <- resp.as[String]
+        } yield {
+          respBody must contain("\"comments\":")
+          respBody must contain("\"total\":2")
+        }
       }
 
       "returns nested replies structure" >> {
         val routes = buildRoutes[IO](commentsResult = testCommentsResult)
         val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/posts/1/comments"))
 
-        val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
-        val respBody = resp.as[String].unsafeRunSync()
-
-        respBody must contain("\"replies\":")
-        respBody must contain("Reply text")
+        for {
+          resp <- routes.routes.run(request).value.map(_.get)
+          respBody <- resp.as[String]
+        } yield {
+          respBody must contain("\"replies\":")
+          respBody must contain("Reply text")
+        }
       }
 
       "returns empty result for post with no comments" >> {
         val routes = buildRoutes[IO]()
         val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/posts/99999/comments"))
 
-        val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
-        val respBody = resp.as[String].unsafeRunSync()
-
-        resp.status mustEqual Status.Ok
-        respBody mustEqual """{"comments":[],"total":0}"""
+        for {
+          resp <- routes.routes.run(request).value.map(_.get)
+          respBody <- resp.as[String]
+        } yield {
+          resp.status mustEqual Status.Ok
+          respBody mustEqual """{"comments":[],"total":0}"""
+        }
       }
     }
 
@@ -63,9 +69,9 @@ class CommentRoutesSpec extends Specification with RoutesSpecSupport {
         val request = Request[IO](Method.POST, Uri.unsafeFromString(s"$v1/posts/1/comments"))
           .withEntity(body.asJson)
 
-        val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
-
-        resp.status mustEqual Status.Created
+        routes.routes.run(request).value.map(_.get).map { resp =>
+          resp.status mustEqual Status.Created
+        }
       }
 
       "returns created comment in body" >> {
@@ -74,11 +80,13 @@ class CommentRoutesSpec extends Specification with RoutesSpecSupport {
         val request = Request[IO](Method.POST, Uri.unsafeFromString(s"$v1/posts/1/comments"))
           .withEntity(body.asJson)
 
-        val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
-        val respBody = resp.as[String].unsafeRunSync()
-
-        respBody must contain("\"name\":\"Author\"")
-        respBody must contain("\"text\":\"Comment text\"")
+        for {
+          resp <- routes.routes.run(request).value.map(_.get)
+          respBody <- resp.as[String]
+        } yield {
+          respBody must contain("\"name\":\"Author\"")
+          respBody must contain("\"text\":\"Comment text\"")
+        }
       }
 
       "returns comment with id" >> {
@@ -87,10 +95,10 @@ class CommentRoutesSpec extends Specification with RoutesSpecSupport {
         val request = Request[IO](Method.POST, Uri.unsafeFromString(s"$v1/posts/1/comments"))
           .withEntity(body.asJson)
 
-        val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
-        val respBody = resp.as[String].unsafeRunSync()
-
-        respBody must contain("\"id\":")
+        for {
+          resp <- routes.routes.run(request).value.map(_.get)
+          respBody <- resp.as[String]
+        } yield respBody must contain("\"id\":")
       }
 
       "creates reply with parent id" >> {
@@ -99,9 +107,9 @@ class CommentRoutesSpec extends Specification with RoutesSpecSupport {
         val request = Request[IO](Method.POST, Uri.unsafeFromString(s"$v1/posts/1/comments"))
           .withEntity(body.asJson)
 
-        val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
-
-        resp.status mustEqual Status.Created
+        routes.routes.run(request).value.map(_.get).map { resp =>
+          resp.status mustEqual Status.Created
+        }
       }
     }
 
@@ -112,9 +120,9 @@ class CommentRoutesSpec extends Specification with RoutesSpecSupport {
         val request = Request[IO](Method.POST, Uri.unsafeFromString(s"$v1/comments/1/rate"))
           .withEntity(body.asJson)
 
-        val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
-
-        resp.status mustEqual Status.NoContent
+        routes.routes.run(request).value.map(_.get).map { resp =>
+          resp.status mustEqual Status.NoContent
+        }
       }
 
       "handles upvote" >> {
@@ -123,9 +131,9 @@ class CommentRoutesSpec extends Specification with RoutesSpecSupport {
         val request = Request[IO](Method.POST, Uri.unsafeFromString(s"$v1/comments/1/rate"))
           .withEntity(body.asJson)
 
-        val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
-
-        resp.status mustEqual Status.NoContent
+        routes.routes.run(request).value.map(_.get).map { resp =>
+          resp.status mustEqual Status.NoContent
+        }
       }
 
       "handles downvote" >> {
@@ -134,9 +142,9 @@ class CommentRoutesSpec extends Specification with RoutesSpecSupport {
         val request = Request[IO](Method.POST, Uri.unsafeFromString(s"$v1/comments/1/rate"))
           .withEntity(body.asJson)
 
-        val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
-
-        resp.status mustEqual Status.NoContent
+        routes.routes.run(request).value.map(_.get).map { resp =>
+          resp.status mustEqual Status.NoContent
+        }
       }
 
       "returns 204 for non-existent comment (idempotent)" >> {
@@ -145,9 +153,9 @@ class CommentRoutesSpec extends Specification with RoutesSpecSupport {
         val request = Request[IO](Method.POST, Uri.unsafeFromString(s"$v1/comments/99999/rate"))
           .withEntity(body.asJson)
 
-        val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
-
-        resp.status mustEqual Status.NoContent
+        routes.routes.run(request).value.map(_.get).map { resp =>
+          resp.status mustEqual Status.NoContent
+        }
       }
     }
   }

@@ -43,10 +43,10 @@ object MetricsMiddleware {
 
   private def normalizePath(path: String): String = path match {
     case p if p.matches(".*/posts/\\d+/comments$") => "/v1/posts/:id/comments"
-    case p if p.matches(".*/posts/\\d+/view$")     => "/v1/posts/:id/view"
-    case p if p.matches(".*/posts/\\d+$")          => "/v1/posts/:id"
-    case p if p.matches(".*/comments/\\d+/rate$")  => "/v1/comments/:id/rate"
-    case p if p.matches(".*/pages/.+$")            => "/v1/pages/:url"
-    case other                                     => other
+    case p if p.matches(".*/posts/\\d+/view$") => "/v1/posts/:id/view"
+    case p if p.matches(".*/posts/\\d+$") => "/v1/posts/:id"
+    case p if p.matches(".*/comments/\\d+/rate$") => "/v1/comments/:id/rate"
+    case p if p.matches(".*/pages/.+$") => "/v1/pages/:url"
+    case other => other
   }
 }

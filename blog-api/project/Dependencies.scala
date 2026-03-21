@@ -19,6 +19,7 @@ object Dependencies {
     val scalacheckShapeless = "1.3.1"
     val testcontainersScala = "0.44.1"
     val testcontainersPostgresql = "2.0.3"
+    val catsEffectTesting = "1.8.0"
     val tapir = "1.9.0"
     val caffeine = "3.1.8"
     val prometheusSimpleclient = "0.16.0"
@@ -50,6 +51,8 @@ object Dependencies {
   val testcontainersPostgresql =
     "org.testcontainers" % "testcontainers-postgresql" % Versions.testcontainersPostgresql
   val specs2 = "org.specs2" %% "specs2-core" % Versions.specs2
+  val catsEffectTestingSpecs2 =
+    "org.typelevel" %% "cats-effect-testing-specs2" % Versions.catsEffectTesting
   val caffeine = "com.github.ben-manes.caffeine" % "caffeine" % Versions.caffeine
   val prometheusSimpleclient =
     "io.prometheus" % "simpleclient" % Versions.prometheusSimpleclient

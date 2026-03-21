@@ -1,7 +1,7 @@
 package su.wps.blog.endpoints
 
 import cats.effect.IO
-import cats.effect.unsafe.implicits.global
+import cats.effect.testing.specs2.CatsEffect
 import io.circe.syntax.*
 import org.http4s.*
 import org.http4s.circe.*
@@ -10,7 +10,7 @@ import org.specs2.mutable.Specification
 import su.wps.blog.models.api.*
 import su.wps.blog.models.domain.PostId
 
-class ProfileRoutesSpec extends Specification with RoutesSpecSupport {
+class ProfileRoutesSpec extends Specification with RoutesSpecSupport with CatsEffect {
 
   "Profile routes" >> {
     "GET /skills" >> {
@@ -18,12 +18,14 @@ class ProfileRoutesSpec extends Specification with RoutesSpecSupport {
         val routes = buildRoutes[IO](skillsResult = testSkillCategories)
         val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/skills"))
 
-        val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
-        val respBody = resp.as[String].unsafeRunSync()
-
-        resp.status mustEqual Status.Ok
-        respBody must contain("\"category\":")
-        respBody must contain("\"skills\":")
+        for {
+          resp <- routes.routes.run(request).value.map(_.get)
+          respBody <- resp.as[String]
+        } yield {
+          resp.status mustEqual Status.Ok
+          respBody must contain("\"category\":")
+          respBody must contain("\"skills\":")
+        }
       }
     }
 
@@ -32,12 +34,14 @@ class ProfileRoutesSpec extends Specification with RoutesSpecSupport {
         val routes = buildRoutes[IO](experiencesResult = testExperiences)
         val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/experiences"))
 
-        val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
-        val respBody = resp.as[String].unsafeRunSync()
-
-        resp.status mustEqual Status.Ok
-        respBody must contain("\"company\":")
-        respBody must contain("\"position\":")
+        for {
+          resp <- routes.routes.run(request).value.map(_.get)
+          respBody <- resp.as[String]
+        } yield {
+          resp.status mustEqual Status.Ok
+          respBody must contain("\"company\":")
+          respBody must contain("\"position\":")
+        }
       }
     }
 
@@ -46,12 +50,14 @@ class ProfileRoutesSpec extends Specification with RoutesSpecSupport {
         val routes = buildRoutes[IO](socialLinksResult = testSocialLinks)
         val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/social-links"))
 
-        val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
-        val respBody = resp.as[String].unsafeRunSync()
-
-        resp.status mustEqual Status.Ok
-        respBody must contain("\"platform\":")
-        respBody must contain("\"url\":")
+        for {
+          resp <- routes.routes.run(request).value.map(_.get)
+          respBody <- resp.as[String]
+        } yield {
+          resp.status mustEqual Status.Ok
+          respBody must contain("\"platform\":")
+          respBody must contain("\"url\":")
+        }
       }
     }
 
@@ -63,11 +69,13 @@ class ProfileRoutesSpec extends Specification with RoutesSpecSupport {
         val request =
           Request[IO](Method.POST, Uri.unsafeFromString(s"$v1/contact")).withEntity(body.asJson)
 
-        val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
-        val respBody = resp.as[String].unsafeRunSync()
-
-        resp.status mustEqual Status.Ok
-        respBody must contain("\"message\":")
+        for {
+          resp <- routes.routes.run(request).value.map(_.get)
+          respBody <- resp.as[String]
+        } yield {
+          resp.status mustEqual Status.Ok
+          respBody must contain("\"message\":")
+        }
       }
     }
 
@@ -92,24 +100,28 @@ class ProfileRoutesSpec extends Specification with RoutesSpecSupport {
         val routes = buildRoutes[IO](feedResult = feedData)
         val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/feed"))
 
-        val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
-        val respBody = resp.as[String].unsafeRunSync()
-
-        resp.status mustEqual Status.Ok
-        respBody must contain("\"posts\":")
-        respBody must contain("\"pages\":")
-        respBody must contain("\"tags\":")
+        for {
+          resp <- routes.routes.run(request).value.map(_.get)
+          respBody <- resp.as[String]
+        } yield {
+          resp.status mustEqual Status.Ok
+          respBody must contain("\"posts\":")
+          respBody must contain("\"pages\":")
+          respBody must contain("\"tags\":")
+        }
       }
 
       "returns empty feed when no data" >> {
         val routes = buildRoutes[IO]()
         val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/feed"))
 
-        val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
-        val respBody = resp.as[String].unsafeRunSync()
-
-        resp.status mustEqual Status.Ok
-        respBody mustEqual """{"posts":[],"pages":[],"tags":[]}"""
+        for {
+          resp <- routes.routes.run(request).value.map(_.get)
+          respBody <- resp.as[String]
+        } yield {
+          resp.status mustEqual Status.Ok
+          respBody mustEqual """{"posts":[],"pages":[],"tags":[]}"""
+        }
       }
     }
 
@@ -118,14 +130,16 @@ class ProfileRoutesSpec extends Specification with RoutesSpecSupport {
         val routes = buildRoutes[IO](aboutResult = testAbout)
         val request = Request[IO](Method.GET, Uri.unsafeFromString(s"$v1/about"))
 
-        val resp = routes.routes.run(request).value.map(_.get).unsafeRunSync()
-        val respBody = resp.as[String].unsafeRunSync()
-
-        resp.status mustEqual Status.Ok
-        respBody must contain("\"profile\":")
-        respBody must contain("\"skills\":")
-        respBody must contain("\"experiences\":")
-        respBody must contain("\"social_links\":")
+        for {
+          resp <- routes.routes.run(request).value.map(_.get)
+          respBody <- resp.as[String]
+        } yield {
+          resp.status mustEqual Status.Ok
+          respBody must contain("\"profile\":")
+          respBody must contain("\"skills\":")
+          respBody must contain("\"experiences\":")
+          respBody must contain("\"social_links\":")
+        }
       }
     }
   }

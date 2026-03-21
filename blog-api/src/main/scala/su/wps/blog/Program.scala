@@ -54,7 +54,11 @@ object Program {
           val pageTranslationRepo = PageTranslationRepositoryImpl.create[xa.DB]
           val tagTranslationRepo = TagTranslationRepositoryImpl.create[xa.DB]
           val postService = PostServiceImpl.create[F, xa.DB](
-            postRepo, tagRepo, postTranslationRepo, tagTranslationRepo, xa
+            postRepo,
+            tagRepo,
+            postTranslationRepo,
+            tagTranslationRepo,
+            xa
           )
           val commentService = CommentServiceImpl.create[F, xa.DB](commentRepo, xa)
           val tagService: TagService[F] = CachingTagService.create[F](
@@ -151,29 +155,24 @@ object Program {
           ce,
           Some(Slf4jDoobieLogHandler.create[F])
         )
-      _ <- tr
-        .configure { ds =>
-          F.delay {
-            ds.setAutoCommit(false)
-            ds.setMaximumPoolSize(config.pool.maximumPoolSize)
-            ds.setMinimumIdle(config.pool.minimumIdle)
-            ds.setIdleTimeout(config.pool.idleTimeoutMs)
-            ds.setMaxLifetime(config.pool.maxLifetimeMs)
-            ds.setConnectionTimeout(config.pool.connectionTimeoutMs)
-            ds.setLeakDetectionThreshold(config.pool.leakDetectionThresholdMs)
-          }
+      _ <- tr.configure { ds =>
+        F.delay {
+          ds.setAutoCommit(false)
+          ds.setMaximumPoolSize(config.pool.maximumPoolSize)
+          ds.setMinimumIdle(config.pool.minimumIdle)
+          ds.setIdleTimeout(config.pool.idleTimeoutMs)
+          ds.setMaxLifetime(config.pool.maxLifetimeMs)
+          ds.setConnectionTimeout(config.pool.connectionTimeoutMs)
+          ds.setLeakDetectionThreshold(config.pool.leakDetectionThresholdMs)
         }
-        .toResource
+      }.toResource
     } yield Txr.plain(tr)
 
   @annotation.nowarn("msg=deprecated")
   private def gzipApp[F[_]: Async](app: HttpApp[F]): HttpApp[F] =
     org.http4s.server.middleware.GZip(app)
 
-  private def mkHttpApp[F[_]: Async](
-    appConfig: AppConfig,
-    routes: HttpRoutes[F]
-  ): HttpApp[F] = {
+  private def mkHttpApp[F[_]: Async](appConfig: AppConfig, routes: HttpRoutes[F]): HttpApp[F] = {
     val corsPolicy =
       if (appConfig.cors.allowedOrigins.isEmpty) {
         CORS.policy.withAllowOriginAll
@@ -187,27 +186,17 @@ object Program {
           }
           .withAllowMethodsIn(Set(Method.GET, Method.POST, Method.OPTIONS))
           .withAllowHeadersIn(
-            Set(
-              CIString("Content-Type"),
-              CIString("Accept"),
-              CIString("X-Request-Id")
-            )
+            Set(CIString("Content-Type"), CIString("Accept"), CIString("X-Request-Id"))
           )
           .withMaxAge(3600.seconds)
       }
 
     val corsApp: HttpApp[F] = corsPolicy(routes.orNotFound)
-    val applyRateLimit: HttpApp[F] => HttpApp[F] = RateLimitMiddleware[F](
-      appConfig.rateLimit.maxRequests,
-      appConfig.rateLimit.windowSeconds
-    )
+    val applyRateLimit: HttpApp[F] => HttpApp[F] =
+      RateLimitMiddleware[F](appConfig.rateLimit.maxRequests, appConfig.rateLimit.windowSeconds)
     val rateLimited: HttpApp[F] = applyRateLimit(corsApp)
 
-    CorrelationIdMiddleware(
-      SecurityHeadersMiddleware(
-        MetricsMiddleware(gzipApp(rateLimited))
-      )
-    )
+    CorrelationIdMiddleware(SecurityHeadersMiddleware(MetricsMiddleware(gzipApp(rateLimited))))
   }
 
   private def mkHttpServer[F[_]: Async: Network](

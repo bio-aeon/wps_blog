@@ -13,14 +13,8 @@ object SecurityHeadersMiddleware {
     Header.Raw(CIString("X-Frame-Options"), "DENY"),
     Header.Raw(CIString("Referrer-Policy"), "strict-origin-when-cross-origin"),
     Header.Raw(CIString("Permissions-Policy"), "camera=(), microphone=(), geolocation=()"),
-    Header.Raw(
-      CIString("Content-Security-Policy"),
-      "default-src 'none'; frame-ancestors 'none'"
-    ),
-    Header.Raw(
-      CIString("Strict-Transport-Security"),
-      "max-age=31536000; includeSubDomains"
-    )
+    Header.Raw(CIString("Content-Security-Policy"), "default-src 'none'; frame-ancestors 'none'"),
+    Header.Raw(CIString("Strict-Transport-Security"), "max-age=31536000; includeSubDomains")
   )
 
   def apply[F[_]: Functor](app: HttpApp[F]): HttpApp[F] =

@@ -7,9 +7,7 @@ import com.github.benmanes.caffeine.cache.{Caffeine, Cache => JCache}
 
 import scala.concurrent.duration.FiniteDuration
 
-final class CacheServiceImpl[F[_]] private (
-  underlying: JCache[String, Any]
-)(implicit F: Sync[F])
+final class CacheServiceImpl[F[_]] private (underlying: JCache[String, Any])(implicit F: Sync[F])
     extends CacheService[F] {
 
   def getOrLoad[A](key: String, ttl: FiniteDuration)(load: F[A]): F[A] =

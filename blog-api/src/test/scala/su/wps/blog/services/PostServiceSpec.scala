@@ -194,8 +194,8 @@ class PostServiceSpec extends Specification {
       service.postById("en", post.nonEmptyId) must beRight.which { r =>
         r.seo.exists(s =>
           s.title.contains("Title") &&
-          s.description.contains("Description") &&
-          s.keywords.contains("kw1, kw2")
+            s.description.contains("Description") &&
+            s.keywords.contains("kw1, kw2")
         )
       }
     }

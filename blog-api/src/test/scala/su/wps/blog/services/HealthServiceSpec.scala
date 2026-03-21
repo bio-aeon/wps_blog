@@ -1,34 +1,37 @@
 package su.wps.blog.services
 
 import cats.effect.IO
-import cats.effect.unsafe.implicits.global
+import cats.effect.testing.specs2.CatsEffect
 import org.specs2.mutable.Specification
 
-class HealthServiceSpec extends Specification {
+class HealthServiceSpec extends Specification with CatsEffect {
 
   "HealthService" >> {
     "returns healthy status when database check succeeds" >> {
       val service = HealthServiceImpl.create[IO](IO.pure(true))
-      val result = service.check.unsafeRunSync()
 
-      result.status mustEqual "healthy"
-      result.database mustEqual "healthy"
-      result.timestamp must not(beEmpty)
+      service.check.map { result =>
+        result.status mustEqual "healthy"
+        result.database mustEqual "healthy"
+        result.timestamp must not(beEmpty)
+      }
     }
 
     "returns degraded status when database check fails" >> {
       val service = HealthServiceImpl.create[IO](IO.pure(false))
-      val result = service.check.unsafeRunSync()
 
-      result.status mustEqual "degraded"
-      result.database mustEqual "unhealthy"
+      service.check.map { result =>
+        result.status mustEqual "degraded"
+        result.database mustEqual "unhealthy"
+      }
     }
 
     "produces ISO-8601 timestamp" >> {
       val service = HealthServiceImpl.create[IO](IO.pure(true))
-      val result = service.check.unsafeRunSync()
 
-      result.timestamp must beMatching("""\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*Z""")
+      service.check.map { result =>
+        result.timestamp must beMatching("""\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*Z""")
+      }
     }
   }
 }

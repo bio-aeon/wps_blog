@@ -23,9 +23,7 @@ object MetricsRoutes {
         val writer = new StringWriter()
         TextFormat.write004(writer, CollectorRegistry.defaultRegistry.metricFamilySamples())
         writer.toString
-      }.flatMap(body =>
-        Ok(body, `Content-Type`(MediaType.text.plain))
-      )
+      }.flatMap(body => Ok(body, `Content-Type`(MediaType.text.plain)))
     }
   }
 }
