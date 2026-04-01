@@ -10,6 +10,9 @@ import su.wps.blog.tools.scalacheck.*
 import su.wps.blog.tools.syntax.*
 import su.wps.blog.tools.types.{PosInt, Varchar}
 
+import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
+
 class ConfigRepositorySpec extends Specification with DbTest {
   sequential
 
@@ -36,6 +39,16 @@ class ConfigRepositorySpec extends Specification with DbTest {
         result must beNone
       }
 
+      "preserves ZonedDateTime through round-trip" >> {
+        val savedAt = ZonedDateTime.now().truncatedTo(ChronoUnit.MICROS)
+        val test = for {
+          _ <- insertConfig(id = PosInt(1), name = "test_datetime", createdAt = savedAt)
+          result <- repo.findByName("test_datetime")
+        } yield result
+
+        val result = test.runWithIO()
+        result must beSome.which(_.createdAt.toInstant == savedAt.toInstant)
+      }
     }
 
     "findByNames" >> {
@@ -57,9 +70,11 @@ class ConfigRepositorySpec extends Specification with DbTest {
   private def insertConfig(
     id: PosInt = random[PosInt],
     name: String,
-    value: String = ""
+    value: String = "",
+    createdAt: ZonedDateTime = random[models.Config].createdAt
   ): ConnectionIO[models.Config] = {
-    val config = random[models.Config].copy(id = id, name = Varchar(name), value = Varchar(value))
+    val config =
+      random[models.Config].copy(id = id, name = Varchar(name), value = Varchar(value), createdAt = createdAt)
     models.Config.sql.insert(config).map(_ => config)
   }
 }

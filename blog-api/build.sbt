@@ -6,7 +6,7 @@ lazy val root = (project in file("."))
     organization := "su.wps",
     name := "wps-blog",
     version := "0.1.0-SNAPSHOT",
-    scalaVersion := "2.13.16",
+    scalaVersion := "2.13.18",
     scalacOptions ++= Seq(
       "-deprecation",
       "-encoding",
@@ -52,6 +52,6 @@ lazy val root = (project in file("."))
       specs2 % Test,
       catsEffectTestingSpecs2 % Test
     ),
-    addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.13.3" cross CrossVersion.patch),
+    addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.13.4" cross CrossVersion.patch),
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
   )

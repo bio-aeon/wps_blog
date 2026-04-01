@@ -18,7 +18,7 @@ object Slf4jDoobieLogHandler {
            |
            |  ${s.linesIterator.dropWhile(_.trim.isEmpty).mkString("\n  ")}
            |
-           | arguments = [${a.mkString(", ")}]
+           | arguments = [${a.allParams.flatten.mkString(", ")}]
            | label     = $l
            |   elapsed = ${e1.toMillis} ms exec + ${e2.toMillis} ms processing (${(e1 + e2).toMillis} ms total)
          """.stripMargin
@@ -30,7 +30,7 @@ object Slf4jDoobieLogHandler {
            |
            |  ${s.linesIterator.dropWhile(_.trim.isEmpty).mkString("\n  ")}
            |
-           | arguments = [${a.mkString(", ")}]
+           | arguments = [${a.allParams.flatten.mkString(", ")}]
            | label     = $l
            |   elapsed = ${e1.toMillis} ms exec + ${e2.toMillis} ms processing (failed) (${(e1 + e2).toMillis} ms total)
            |   failure = ${t.getMessage}
@@ -43,7 +43,7 @@ object Slf4jDoobieLogHandler {
            |
            |  ${s.linesIterator.dropWhile(_.trim.isEmpty).mkString("\n  ")}
            |
-           | arguments = [${a.mkString(", ")}]
+           | arguments = [${a.allParams.flatten.mkString(", ")}]
            |   elapsed = ${e1.toMillis} ms exec (failed)
            |   failure = ${t.getMessage}
          """.stripMargin

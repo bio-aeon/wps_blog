@@ -2,6 +2,7 @@ package su.wps.blog.repositories.models
 
 import cats.syntax.functor.*
 import doobie.*
+import doobie.generic.auto.*
 import su.wps.blog.tools.types.*
 
 final case class CommentRater(id: PosInt, ip: Varchar[W.`39`.T], commentId: PosInt)

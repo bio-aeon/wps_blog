@@ -2,6 +2,7 @@ package su.wps.blog.repositories.models
 
 import cats.syntax.functor.*
 import doobie.*
+import doobie.generic.auto.*
 import su.wps.blog.instances.time.*
 import su.wps.blog.tools.types.*
 
