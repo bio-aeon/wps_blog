@@ -14,3 +14,6 @@ from blog_admin.models.language import Language
 from blog_admin.models.post_translation import PostTranslation
 from blog_admin.models.page_translation import PageTranslation
 from blog_admin.models.tag_translation import TagTranslation
+from blog_admin.models.content_draft import ContentDraft
+from blog_admin.models.content_template import ContentTemplate
+from blog_admin.models.generation_history import GenerationHistory

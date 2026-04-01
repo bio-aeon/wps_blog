@@ -1,0 +1,96 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Content Assistant | {{ title }}{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'blog_admin/css/assistant.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="assistant-dashboard">
+
+    <div class="assistant-header">
+        <h1>Content Assistant</h1>
+        <div class="quick-actions">
+            <a href="{% url 'assistant:blog-composer' %}" class="btn btn-primary">New Blog Draft</a>
+            <a href="{% url 'assistant:linkedin-composer' %}" class="btn btn-secondary">New LinkedIn Draft</a>
+            <a href="{% url 'assistant:twitter-composer' %}" class="btn btn-secondary">New Twitter Draft</a>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ draft_counts.blog }}</div>
+            <div class="stat-label">Blog Drafts</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ draft_counts.linkedin }}</div>
+            <div class="stat-label">LinkedIn Drafts</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ draft_counts.twitter }}</div>
+            <div class="stat-label">Twitter Drafts</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ monthly_generations }}</div>
+            <div class="stat-label">Generations This Month</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ monthly_tokens|floatformat:0 }}</div>
+            <div class="stat-label">Tokens Used (Month)</div>
+            <div class="stat-detail">{{ budget_usage_pct }}% of budget</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">${{ estimated_cost }}</div>
+            <div class="stat-label">Estimated Cost (Month)</div>
+        </div>
+    </div>
+
+    {% if budget_warning %}
+    <div class="dashboard-section" style="border-color: #e74c3c; background: #fef2f2;">
+        <p style="color: #e74c3c; font-weight: bold; margin: 0;">
+            Token budget warning: usage is at {{ budget_usage_pct }}% of the monthly budget.
+        </p>
+    </div>
+    {% endif %}
+
+    <!-- Recent Drafts -->
+    <div class="dashboard-section">
+        <h2>Recent Drafts</h2>
+        {% if recent_drafts %}
+        <table class="dashboard-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Platform</th>
+                    <th>Status</th>
+                    <th>Language</th>
+                    <th>Updated</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for draft in recent_drafts %}
+                <tr>
+                    <td>
+                        <a href="{% url 'admin:blog_admin_contentdraft_change' draft.pk %}">
+                            {{ draft.title|default:"(untitled)" }}
+                        </a>
+                    </td>
+                    <td><span class="platform-badge platform-{{ draft.platform }}">{{ draft.platform }}</span></td>
+                    <td><span class="status-badge status-{{ draft.status }}">{{ draft.status }}</span></td>
+                    <td>{{ draft.language_id }}</td>
+                    <td>{{ draft.updated_at|date:"M d, H:i" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="empty-state">No drafts yet. Create one using the buttons above.</p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

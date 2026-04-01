@@ -52,6 +52,11 @@
             <div class="stat-detail stat-warning">{{ unread_contacts }} unread</div>
         </div>
         {% endif %}
+        <div class="stat-card">
+            <div class="stat-number">{{ assistant_draft_count }}</div>
+            <div class="stat-label">Content Drafts</div>
+            <div class="stat-detail"><a href="{% url 'assistant:dashboard' %}">Open Assistant</a></div>
+        </div>
     </div>
 
     <div class="dashboard-columns">

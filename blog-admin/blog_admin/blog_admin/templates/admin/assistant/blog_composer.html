@@ -1,0 +1,91 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Blog Composer | Content Assistant{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'blog_admin/css/assistant.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="assistant-dashboard">
+    <div class="assistant-header">
+        <h1>Blog Post Composer</h1>
+        <div class="quick-actions">
+            <a href="{% url 'assistant:dashboard' %}" class="btn btn-secondary">Back to Assistant</a>
+        </div>
+    </div>
+
+    <div class="composer-layout">
+        <div class="composer-main">
+            <h2>Editor</h2>
+
+            <div class="form-group">
+                <label for="topic">Topic</label>
+                <input type="text" id="topic" name="topic"
+                       value="{{ draft.title|default:'' }}"
+                       placeholder="Enter a topic or click Suggest Topics">
+            </div>
+
+            <div class="action-row">
+                <button class="btn btn-secondary" id="btn-suggest">Suggest Topics</button>
+                <select id="tone-select">
+                    <option value="technical">Technical</option>
+                    <option value="casual">Casual</option>
+                    <option value="professional">Professional</option>
+                    <option value="conversational">Conversational</option>
+                    <option value="academic">Academic</option>
+                </select>
+                <select id="length-select">
+                    <option value="short">Short (~500 words)</option>
+                    <option value="medium" selected>Medium (~1500 words)</option>
+                    <option value="long">Long (~3000 words)</option>
+                </select>
+                <select id="language-select">
+                    <option value="en">English</option>
+                    <option value="ru">Russian</option>
+                    <option value="el">Greek</option>
+                </select>
+            </div>
+
+            <div id="suggestions-panel" style="display:none;">
+                <h3>Suggested Topics</h3>
+                <ul id="suggestions-list"></ul>
+            </div>
+
+            <div class="form-group" style="margin-top:16px;">
+                <label for="body">Content (Markdown)</label>
+                <textarea id="body" name="body" rows="20"
+                          placeholder="Generated content will appear here...">{{ draft.body|default:'' }}</textarea>
+            </div>
+
+            <div class="action-row">
+                <button class="btn btn-primary" id="btn-generate">Generate Draft</button>
+                <button class="btn btn-secondary" id="btn-refine">Refine</button>
+                <button class="btn btn-secondary" id="btn-seo">SEO Suggestions</button>
+                <button class="btn btn-secondary" id="btn-save">Save Draft</button>
+            </div>
+        </div>
+
+        <div class="composer-sidebar">
+            <h3>Draft Info</h3>
+            <p><strong>Platform:</strong> Blog</p>
+            <p><strong>Status:</strong> <span id="draft-status">{{ draft.status|default:'new' }}</span></p>
+            <p><strong>Draft ID:</strong> <span id="draft-id">{{ draft.pk|default:'—' }}</span></p>
+
+            <div id="seo-panel" style="display:none; margin-top:16px;">
+                <h3>SEO Suggestions</h3>
+                <div id="seo-results"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'blog_admin/js/composer.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        initComposer('blog', '{{ csrf_token }}', {{ draft_id|default:'null' }});
+    });
+</script>
+{% endblock %}

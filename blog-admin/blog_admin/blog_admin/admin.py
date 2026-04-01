@@ -6,6 +6,7 @@ from blog_admin.models import (
     User, Post, Tag, PostTag, Comment, Page, Config,
     Skill, Experience, SocialLink, ContactSubmission,
     Language, PostTranslation, PageTranslation, TagTranslation,
+    ContentDraft, ContentTemplate, GenerationHistory,
 )
 from blog_admin.forms import PostAdminForm, PageAdminForm
 
@@ -319,4 +320,69 @@ class ContactSubmissionAdmin(admin.ModelAdmin):
     @admin.action(description='Mark selected submissions as unread')
     def mark_as_unread(self, request, queryset):
         queryset.update(is_read=False)
+
+
+# -- Content Draft Admin -------------------------------------------------------
+
+class GenerationHistoryInline(admin.TabularInline):
+    model = GenerationHistory
+    extra = 0
+    readonly_fields = ('model', 'prompt', 'response', 'token_usage', 'created_at')
+    fields = ('model', 'token_usage', 'created_at')
+    show_change_link = True
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(ContentDraft)
+class ContentDraftAdmin(admin.ModelAdmin):
+    list_display = ('title_display', 'platform', 'status', 'language', 'updated_at')
+    list_filter = ('platform', 'status', 'language')
+    search_fields = ('title', 'body')
+    readonly_fields = ('created_at', 'updated_at')
+    ordering = ('-updated_at',)
+    list_per_page = 30
+    inlines = [GenerationHistoryInline]
+
+    fieldsets = (
+        (None, {'fields': ('platform', 'title', 'body')}),
+        ('Status', {'fields': ('status', 'language', 'source_post')}),
+        ('Metadata', {
+            'fields': ('metadata', 'created_at', 'updated_at'),
+            'classes': ('collapse',),
+        }),
+    )
+
+    @admin.display(description='Title')
+    def title_display(self, obj):
+        return obj.title or '(untitled)'
+
+
+@admin.register(ContentTemplate)
+class ContentTemplateAdmin(admin.ModelAdmin):
+    list_display = ('name', 'platform', 'created_at')
+    list_filter = ('platform',)
+    search_fields = ('name', 'description')
+    readonly_fields = ('created_at',)
+    ordering = ('platform', 'name')
+
+
+@admin.register(GenerationHistory)
+class GenerationHistoryAdmin(admin.ModelAdmin):
+    list_display = ('id', 'draft', 'model', 'token_display', 'created_at')
+    list_filter = ('model',)
+    readonly_fields = ('draft', 'prompt', 'model', 'response', 'token_usage', 'created_at')
+    ordering = ('-created_at',)
+    list_per_page = 30
+
+    def has_add_permission(self, request):
+        return False
+
+    @admin.display(description='Tokens')
+    def token_display(self, obj):
+        usage = obj.token_usage or {}
+        inp = usage.get('input', 0)
+        out = usage.get('output', 0)
+        return f"{inp} in / {out} out"
 

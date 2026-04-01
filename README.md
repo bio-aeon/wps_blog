@@ -9,13 +9,19 @@ The previous implementation as a monolithic application on Django, is kept in [t
 │  (Leptos)    │     │  (Scala)    │     │  (wps_blog_db)   │
 │  Port: 3000  │     │  Port: 9000 │     │  Port: 9876      │
 └──────────────┘     └─────────────┘     └──────────────────┘
+                                                  ▲
+                     ┌─────────────┐              │
+                     │ blog-admin  │──────────────┘
+                     │  (Django)   │
+                     │  Port: 8000 │
+                     └─────────────┘
 ```
 
 | Service | Stack | Description |
 |---------|-------|-------------|
 | **blog-api** | Scala, HTTP4s, Doobie, Cats Effect | REST API with Swagger docs |
 | **blog-ui** | Rust, Leptos, Actix-web, WASM | SSR frontend with hydration |
-| **blog-admin** | Python, Django | Content management (WIP) |
+| **blog-admin** | Python, Django | Content management + AI Content Assistant |
 
 ### Quick Start with Docker Compose
 
@@ -36,6 +42,8 @@ Once everything is up:
 | Frontend | http://localhost:3000 |
 | API | http://localhost:9000 |
 | Swagger UI | http://localhost:9000/docs |
+| Admin | http://localhost:8000/admin/ |
+| Content Assistant | http://localhost:8000/admin/assistant/ |
 | PostgreSQL | localhost:9876 (user: `postgres`, password: `postgres`) |
 
 ### Stopping and Resetting
@@ -61,31 +69,31 @@ docker compose down -v
 
 ```bash
 # Terminal 1 - API
-cd code/blog-api && sbt run
+cd blog-api && sbt run
 
 # Terminal 2 - Frontend
-cd code/blog-ui && cargo leptos serve
+cd blog-ui && cargo leptos serve
 
 # Terminal 3 - Admin (optional)
-cd code/blog-admin/blog_admin && python manage.py runserver 8000
+cd blog-admin/blog_admin && python manage.py runserver 8000
 ```
 
 ### Testing
 
 ```bash
 # API tests (Scala)
-cd code/blog-api && sbt test
+cd blog-api && sbt test
 
 # UI tests (Rust + Playwright)
-cd code/blog-ui && cargo leptos test
+cd blog-ui && cargo leptos test
 
 # Admin tests (Django)
-cd code/blog-admin/blog_admin && python manage.py test
+cd blog-admin/blog_admin && python manage.py test
 ```
 
 ### To do
 
 - [x] API service
 - [x] UI service (SPA + SSR)
-- [ ] Admin service
+- [x] Admin service
 - [x] CI using Github Actions

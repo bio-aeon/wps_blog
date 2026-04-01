@@ -9,7 +9,7 @@ from django.utils import timezone
 from blog_admin.models import (
     Post, Comment, Tag, Page, User,
     Skill, Experience, SocialLink, ContactSubmission,
-    Language, PostTranslation,
+    Language, PostTranslation, ContentDraft,
 )
 
 
@@ -52,8 +52,11 @@ def dashboard_view(request):
         },
     }
 
+    assistant_draft_count = ContentDraft.objects.exclude(status='archived').count()
+
     context = {
         'title': 'Dashboard',
+        'assistant_draft_count': assistant_draft_count,
         'total_posts': total_posts,
         'published_posts': published_posts,
         'draft_posts': draft_posts,

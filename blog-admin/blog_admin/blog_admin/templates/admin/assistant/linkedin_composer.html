@@ -1,0 +1,83 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}LinkedIn Composer | Content Assistant{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'blog_admin/css/assistant.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="assistant-dashboard">
+    <div class="assistant-header">
+        <h1>LinkedIn Post Composer</h1>
+        <div class="quick-actions">
+            <a href="{% url 'assistant:dashboard' %}" class="btn btn-secondary">Back to Assistant</a>
+        </div>
+    </div>
+
+    <div class="composer-layout">
+        <div class="composer-main">
+            <h2>Editor</h2>
+
+            <div class="form-group">
+                <label for="topic">Topic</label>
+                <input type="text" id="topic" name="topic"
+                       value="{{ draft.title|default:'' }}"
+                       placeholder="Enter a topic or click Suggest Topics">
+            </div>
+
+            <div class="action-row">
+                <button class="btn btn-secondary" id="btn-suggest">Suggest Topics</button>
+                <select id="tone-select">
+                    <option value="professional" selected>Professional</option>
+                    <option value="technical">Technical</option>
+                    <option value="casual">Casual</option>
+                    <option value="conversational">Conversational</option>
+                </select>
+                <select id="language-select">
+                    <option value="en">English</option>
+                    <option value="ru">Russian</option>
+                    <option value="el">Greek</option>
+                </select>
+            </div>
+
+            <div id="suggestions-panel" style="display:none;">
+                <h3>Suggested Topics</h3>
+                <ul id="suggestions-list"></ul>
+            </div>
+
+            <div class="form-group" style="margin-top:16px;">
+                <label for="body">Post Content</label>
+                <textarea id="body" name="body" rows="12"
+                          placeholder="Generated content will appear here...">{{ draft.body|default:'' }}</textarea>
+                <div class="char-counter" id="char-counter">0 / 3000 characters</div>
+            </div>
+
+            <div class="action-row">
+                <button class="btn btn-primary" id="btn-generate">Generate Post</button>
+                <button class="btn btn-secondary" id="btn-refine">Refine</button>
+                <button class="btn btn-primary" id="btn-copy">Copy to Clipboard</button>
+                <button class="btn btn-secondary" id="btn-save">Save Draft</button>
+            </div>
+        </div>
+
+        <div class="composer-sidebar">
+            <h3>Draft Info</h3>
+            <p><strong>Platform:</strong> LinkedIn</p>
+            <p><strong>Status:</strong> <span id="draft-status">{{ draft.status|default:'new' }}</span></p>
+            <p><strong>Optimal:</strong> ~1300 chars</p>
+            <p><strong>Max:</strong> 3000 chars</p>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'blog_admin/js/composer.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        initComposer('linkedin', '{{ csrf_token }}', {{ draft_id|default:'null' }});
+        initCharCounter('body', 3000);
+    });
+</script>
+{% endblock %}

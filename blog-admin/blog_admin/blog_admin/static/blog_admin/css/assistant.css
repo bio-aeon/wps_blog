@@ -1,0 +1,153 @@
+/* Inherit dashboard base styles — assistant extends the same patterns */
+
+.assistant-dashboard { padding: 20px 0; }
+
+.assistant-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.assistant-header h1 {
+    margin: 0;
+    font-size: 1.6em;
+    color: #333;
+}
+
+.quick-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.9em;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+}
+
+.btn-primary {
+    background: #417690;
+    color: #fff;
+}
+.btn-primary:hover { background: #346078; }
+
+.btn-secondary {
+    background: #eee;
+    color: #417690;
+    border: 1px solid #ccc;
+}
+.btn-secondary:hover { background: #ddd; }
+
+/* Stats — reuse .stats-grid, .stat-card from dashboard.css */
+
+/* Platform badges */
+.platform-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 0.8em;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+.platform-blog     { background: #e8f5e9; color: #2e7d32; }
+.platform-linkedin { background: #e3f2fd; color: #1565c0; }
+.platform-twitter  { background: #fce4ec; color: #c62828; }
+
+/* Status badges */
+.status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+.status-idea       { background: #f3e5f5; color: #7b1fa2; }
+.status-generating { background: #fff3e0; color: #e65100; }
+.status-draft      { background: #fff9c4; color: #f57f17; }
+.status-review     { background: #e3f2fd; color: #1565c0; }
+.status-approved   { background: #e8f5e9; color: #2e7d32; }
+.status-published  { background: #e8f5e9; color: #1b5e20; }
+.status-archived   { background: #eceff1; color: #546e7a; }
+
+/* Composer layout */
+.composer-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 900px) {
+    .composer-layout { grid-template-columns: 1fr; }
+}
+
+.composer-main,
+.composer-sidebar {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.composer-main h2,
+.composer-sidebar h3 {
+    margin: 0 0 15px 0;
+    color: #333;
+    border-bottom: 2px solid #417690;
+    padding-bottom: 8px;
+}
+
+/* Form elements */
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    font-size: 0.85em;
+    color: #666;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+
+.form-group input[type="text"],
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.95em;
+    box-sizing: border-box;
+}
+
+.form-group textarea {
+    min-height: 200px;
+    font-family: monospace;
+}
+
+.char-counter {
+    text-align: right;
+    font-size: 0.8em;
+    color: #888;
+    margin-top: 4px;
+}
+.char-counter.warning { color: #e65100; }
+.char-counter.over    { color: #c62828; font-weight: bold; }
+
+/* Action buttons row */
+.action-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+}

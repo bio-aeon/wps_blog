@@ -1,0 +1,26 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Templates | Content Assistant{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'blog_admin/css/assistant.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="assistant-dashboard">
+    <div class="assistant-header">
+        <h1>Prompt Templates</h1>
+        <div class="quick-actions">
+            <a href="{% url 'assistant:dashboard' %}" class="btn btn-secondary">Back to Assistant</a>
+        </div>
+    </div>
+
+    <div class="dashboard-section">
+        <p>Manage prompt templates via the
+            <a href="{% url 'admin:blog_admin_contenttemplate_changelist' %}">Django admin interface</a>.
+        </p>
+    </div>
+</div>
+{% endblock %}
