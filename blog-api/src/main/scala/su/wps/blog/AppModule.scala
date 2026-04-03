@@ -12,6 +12,7 @@ import doobie.hikari.HikariTransactor
 import doobie.util.ExecutionContexts
 import fly4s.*
 import fly4s.data.*
+import fs2.compression.Compression
 import fs2.io.net.Network
 import org.http4s.{HttpApp, HttpRoutes, Method}
 import org.http4s.ember.server.EmberServerBuilder
@@ -30,7 +31,7 @@ import scala.concurrent.duration.*
 
 object AppModule {
 
-  def apply[F[_]: Async: Network: TagK]: ModuleDef = new ModuleDef {
+  def apply[F[_]: Async: Compression: Network: TagK]: ModuleDef = new ModuleDef {
     make[AppConfig].fromEffect(parseAppConfig[F])
     make[DbConfig].from((_: AppConfig).db)
     make[HttpServerConfig].from((_: AppConfig).httpServer)
@@ -244,11 +245,13 @@ object AppModule {
       }.toResource
     } yield Txr.plain(tr)
 
-  @annotation.nowarn("msg=deprecated")
-  private def gzipApp[F[_]: Async](app: HttpApp[F]): HttpApp[F] =
+  private def gzipApp[F[_]: Async: Compression](app: HttpApp[F]): HttpApp[F] =
     GZip(app)
 
-  private def mkHttpApp[F[_]: Async](appConfig: AppConfig, routes: HttpRoutes[F]): HttpApp[F] = {
+  private def mkHttpApp[F[_]: Async: Compression](
+    appConfig: AppConfig,
+    routes: HttpRoutes[F]
+  ): HttpApp[F] = {
     val corsPolicy =
       if (appConfig.cors.allowedOrigins.isEmpty) {
         CORS.policy.withAllowOriginAll
