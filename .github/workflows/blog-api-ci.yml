@@ -23,6 +23,9 @@ jobs:
         distribution: 'temurin'
         cache: 'sbt'
     - uses: sbt/setup-sbt@v1
+    - name: Check formatting
+      working-directory: ./blog-api
+      run: sbt scalafmtCheckAll
     - name: Run tests
       working-directory: ./blog-api
       run: sbt test

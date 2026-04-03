@@ -46,11 +46,13 @@ lazy val root = (project in file("."))
       prometheusSimpleclient,
       prometheusCommon,
       logstashLogbackEncoder,
+      distageCore,
       scalacheckShapeless % Test,
       testcontainersScala % Test,
       testcontainersPostgresql % Test,
       specs2 % Test,
-      catsEffectTestingSpecs2 % Test
+      catsEffectTestingSpecs2 % Test,
+      distageFramework
     ),
     addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.13.4" cross CrossVersion.patch),
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")

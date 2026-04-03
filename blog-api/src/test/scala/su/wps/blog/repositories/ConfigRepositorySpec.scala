@@ -74,7 +74,12 @@ class ConfigRepositorySpec extends Specification with DbTest {
     createdAt: ZonedDateTime = random[models.Config].createdAt
   ): ConnectionIO[models.Config] = {
     val config =
-      random[models.Config].copy(id = id, name = Varchar(name), value = Varchar(value), createdAt = createdAt)
+      random[models.Config].copy(
+        id = id,
+        name = Varchar(name),
+        value = Varchar(value),
+        createdAt = createdAt
+      )
     models.Config.sql.insert(config).map(_ => config)
   }
 }

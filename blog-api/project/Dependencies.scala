@@ -24,6 +24,7 @@ object Dependencies {
     val caffeine = "3.1.8"
     val prometheusSimpleclient = "0.16.0"
     val logstashLogbackEncoder = "8.0"
+    val distage = "1.2.24"
   }
 
   val http4sEmberServer = "org.http4s" %% "http4s-ember-server" % Versions.http4s
@@ -64,4 +65,6 @@ object Dependencies {
   val tapirHttp4sServer = "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % Versions.tapir
   val tapirSwaggerUiBundle =
     "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % Versions.tapir
+  val distageCore = "io.7mind.izumi" %% "distage-core" % Versions.distage
+  val distageFramework = "io.7mind.izumi" %% "distage-framework" % Versions.distage
 }
