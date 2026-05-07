@@ -1,4 +1,4 @@
-Django==6.0.4
+Django==6.0.5
 psycopg2-binary==2.9.12
 model-bakery==1.23.4
 gunicorn==26.0.0
