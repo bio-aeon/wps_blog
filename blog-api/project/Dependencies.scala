@@ -23,7 +23,7 @@ object Dependencies {
     val tapir = "1.9.0"
     val caffeine = "3.1.8"
     val prometheusSimpleclient = "0.16.0"
-    val logstashLogbackEncoder = "8.0"
+    val logstashLogbackEncoder = "8.1"
     val distage = "1.2.24"
   }
 
