@@ -20,7 +20,7 @@ object Dependencies {
     val testcontainersScala = "0.44.1"
     val testcontainersPostgresql = "2.0.3"
     val catsEffectTesting = "1.8.0"
-    val tapir = "1.9.0"
+    val tapir = "1.9.11"
     val caffeine = "3.1.8"
     val prometheusSimpleclient = "0.16.0"
     val logstashLogbackEncoder = "8.0"
