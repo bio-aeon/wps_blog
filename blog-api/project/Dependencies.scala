@@ -5,7 +5,7 @@ object Dependencies {
   object Versions {
     val http4s = "0.23.30"
     val specs2 = "4.21.0"
-    val logback = "1.5.18"
+    val logback = "1.5.38"
     val circe = "0.14.14"
     val tofu = "0.14.1"
     val typesafeConfig = "1.4.3"
@@ -15,7 +15,7 @@ object Dependencies {
     val mouse = "1.3.2"
     val chimney = "1.8.1"
     val fly4s = "1.1.0"
-    val flyway = "11.10.1"
+    val flyway = "11.10.5"
     val scalacheckShapeless = "1.3.1"
     val testcontainersScala = "0.44.1"
     val testcontainersPostgresql = "2.0.3"
@@ -23,7 +23,7 @@ object Dependencies {
     val tapir = "1.9.0"
     val caffeine = "3.1.8"
     val prometheusSimpleclient = "0.16.0"
-    val logstashLogbackEncoder = "8.0"
+    val logstashLogbackEncoder = "8.1"
     val distage = "1.2.24"
   }
 
