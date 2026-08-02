@@ -2,7 +2,7 @@ package su.wps.blog.repositories
 
 import cats.syntax.apply.*
 import cats.syntax.traverse.*
-import doobie.ConnectionIO
+import org.typelevel.doobie.ConnectionIO
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 import org.scalacheck.ScalacheckShapeless.*

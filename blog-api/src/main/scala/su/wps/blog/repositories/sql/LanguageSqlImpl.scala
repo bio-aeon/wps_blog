@@ -1,8 +1,8 @@
 package su.wps.blog.repositories.sql
 
 import cats.tagless.syntax.functorK.*
-import doobie.*
-import doobie.implicits.*
+import org.typelevel.doobie.*
+import org.typelevel.doobie.implicits.*
 import su.wps.blog.models.domain.Language
 import tofu.doobie.LiftConnectionIO
 

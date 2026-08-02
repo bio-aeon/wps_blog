@@ -2,8 +2,8 @@ package su.wps.blog.tools
 
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
-import doobie.*
-import doobie.implicits.*
+import org.typelevel.doobie.*
+import org.typelevel.doobie.implicits.*
 
 object syntax {
   implicit def toRunConnectionIOOps[A](ca: ConnectionIO[A]): RunConnectionIOOps[A] =

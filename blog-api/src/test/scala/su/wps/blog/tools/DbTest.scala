@@ -3,7 +3,7 @@ package su.wps.blog.tools
 import cats.effect.unsafe.implicits.global
 import cats.effect.{IO, Resource}
 import com.dimafeng.testcontainers.PostgreSQLContainer
-import doobie.Transactor
+import org.typelevel.doobie.Transactor
 import fly4s.*
 import fly4s.data.*
 import org.specs2.specification.{BeforeAfterAll, BeforeAfterEach}

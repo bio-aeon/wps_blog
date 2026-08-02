@@ -1,6 +1,6 @@
 package su.wps.blog.repositories
 
-import doobie.ConnectionIO
+import org.typelevel.doobie.ConnectionIO
 import org.specs2.mutable.Specification
 import su.wps.blog.models.domain.{ContactSubmission, ContactSubmissionId}
 import su.wps.blog.tools.DbTest
