@@ -7,7 +7,7 @@ object Dependencies {
     val specs2 = "4.21.0"
     val logback = "1.5.18"
     val circe = "0.14.14"
-    val tofu = "0.14.1"
+    val tofu = "0.14.2"
     val typesafeConfig = "1.4.3"
     val pureconfig = "0.17.9"
     val doobie = "1.0.0-RC12"
