@@ -18,7 +18,7 @@ object Dependencies {
     val flyway = "11.10.1"
     val scalacheckShapeless = "1.3.1"
     val testcontainersScala = "0.44.1"
-    val testcontainersPostgresql = "2.0.3"
+    val testcontainersPostgresql = "2.0.5"
     val catsEffectTesting = "1.8.0"
     val tapir = "1.9.0"
     val caffeine = "3.1.8"
