@@ -11,7 +11,7 @@ object Dependencies {
     val typesafeConfig = "1.4.3"
     val pureconfig = "0.17.9"
     val doobie = "1.0.0-RC12"
-    val log4cats = "2.7.1"
+    val log4cats = "2.8.0"
     val mouse = "1.3.2"
     val chimney = "1.8.1"
     val fly4s = "1.1.0"
