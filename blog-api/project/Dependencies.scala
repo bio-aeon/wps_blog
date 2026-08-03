@@ -24,7 +24,7 @@ object Dependencies {
     val caffeine = "3.1.8"
     val prometheusSimpleclient = "0.16.0"
     val logstashLogbackEncoder = "8.1"
-    val distage = "1.2.24"
+    val distage = "1.2.25"
   }
 
   val http4sEmberServer = "org.http4s" %% "http4s-ember-server" % Versions.http4s
