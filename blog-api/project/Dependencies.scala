@@ -3,8 +3,8 @@ import sbt.*
 object Dependencies {
 
   object Versions {
+    val specs2 = "4.23.0"
     val http4s = "0.23.36"
-    val specs2 = "4.21.0"
     val logback = "1.5.38"
     val circe = "0.14.16"
     val tofu = "0.14.1"
