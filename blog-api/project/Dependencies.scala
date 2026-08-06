@@ -12,7 +12,7 @@ object Dependencies {
     val pureconfig = "0.17.10"
     val doobie = "1.0.0-RC12"
     val log4cats = "2.7.1"
-    val mouse = "1.3.2"
+    val mouse = "1.4.0"
     val chimney = "1.8.2"
     val fly4s = "1.1.1"
     val flyway = "11.10.5"
