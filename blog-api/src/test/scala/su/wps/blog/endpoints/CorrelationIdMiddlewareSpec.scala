@@ -16,11 +16,10 @@ class CorrelationIdMiddlewareSpec extends Specification with CatsEffect {
   private val app = CorrelationIdMiddleware(testApp)
 
   "CorrelationIdMiddleware" >> {
-    "generates X-Request-Id when not present in request" >> {
+    "generates X-Request-Id when not present in request" >>
       app.run(Request[IO](Method.GET, uri"/test")).map { resp =>
         resp.headers.get(RequestIdHeader) must beSome
       }
-    }
 
     "preserves X-Request-Id from incoming request" >> {
       val customId = "test-correlation-id-123"
@@ -32,11 +31,10 @@ class CorrelationIdMiddlewareSpec extends Specification with CatsEffect {
       }
     }
 
-    "adds X-Request-Id to response headers" >> {
+    "adds X-Request-Id to response headers" >>
       app.run(Request[IO](Method.GET, uri"/any")).map { resp =>
         val id = resp.headers.get(RequestIdHeader).map(_.head.value)
         id must beSome[String].which(_.nonEmpty)
       }
-    }
   }
 }
