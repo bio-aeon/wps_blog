@@ -3,11 +3,11 @@ import sbt.*
 object Dependencies {
 
   object Versions {
+    val tofu = "0.14.2"
     val specs2 = "4.23.0"
     val http4s = "0.23.36"
     val logback = "1.5.38"
     val circe = "0.14.16"
-    val tofu = "0.14.1"
     val typesafeConfig = "1.4.9"
     val pureconfig = "0.17.10"
     val doobie = "1.0.0-RC12"
