@@ -2,8 +2,8 @@ package su.wps.blog.repositories.sql
 
 import cats.syntax.option.*
 import cats.tagless.syntax.functorK.*
-import doobie.*
-import doobie.implicits.*
+import org.typelevel.doobie.*
+import org.typelevel.doobie.implicits.*
 import su.wps.blog.models.domain.{Comment, CommentId, PostId}
 import su.wps.blog.instances.time.*
 import tofu.doobie.LiftConnectionIO

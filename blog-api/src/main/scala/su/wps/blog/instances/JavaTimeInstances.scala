@@ -1,7 +1,7 @@
 package su.wps.blog.instances
 
-import doobie.Meta
-import doobie.implicits.javatimedrivernative.{JavaInstantMeta, JavaLocalDateMeta}
+import org.typelevel.doobie.Meta
+import org.typelevel.doobie.implicits.javatimedrivernative.{JavaInstantMeta, JavaLocalDateMeta}
 
 import java.time.{LocalDate, ZoneId, ZonedDateTime}
 

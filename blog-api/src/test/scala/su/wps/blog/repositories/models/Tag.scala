@@ -1,8 +1,8 @@
 package su.wps.blog.repositories.models
 
 import cats.syntax.functor.*
-import doobie.*
-import doobie.generic.auto.*
+import org.typelevel.doobie.*
+import org.typelevel.doobie.generic.auto.*
 import su.wps.blog.tools.types.*
 
 final case class Tag(id: PosInt, name: Varchar[W.`100`.T], slug: Varchar[W.`100`.T])

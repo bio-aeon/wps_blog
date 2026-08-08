@@ -1,7 +1,7 @@
 package su.wps.blog.repositories.sql
 
 import cats.effect.Sync
-import doobie.util.log.*
+import org.typelevel.doobie.util.log.*
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 
