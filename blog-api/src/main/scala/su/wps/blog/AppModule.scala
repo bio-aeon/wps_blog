@@ -109,7 +109,9 @@ object AppModule {
         ContactServiceImpl.create[F, ConnectionIO](cr, cfgr, xa)
     }
     make[HealthService[F]].from { (xa: Txr.Plain[F]) =>
-      HealthServiceImpl.create[F](xa.trans(org.typelevel.doobie.FC.isValid(1)).handleError(_ => false))
+      HealthServiceImpl.create[F](
+        xa.trans(org.typelevel.doobie.FC.isValid(1)).handleError(_ => false)
+      )
     }
 
     make[TagService[F]].from {
