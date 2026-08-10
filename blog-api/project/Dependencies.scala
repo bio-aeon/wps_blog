@@ -13,7 +13,7 @@ object Dependencies {
     val doobie = "1.0.0-RC12"
     val log4cats = "2.8.0"
     val mouse = "1.4.0"
-    val chimney = "1.8.2"
+    val chimney = "1.11.0"
     val fly4s = "1.2.0"
     val flyway = "11.10.5"
     val scalacheckShapeless = "1.3.1"
