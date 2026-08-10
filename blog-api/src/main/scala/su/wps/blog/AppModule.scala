@@ -195,7 +195,7 @@ object AppModule {
       val withMiddleware = CacheMiddleware(ErrorHandler(routes.routes))
       val allRoutes: HttpRoutes[F] =
         LivenessRoutes.routes[F] <+> MetricsRoutes.routes[F] <+>
-          SwaggerRoutes.routes[F] <+> withMiddleware
+          SwaggerRoutes.routes[F](routes.endpoints) <+> withMiddleware
       mkHttpApp[F](appConfig, allRoutes)
     }
     make[Server].fromResource { (c: HttpServerConfig, app: HttpApp[F]) =>

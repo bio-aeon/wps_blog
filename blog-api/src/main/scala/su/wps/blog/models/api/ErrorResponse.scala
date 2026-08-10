@@ -10,21 +10,27 @@ final case class ErrorResponse(
 )
 
 object ErrorResponse {
+  val NotFoundCode = "NOT_FOUND"
+  val BadRequestCode = "BAD_REQUEST"
+  val InternalCode = "INTERNAL_ERROR"
+  val ValidationCode = "VALIDATION_ERROR"
+  val RateLimitedCode = "RATE_LIMITED"
+
   implicit val encoder: Encoder[ErrorResponse] =
     Encoder.forProduct3("code", "message", "details")(e => (e.code, e.message, e.details))
 
   def notFound(resource: String, id: String): ErrorResponse =
-    ErrorResponse("NOT_FOUND", s"$resource not found: $id")
+    ErrorResponse(NotFoundCode, s"$resource not found: $id")
 
   def badRequest(message: String): ErrorResponse =
-    ErrorResponse("BAD_REQUEST", message)
+    ErrorResponse(BadRequestCode, message)
 
   def internal(message: String): ErrorResponse =
-    ErrorResponse("INTERNAL_ERROR", message)
+    ErrorResponse(InternalCode, message)
 
   def validationError(errors: Map[String, String]): ErrorResponse =
-    ErrorResponse("VALIDATION_ERROR", "Request validation failed", Some(errors))
+    ErrorResponse(ValidationCode, "Request validation failed", Some(errors))
 
   def tooManyRequests(message: String): ErrorResponse =
-    ErrorResponse("RATE_LIMITED", message)
+    ErrorResponse(RateLimitedCode, message)
 }

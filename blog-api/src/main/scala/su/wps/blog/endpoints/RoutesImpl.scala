@@ -1,22 +1,28 @@
 package su.wps.blog.endpoints
 
-import cats.effect.Concurrent
-import cats.syntax.apply.*
+import cats.data.{Validated, ValidatedNec}
+import cats.effect.Async
+import cats.syntax.applicativeError.*
+import cats.syntax.applicative.*
 import cats.syntax.flatMap.*
 import cats.syntax.functor.*
-import io.circe.syntax.*
-import org.http4s.{HttpRoutes, Request}
-import org.http4s.circe.*
-import org.http4s.circe.CirceEntityDecoder.*
-import org.http4s.dsl.Http4sDsl
-import org.http4s.headers.`X-Forwarded-For`
-import org.http4s.server.Router
-import su.wps.blog.models.api.{CreateCommentRequest, CreateContactRequest, RateCommentRequest}
+import org.http4s.HttpRoutes
+import sttp.tapir.AnyEndpoint
+import sttp.tapir.json.circe.*
+import sttp.tapir.server.ServerEndpoint
+import sttp.tapir.server.http4s.{Http4sServerInterpreter, Http4sServerOptions}
+import sttp.tapir.server.model.ValuedEndpointOutput
+import su.wps.blog.models.api.{
+  CreateCommentRequest,
+  CreateContactRequest,
+  ErrorResponse,
+  RateCommentRequest
+}
 import su.wps.blog.models.domain.{AppErr, CommentId, PostId}
 import su.wps.blog.services.*
 import su.wps.blog.validation.Validation
 
-final class RoutesImpl[F[_]: Concurrent] private (
+final class RoutesImpl[F[_]: Async] private (
   postService: PostService[F],
   commentService: CommentService[F],
   tagService: TagService[F],
@@ -29,177 +35,197 @@ final class RoutesImpl[F[_]: Concurrent] private (
   aboutService: AboutService[F],
   feedService: FeedService[F],
   languageService: LanguageService[F]
-) extends Http4sDsl[F]
-    with Routes[F] {
+) extends Routes[F] {
   import RoutesImpl._
+  import TapirSupport.*
 
-  private object LimitParamMatcher extends QueryParamDecoderMatcher[Int]("limit")
-  private object OffsetParamMatcher extends QueryParamDecoderMatcher[Int]("offset")
-  private object TagParamMatcher extends OptionalQueryParamDecoderMatcher[String]("tag")
-  private object QueryParamMatcher extends QueryParamDecoderMatcher[String]("q")
-  private object CountParamMatcher extends OptionalQueryParamDecoderMatcher[Int]("count")
-  private object LangParamMatcher extends OptionalQueryParamDecoderMatcher[String]("lang")
+  private def attempt[A](fa: F[A]): F[Either[ErrorResponse, A]] =
+    fa.attempt.map(_.left.map(ApiErrors.fromThrowable))
 
-  private def resolveLang(req: Request[F], explicit: Option[String]): F[String] = {
-    val acceptLang = req.headers
-      .get(org.typelevel.ci.CIString("Accept-Language"))
-      .map(_.head.value)
-    languageService.resolveLanguage(explicit, acceptLang)
+  private def resolveLang(explicit: Option[String], acceptLanguage: Option[String]): F[String] =
+    languageService.resolveLanguage(explicit, acceptLanguage)
+
+  private def validated[A](result: ValidatedNec[Validation.FieldError, A]): F[A] = result match {
+    case Validated.Valid(a) => a.pure[F]
+    case Validated.Invalid(errors) =>
+      Async[F].raiseError(AppErr.ValidationFailed(errors.toNonEmptyList.toList.toMap))
   }
 
-  private val apiRoutes: HttpRoutes[F] = HttpRoutes.of[F] {
-    case req @ GET -> Root / "posts" :? LimitParamMatcher(limit) +& OffsetParamMatcher(offset)
-        +& TagParamMatcher(maybeTag) +& LangParamMatcher(maybeLang) =>
-      withValidPagination(limit, offset) { (l, o) =>
-        resolveLang(req, maybeLang).flatMap { lang =>
-          maybeTag match {
-            case Some(tagSlug) =>
-              postService.postsByTag(lang, tagSlug, l, o).map(_.asJson).flatMap(Ok(_))
-            case None =>
-              postService.allPosts(lang, l, o).map(_.asJson).flatMap(Ok(_))
+  private val getPosts =
+    ApiEndpoints.getPosts.serverLogic { case (limit, offset, maybeTag, maybeLang, acceptLanguage) =>
+      attempt {
+        for {
+          pagination <- validated(Validation.validatePagination(limit, offset))
+          (l, o) = pagination
+          lang <- resolveLang(maybeLang, acceptLanguage)
+          result <- maybeTag match {
+            case Some(tagSlug) => postService.postsByTag(lang, tagSlug, l, o)
+            case None => postService.allPosts(lang, l, o)
           }
-        }
+        } yield result
       }
+    }
 
-    case req @ GET -> Root / "posts" / "search" :? QueryParamMatcher(query)
-        +& LimitParamMatcher(limit) +& OffsetParamMatcher(offset)
-        +& LangParamMatcher(maybeLang) =>
-      withValidPagination(limit, offset) { (l, o) =>
-        resolveLang(req, maybeLang).flatMap { lang =>
-          postService.searchPosts(lang, query, l, o).map(_.asJson).flatMap(Ok(_))
-        }
+  private val searchPosts =
+    ApiEndpoints.searchPosts.serverLogic { case (query, limit, offset, maybeLang, acceptLanguage) =>
+      attempt {
+        for {
+          pagination <- validated(Validation.validatePagination(limit, offset))
+          (l, o) = pagination
+          lang <- resolveLang(maybeLang, acceptLanguage)
+          result <- postService.searchPosts(lang, query, l, o)
+        } yield result
       }
+    }
 
-    case req @ GET -> Root / "posts" / "recent" :? CountParamMatcher(maybeCount)
-        +& LangParamMatcher(maybeLang) =>
+  private val recentPosts =
+    ApiEndpoints.recentPosts.serverLogic { case (maybeCount, maybeLang, acceptLanguage) =>
       val count = maybeCount
         .getOrElse(DefaultRecentPostsCount)
         .min(MaxRecentPostsCount)
         .max(MinRecentPostsCount)
-      resolveLang(req, maybeLang).flatMap { lang =>
-        postService.recentPosts(lang, count).map(_.asJson).flatMap(Ok(_))
+      attempt {
+        resolveLang(maybeLang, acceptLanguage).flatMap(postService.recentPosts(_, count))
       }
-
-    case req @ GET -> Root / "posts" / IntVar(id) :? LangParamMatcher(maybeLang) =>
-      resolveLang(req, maybeLang).flatMap { lang =>
-        postService.postById(lang, PostId(id)).map(_.asJson).flatMap(Ok(_))
-      }
-
-    case POST -> Root / "posts" / IntVar(id) / "view" =>
-      postService.incrementViewCount(PostId(id)) *> NoContent()
-
-    case GET -> Root / "posts" / IntVar(id) / "comments" =>
-      commentService.getCommentsForPost(PostId(id)).map(_.asJson).flatMap(Ok(_))
-
-    case req @ POST -> Root / "posts" / IntVar(id) / "comments" =>
-      req.as[CreateCommentRequest].flatMap { request =>
-        withValidComment(request) { validated =>
-          commentService.createComment(PostId(id), validated).map(_.asJson).flatMap(Created(_))
-        }
-      }
-
-    case req @ POST -> Root / "comments" / IntVar(id) / "rate" =>
-      val ip = extractIp(req)
-      req.as[RateCommentRequest].flatMap { request =>
-        commentService.rateComment(CommentId(id), request.isUpvote, ip) *> NoContent()
-      }
-
-    case req @ GET -> Root / "tags" / "cloud" :? LangParamMatcher(maybeLang) =>
-      resolveLang(req, maybeLang).flatMap { lang =>
-        tagService.getTagCloud(lang).map(_.asJson).flatMap(Ok(_))
-      }
-
-    case req @ GET -> Root / "tags" :? LangParamMatcher(maybeLang) =>
-      resolveLang(req, maybeLang).flatMap { lang =>
-        tagService.getAllTags(lang).map(_.asJson).flatMap(Ok(_))
-      }
-
-    case req @ GET -> Root / "pages" :? LangParamMatcher(maybeLang) =>
-      resolveLang(req, maybeLang).flatMap { lang =>
-        pageService.getAllPages(lang).map(_.asJson).flatMap(Ok(_))
-      }
-
-    case req @ GET -> Root / "pages" / url :? LangParamMatcher(maybeLang) =>
-      resolveLang(req, maybeLang).flatMap { lang =>
-        pageService.getPageByUrl(lang, url).map(_.asJson).flatMap(Ok(_))
-      }
-
-    case GET -> Root / "skills" =>
-      skillService.getSkillsByCategory.map(_.asJson).flatMap(Ok(_))
-
-    case GET -> Root / "experiences" =>
-      experienceService.getExperiences.map(_.asJson).flatMap(Ok(_))
-
-    case GET -> Root / "social-links" =>
-      socialLinkService.getSocialLinks.map(_.asJson).flatMap(Ok(_))
-
-    case req @ POST -> Root / "contact" =>
-      val ip = extractIp(req)
-      req.as[CreateContactRequest].flatMap { request =>
-        withValidContact(request) { validated =>
-          contactService.submitContact(validated, ip).map(_.asJson).flatMap(Ok(_))
-        }
-      }
-
-    case GET -> Root / "about" =>
-      aboutService.getAboutPage.map(_.asJson).flatMap(Ok(_))
-
-    case req @ GET -> Root / "feed" :? LangParamMatcher(maybeLang) =>
-      resolveLang(req, maybeLang).flatMap { lang =>
-        feedService.getFeed(lang).map(_.asJson).flatMap(Ok(_))
-      }
-
-    case GET -> Root / "languages" =>
-      languageService.getActiveLanguages.map(_.asJson).flatMap(Ok(_))
-  }
-
-  private val systemRoutes: HttpRoutes[F] = HttpRoutes.of[F] { case GET -> Root / "health" =>
-    healthService.check.map(_.asJson).flatMap(Ok(_))
-  }
-
-  val routes: HttpRoutes[F] = Router(s"/$ApiVersion" -> apiRoutes, "/" -> systemRoutes)
-
-  private def withValidPagination(limit: Int, offset: Int)(
-    f: (Int, Int) => F[org.http4s.Response[F]]
-  ): F[org.http4s.Response[F]] =
-    Validation.validatePagination(limit, offset) match {
-      case cats.data.Validated.Valid((l, o)) => f(l, o)
-      case cats.data.Validated.Invalid(errors) =>
-        Concurrent[F].raiseError(AppErr.ValidationFailed(errors.toNonEmptyList.toList.toMap))
     }
 
-  private def withValidComment(
-    request: CreateCommentRequest
-  )(f: CreateCommentRequest => F[org.http4s.Response[F]]): F[org.http4s.Response[F]] =
-    Validation.validateComment(request.name, request.email, request.text) match {
-      case cats.data.Validated.Valid((name, email, text)) =>
-        f(request.copy(name = name, email = email, text = text))
-      case cats.data.Validated.Invalid(errors) =>
-        Concurrent[F].raiseError(AppErr.ValidationFailed(errors.toNonEmptyList.toList.toMap))
+  private val getPostById =
+    ApiEndpoints.getPostById.serverLogic { case (id, maybeLang, acceptLanguage) =>
+      attempt {
+        resolveLang(maybeLang, acceptLanguage).flatMap(postService.postById(_, PostId(id)))
+      }
     }
 
-  private def withValidContact(
-    request: CreateContactRequest
-  )(f: CreateContactRequest => F[org.http4s.Response[F]]): F[org.http4s.Response[F]] =
-    Validation.validateContact(
-      request.name,
-      request.email,
-      request.subject,
-      request.message
-    ) match {
-      case cats.data.Validated.Valid((name, email, subject, message)) =>
-        f(request.copy(name = name, email = email, subject = subject, message = message))
-      case cats.data.Validated.Invalid(errors) =>
-        Concurrent[F].raiseError(AppErr.ValidationFailed(errors.toNonEmptyList.toList.toMap))
+  private val incrementViewCount =
+    ApiEndpoints.incrementViewCount.serverLogic { id =>
+      attempt(postService.incrementViewCount(PostId(id)))
     }
 
-  private def extractIp(req: Request[F]): String =
-    req.headers
-      .get[`X-Forwarded-For`]
-      .flatMap(_.values.head)
-      .map(_.toUriString)
-      .orElse(req.remoteAddr.map(_.toUriString))
-      .getOrElse("unknown")
+  private val getCommentsForPost =
+    ApiEndpoints.getCommentsForPost.serverLogic { id =>
+      attempt(commentService.getCommentsForPost(PostId(id)))
+    }
+
+  private val createComment =
+    ApiEndpoints.createComment.serverLogic { case (id, request) =>
+      attempt {
+        for {
+          fields <- validated(Validation.validateComment(request.name, request.email, request.text))
+          (name, email, text) = fields
+          created <- commentService.createComment(
+            PostId(id),
+            request.copy(name = name, email = email, text = text)
+          )
+        } yield created
+      }
+    }
+
+  private val rateComment =
+    ApiEndpoints.rateComment.serverLogic { case (id, request, ip) =>
+      attempt(commentService.rateComment(CommentId(id), request.isUpvote, ip))
+    }
+
+  private val getAllTags =
+    ApiEndpoints.getAllTags.serverLogic { case (maybeLang, acceptLanguage) =>
+      attempt(resolveLang(maybeLang, acceptLanguage).flatMap(tagService.getAllTags))
+    }
+
+  private val getTagCloud =
+    ApiEndpoints.getTagCloud.serverLogic { case (maybeLang, acceptLanguage) =>
+      attempt(resolveLang(maybeLang, acceptLanguage).flatMap(tagService.getTagCloud))
+    }
+
+  private val getAllPages =
+    ApiEndpoints.getAllPages.serverLogic { case (maybeLang, acceptLanguage) =>
+      attempt(resolveLang(maybeLang, acceptLanguage).flatMap(pageService.getAllPages))
+    }
+
+  private val getPageByUrl =
+    ApiEndpoints.getPageByUrl.serverLogic { case (url, maybeLang, acceptLanguage) =>
+      attempt {
+        resolveLang(maybeLang, acceptLanguage).flatMap(pageService.getPageByUrl(_, url))
+      }
+    }
+
+  private val healthCheck =
+    ApiEndpoints.healthCheck.serverLogic(_ => attempt(healthService.check))
+
+  private val getSkills =
+    ApiEndpoints.getSkills.serverLogic(_ => attempt(skillService.getSkillsByCategory))
+
+  private val getExperiences =
+    ApiEndpoints.getExperiences.serverLogic(_ => attempt(experienceService.getExperiences))
+
+  private val getSocialLinks =
+    ApiEndpoints.getSocialLinks.serverLogic(_ => attempt(socialLinkService.getSocialLinks))
+
+  private val submitContact =
+    ApiEndpoints.submitContact.serverLogic { case (request, ip) =>
+      attempt {
+        for {
+          fields <- validated(
+            Validation
+              .validateContact(request.name, request.email, request.subject, request.message)
+          )
+          (name, email, subject, message) = fields
+          response <- contactService.submitContact(
+            request.copy(name = name, email = email, subject = subject, message = message),
+            ip
+          )
+        } yield response
+      }
+    }
+
+  private val getAbout =
+    ApiEndpoints.getAbout.serverLogic(_ => attempt(aboutService.getAboutPage))
+
+  private val getFeed =
+    ApiEndpoints.getFeed.serverLogic { case (maybeLang, acceptLanguage) =>
+      attempt(resolveLang(maybeLang, acceptLanguage).flatMap(feedService.getFeed))
+    }
+
+  private val getLanguages =
+    ApiEndpoints.getLanguages.serverLogic(_ => attempt(languageService.getActiveLanguages))
+
+  /** Order matters: the literal `search` and `recent` paths must precede `posts/{id}`. */
+  val serverEndpoints: List[ServerEndpoint[Any, F]] = List(
+    getPosts,
+    searchPosts,
+    recentPosts,
+    getPostById,
+    incrementViewCount,
+    getCommentsForPost,
+    createComment,
+    rateComment,
+    getTagCloud,
+    getAllTags,
+    getAllPages,
+    getPageByUrl,
+    healthCheck,
+    getSkills,
+    getExperiences,
+    getSocialLinks,
+    submitContact,
+    getAbout,
+    getFeed,
+    getLanguages
+  )
+
+  val endpoints: List[AnyEndpoint] = serverEndpoints.map(_.endpoint)
+
+  /** Renders tapir's own decode failures as ErrorResponse, so malformed requests use the same JSON
+    * envelope as every other error.
+    */
+  private val serverOptions: Http4sServerOptions[F] =
+    Http4sServerOptions
+      .customiseInterceptors[F]
+      .defaultHandlers(message =>
+        ValuedEndpointOutput(jsonBody[ErrorResponse], ErrorResponse.badRequest(message))
+      )
+      .options
+
+  val routes: HttpRoutes[F] =
+    Http4sServerInterpreter[F](serverOptions).toRoutes(serverEndpoints)
 }
 
 object RoutesImpl {
@@ -208,7 +234,7 @@ object RoutesImpl {
   val MaxRecentPostsCount = 20
   val MinRecentPostsCount = 1
 
-  def create[F[_]: Concurrent](
+  def create[F[_]: Async](
     postService: PostService[F],
     commentService: CommentService[F],
     tagService: TagService[F],

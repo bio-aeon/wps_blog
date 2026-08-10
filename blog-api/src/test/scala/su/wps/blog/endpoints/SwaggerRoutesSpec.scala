@@ -6,9 +6,10 @@ import org.http4s.*
 import org.http4s.implicits.*
 import org.specs2.mutable.Specification
 
-class SwaggerRoutesSpec extends Specification with CatsEffect {
+class SwaggerRoutesSpec extends Specification with RoutesSpecSupport with CatsEffect {
 
-  private val swaggerRoutes = SwaggerRoutes.routes[IO]
+  private val apiEndpoints = buildRoutes[IO]().endpoints
+  private val swaggerRoutes = SwaggerRoutes.routes[IO](apiEndpoints)
 
   "SwaggerRoutes" >> {
     "serves Swagger UI at /docs" >> {
@@ -100,9 +101,21 @@ class SwaggerRoutesSpec extends Specification with CatsEffect {
     }
   }
 
-  "ApiEndpoints" >> {
-    "defines all 20 endpoints" >> {
-      ApiEndpoints.all must have size 20
+  "OpenAPI spec" >> {
+    "documents every served route" >> {
+      val request = Request[IO](Method.GET, uri"/docs/docs.yaml")
+
+      for {
+        resp <- swaggerRoutes.run(request).value.map(_.get)
+        body <- resp.as[String]
+      } yield {
+        // showPathTemplate appends the query template; OpenAPI path keys omit it. Matching on
+        // the trailing colon pins each path to a YAML key, so /v1/posts cannot be satisfied by
+        // /v1/posts/search merely containing it.
+        val paths = apiEndpoints.map(_.showPathTemplate().takeWhile(_ != '?'))
+        val undocumented = paths.filterNot(path => body.contains(s"$path:"))
+        undocumented must beEmpty
+      }
     }
   }
 }

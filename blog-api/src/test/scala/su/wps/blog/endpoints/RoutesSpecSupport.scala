@@ -1,6 +1,6 @@
 package su.wps.blog.endpoints
 
-import cats.effect.Concurrent
+import cats.effect.Async
 import su.wps.blog.endpoints.mocks.*
 import su.wps.blog.models.api.*
 import su.wps.blog.models.domain.{AppErr, CommentId, PostId, TagId}
@@ -209,7 +209,7 @@ trait RoutesSpecSupport {
     )
   )
 
-  protected def buildRoutes[F[_]: Concurrent: Raise[*[_], AppErr]](
+  protected def buildRoutes[F[_]: Async: Raise[*[_], AppErr]](
     allPostsResult: List[ListPostResult] = Nil,
     postByIdResult: Option[PostResult] = None,
     postsByTagResult: List[ListPostResult] = Nil,
