@@ -10,7 +10,7 @@ object Dependencies {
     val circe = "0.14.16"
     val typesafeConfig = "1.4.9"
     val pureconfig = "0.17.10"
-    val doobie = "1.0.0-RC12"
+    val doobie = "1.0.0-RC13"
     val log4cats = "2.8.0"
     val mouse = "1.4.0"
     val chimney = "1.8.2"
@@ -33,8 +33,8 @@ object Dependencies {
   val circeParser = "io.circe" %% "circe-parser" % Versions.circe
   val circeGeneric = "io.circe" %% "circe-generic" % Versions.circe
   val doobieCore = "org.tpolecat" %% "doobie-core" % Versions.doobie
-  val doobiePostgres = "org.tpolecat" %% "doobie-postgres" % Versions.doobie
-  val doobieHikari = "org.tpolecat" %% "doobie-hikari" % Versions.doobie
+  val doobiePostgres = "org.typelevel" %% "doobie-postgres" % Versions.doobie
+  val doobieHikari = "org.typelevel" %% "doobie-hikari" % Versions.doobie
   val tofuDerivation = "tf.tofu" %% "tofu-derivation" % Versions.tofu
   val tofuDoobie = "tf.tofu" %% "tofu-doobie-ce3" % Versions.tofu
   val logbackClassic = "ch.qos.logback" % "logback-classic" % Versions.logback
