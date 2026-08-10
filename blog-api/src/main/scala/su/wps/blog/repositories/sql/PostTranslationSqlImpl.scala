@@ -3,8 +3,8 @@ package su.wps.blog.repositories.sql
 import cats.syntax.applicative.*
 import cats.syntax.list.*
 import cats.tagless.syntax.functorK.*
-import doobie.*
-import doobie.implicits.*
+import org.typelevel.doobie.*
+import org.typelevel.doobie.implicits.*
 import su.wps.blog.instances.time.*
 import su.wps.blog.models.domain.{PostId, PostTranslation}
 import tofu.doobie.LiftConnectionIO
