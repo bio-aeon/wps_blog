@@ -1,8 +1,12 @@
 import unicodedata
 
+from django.conf import settings
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import BaseUserManager
 from django.db import models
+from django.utils.crypto import salted_hmac
+
+SESSION_AUTH_HASH_KEY_SALT = 'django.contrib.auth.models.AbstractBaseUser.get_session_auth_hash'
 
 
 class UserManager(BaseUserManager):
@@ -69,6 +73,21 @@ class User(models.Model):
     def set_password(self, raw_password):
         self.password = make_password(raw_password)
         self._password = raw_password
+
+    def _get_session_auth_hash(self, secret=None):
+        return salted_hmac(
+            SESSION_AUTH_HASH_KEY_SALT,
+            self.password,
+            secret=secret,
+            algorithm='sha256',
+        ).hexdigest()
+
+    def get_session_auth_hash(self):
+        return self._get_session_auth_hash()
+
+    def get_session_auth_fallback_hash(self):
+        for fallback_secret in settings.SECRET_KEY_FALLBACKS:
+            yield self._get_session_auth_hash(secret=fallback_secret)
 
     @classmethod
     def normalize_username(cls, username):
