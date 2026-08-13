@@ -1,6 +1,6 @@
 package su.wps.blog.tools
 
-import doobie.Meta
+import org.typelevel.doobie.Meta
 import org.scalacheck.{Arbitrary, Gen}
 import shapeless.Witness
 

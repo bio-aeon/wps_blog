@@ -7,9 +7,9 @@ import cats.syntax.applicativeError.*
 import cats.syntax.semigroupk.*
 import com.typesafe.config.ConfigFactory
 import distage.{Lifecycle, ModuleDef, TagK}
-import doobie.ConnectionIO
-import doobie.hikari.HikariTransactor
-import doobie.util.ExecutionContexts
+import org.typelevel.doobie.ConnectionIO
+import org.typelevel.doobie.hikari.HikariTransactor
+import org.typelevel.doobie.util.ExecutionContexts
 import fly4s.*
 import fly4s.data.*
 import fs2.compression.Compression
@@ -109,7 +109,9 @@ object AppModule {
         ContactServiceImpl.create[F, ConnectionIO](cr, cfgr, xa)
     }
     make[HealthService[F]].from { (xa: Txr.Plain[F]) =>
-      HealthServiceImpl.create[F](xa.trans(doobie.FC.isValid(1)).handleError(_ => false))
+      HealthServiceImpl.create[F](
+        xa.trans(org.typelevel.doobie.FC.isValid(1)).handleError(_ => false)
+      )
     }
 
     make[TagService[F]].from {

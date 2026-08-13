@@ -3,14 +3,14 @@ import sbt.*
 object Dependencies {
 
   object Versions {
-    val tofu = "0.14.2"
+    val tofu = "0.14.3"
     val specs2 = "4.23.0"
     val http4s = "0.23.36"
     val logback = "1.6.1"
     val circe = "0.14.16"
     val typesafeConfig = "1.4.9"
     val pureconfig = "0.17.10"
-    val doobie = "1.0.0-RC12"
+    val doobie = "1.0.0-RC13"
     val log4cats = "2.8.0"
     val mouse = "1.4.0"
     val chimney = "1.11.0"
@@ -32,9 +32,9 @@ object Dependencies {
   val http4sDsl = "org.http4s" %% "http4s-dsl" % Versions.http4s
   val circeParser = "io.circe" %% "circe-parser" % Versions.circe
   val circeGeneric = "io.circe" %% "circe-generic" % Versions.circe
-  val doobieCore = "org.tpolecat" %% "doobie-core" % Versions.doobie
-  val doobiePostgres = "org.tpolecat" %% "doobie-postgres" % Versions.doobie
-  val doobieHikari = "org.tpolecat" %% "doobie-hikari" % Versions.doobie
+  val doobieCore = "org.typelevel" %% "doobie-core" % Versions.doobie
+  val doobiePostgres = "org.typelevel" %% "doobie-postgres" % Versions.doobie
+  val doobieHikari = "org.typelevel" %% "doobie-hikari" % Versions.doobie
   val tofuDerivation = "tf.tofu" %% "tofu-derivation" % Versions.tofu
   val tofuDoobie = "tf.tofu" %% "tofu-doobie-ce3" % Versions.tofu
   val logbackClassic = "ch.qos.logback" % "logback-classic" % Versions.logback
