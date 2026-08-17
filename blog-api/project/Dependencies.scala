@@ -15,7 +15,7 @@ object Dependencies {
     val mouse = "1.4.0"
     val chimney = "1.11.0"
     val fly4s = "1.2.0"
-    val flyway = "11.20.3"
+    val flyway = "13.3.0"
     val scalacheckShapeless = "1.3.1"
     val testcontainersScala = "0.44.1"
     val testcontainersPostgresql = "2.0.5"
