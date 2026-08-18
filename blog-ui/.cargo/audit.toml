@@ -1,5 +1,12 @@
-# Transitive dependency through actix-web -> cookie -> time.
-# Cannot be fixed until actix-web upgrades cookie to a version using time >=0.3.47.
-# DoS via stack exhaustion (medium severity) — acceptable risk for a personal blog.
 [advisories]
-ignore = ["RUSTSEC-2026-0009"]
+ignore = [
+    # Transitive dependency through actix-web -> cookie -> time.
+    # Cannot be fixed until actix-web upgrades cookie to a version using time >=0.3.47.
+    # DoS via stack exhaustion (medium severity) — acceptable risk for a personal blog.
+    "RUSTSEC-2026-0009",
+    # Transitive dependency through actix-web -> actix-http -> h2 0.3.
+    # Cannot be fixed until actix-http moves to h2 0.4; no 0.3.x release carries the fix.
+    # Unbounded empty DATA frames (low severity). HttpServer::bind serves HTTP/1.x only,
+    # so the h2 code path is never reached — the fixed h2 0.4.16 covers the reqwest path.
+    "RUSTSEC-2026-0258",
+]
