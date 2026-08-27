@@ -22,7 +22,7 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: 'sbt'
-    - uses: sbt/setup-sbt@v1.5.7
+    - uses: sbt/setup-sbt@v1.5.8
     - name: Check formatting
       working-directory: ./blog-api
       run: sbt scalafmtCheckAll
