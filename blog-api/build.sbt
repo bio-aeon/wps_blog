@@ -6,7 +6,7 @@ lazy val root = (project in file("."))
     organization := "su.wps",
     name := "wps-blog",
     version := "0.1.0-SNAPSHOT",
-    scalaVersion := "2.13.18",
+    scalaVersion := "3.9.0",
     // sbt 2 moved the default target to target/out/jvm/scala-<ver>/<project>;
     // pin the staged output so the Dockerfile path stays stable across Scala bumps
     Universal / target := baseDirectory.value / "target" / "universal",
