@@ -4,10 +4,12 @@ WORKDIR /app
 
 COPY project/build.properties project/plugins.sbt project/Dependencies.scala project/
 COPY build.sbt .
-RUN sbt update
+# --server bypasses the sbtn thin client that sbt 2 uses by default; its server
+# handshake races on project/target/active.json and can exit 1 without an error
+RUN sbt --server update
 
 COPY . .
-RUN sbt stage
+RUN sbt --server stage
 
 FROM eclipse-temurin:17-jre-jammy
 
