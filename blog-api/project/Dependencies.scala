@@ -9,7 +9,7 @@ object Dependencies {
     val logback = "1.6.5"
     val circe = "0.14.16"
     val typesafeConfig = "1.4.9"
-    val pureconfig = "0.17.10"
+    val pureconfig = "0.17.11"
     val doobie = "1.0.0-RC13"
     val log4cats = "2.8.0"
     val mouse = "1.4.0"
