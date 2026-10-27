@@ -3,14 +3,15 @@ package su.wps.blog.endpoints
 import cats.effect.Sync
 import cats.syntax.flatMap.*
 import cats.syntax.functor.*
-import io.prometheus.client.CollectorRegistry
-import io.prometheus.client.exporter.common.TextFormat
+import io.prometheus.metrics.expositionformats.PrometheusTextFormatWriter
+import io.prometheus.metrics.model.registry.PrometheusRegistry
 import org.http4s.HttpRoutes
 import org.http4s.dsl.Http4sDsl
 import org.http4s.headers.`Content-Type`
 import org.http4s.MediaType
 
-import java.io.StringWriter
+import java.io.ByteArrayOutputStream
+import java.nio.charset.StandardCharsets
 
 object MetricsRoutes {
 
@@ -20,9 +21,9 @@ object MetricsRoutes {
 
     HttpRoutes.of[F] { case GET -> Root / "metrics" =>
       F.delay {
-        val writer = new StringWriter()
-        TextFormat.write004(writer, CollectorRegistry.defaultRegistry.metricFamilySamples())
-        writer.toString
+        val out = new ByteArrayOutputStream()
+        PrometheusTextFormatWriter.create().write(out, PrometheusRegistry.defaultRegistry.scrape())
+        out.toString(StandardCharsets.UTF_8)
       }.flatMap(body => Ok(body, `Content-Type`(MediaType.text.plain)))
     }
   }

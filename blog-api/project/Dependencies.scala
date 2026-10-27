@@ -22,7 +22,7 @@ object Dependencies {
     val catsEffectTesting = "1.8.0"
     val tapir = "1.13.32"
     val caffeine = "3.3.0"
-    val prometheusSimpleclient = "1.10.0"
+    val prometheusMetrics = "1.10.0"
     val logstashLogbackEncoder = "9.0"
     val distage = "1.2.25"
   }
@@ -55,10 +55,10 @@ object Dependencies {
   val catsEffectTestingSpecs2 =
     "org.typelevel" %% "cats-effect-testing-specs2" % Versions.catsEffectTesting
   val caffeine = "com.github.ben-manes.caffeine" % "caffeine" % Versions.caffeine
-  val prometheusSimpleclient =
-    "io.prometheus" % "prometheus-metrics-core" % Versions.prometheusSimpleclient
-  val prometheusCommon =
-    "io.prometheus" % "simpleclient_common" % Versions.prometheusSimpleclient
+  val prometheusMetricsCore =
+    "io.prometheus" % "prometheus-metrics-core" % Versions.prometheusMetrics
+  val prometheusMetricsTextFormats =
+    "io.prometheus" % "prometheus-metrics-exposition-textformats" % Versions.prometheusMetrics
   val logstashLogbackEncoder =
     "net.logstash.logback" % "logstash-logback-encoder" % Versions.logstashLogbackEncoder
   val tapirJsonCirce = "com.softwaremill.sttp.tapir" %% "tapir-json-circe" % Versions.tapir

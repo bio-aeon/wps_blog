@@ -4,21 +4,22 @@ import cats.data.Kleisli
 import cats.effect.{Clock, Sync}
 import cats.syntax.flatMap.*
 import cats.syntax.functor.*
-import io.prometheus.client.{CollectorRegistry, Counter, Histogram}
+import io.prometheus.metrics.core.metrics.{Counter, Histogram}
 import org.http4s.*
 
 object MetricsMiddleware {
 
   private val RequestDuration: Histogram = Histogram
-    .build()
+    .builder()
     .name("http_request_duration_seconds")
     .help("HTTP request latency in seconds")
     .labelNames("method", "path", "status")
-    .buckets(0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5)
+    .classicOnly()
+    .classicUpperBounds(0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5)
     .register()
 
   private val RequestTotal: Counter = Counter
-    .build()
+    .builder()
     .name("http_requests_total")
     .help("Total HTTP requests")
     .labelNames("method", "path", "status")
@@ -35,8 +36,8 @@ object MetricsMiddleware {
         path = normalizePath(req.uri.path.renderString)
         status = response.status.code.toString
         _ <- Sync[F].delay {
-          RequestDuration.labels(method, path, status).observe(elapsed)
-          RequestTotal.labels(method, path, status).inc()
+          RequestDuration.labelValues(method, path, status).observe(elapsed)
+          RequestTotal.labelValues(method, path, status).inc()
         }
       } yield response
     }
