@@ -22,7 +22,8 @@ object Dependencies {
     val catsEffectTesting = "1.8.0"
     val tapir = "1.13.32"
     val caffeine = "3.3.0"
-    val prometheusMetrics = "1.10.0"
+    val otel4sSdk = "0.19.4"
+    val http4sOtel4s = "0.19.0"
     val logstashLogbackEncoder = "9.0"
     val distage = "1.2.25"
   }
@@ -55,10 +56,11 @@ object Dependencies {
   val catsEffectTestingSpecs2 =
     "org.typelevel" %% "cats-effect-testing-specs2" % Versions.catsEffectTesting
   val caffeine = "com.github.ben-manes.caffeine" % "caffeine" % Versions.caffeine
-  val prometheusMetricsCore =
-    "io.prometheus" % "prometheus-metrics-core" % Versions.prometheusMetrics
-  val prometheusMetricsTextFormats =
-    "io.prometheus" % "prometheus-metrics-exposition-textformats" % Versions.prometheusMetrics
+  val otel4sSdkMetrics = "org.typelevel" %% "otel4s-sdk-metrics" % Versions.otel4sSdk
+  val otel4sSdkExporterPrometheus =
+    "org.typelevel" %% "otel4s-sdk-exporter-prometheus" % Versions.otel4sSdk
+  val http4sOtel4sMetrics =
+    "org.http4s" %% "http4s-otel4s-middleware-metrics" % Versions.http4sOtel4s
   val logstashLogbackEncoder =
     "net.logstash.logback" % "logstash-logback-encoder" % Versions.logstashLogbackEncoder
   val tapirJsonCirce = "com.softwaremill.sttp.tapir" %% "tapir-json-circe" % Versions.tapir

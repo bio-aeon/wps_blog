@@ -1,46 +1,17 @@
 package su.wps.blog.endpoints
 
-import cats.data.Kleisli
-import cats.effect.{Clock, Sync}
-import cats.syntax.flatMap.*
-import cats.syntax.functor.*
-import io.prometheus.metrics.core.metrics.{Counter, Histogram}
+import cats.data.OptionT
+import cats.effect.{Clock, MonadCancelThrow}
 import org.http4s.*
+import org.http4s.metrics.MetricsOps
+import org.http4s.server.middleware.Metrics
 
-object MetricsMiddleware {
+private[blog] object MetricsMiddleware {
 
-  private val RequestDuration: Histogram = Histogram
-    .builder()
-    .name("http_request_duration_seconds")
-    .help("HTTP request latency in seconds")
-    .labelNames("method", "path", "status")
-    .classicOnly()
-    .classicUpperBounds(0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5)
-    .register()
-
-  private val RequestTotal: Counter = Counter
-    .builder()
-    .name("http_requests_total")
-    .help("Total HTTP requests")
-    .labelNames("method", "path", "status")
-    .register()
-
-  def apply[F[_]: Sync: Clock](app: HttpApp[F]): HttpApp[F] =
-    Kleisli { req =>
-      for {
-        start <- Clock[F].monotonic
-        response <- app.run(req)
-        end <- Clock[F].monotonic
-        elapsed = (end - start).toUnit(java.util.concurrent.TimeUnit.SECONDS)
-        method = req.method.name
-        path = normalizePath(req.uri.path.renderString)
-        status = response.status.code.toString
-        _ <- Sync[F].delay {
-          RequestDuration.labelValues(method, path, status).observe(elapsed)
-          RequestTotal.labelValues(method, path, status).inc()
-        }
-      } yield response
-    }
+  def apply[F[_]: Clock: MonadCancelThrow](ops: MetricsOps[F])(app: HttpApp[F]): HttpApp[F] = {
+    val classifyRoute = (req: Request[F]) => Option(normalizePath(req.uri.path.renderString))
+    Metrics[F](ops, classifierF = classifyRoute)(app.mapF(OptionT.liftF(_))).orNotFound
+  }
 
   private def normalizePath(path: String): String = path match {
     case p if p.matches(".*/posts/\\d+/comments$") => "/v1/posts/:id/comments"

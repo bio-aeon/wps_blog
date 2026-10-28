@@ -16,15 +16,22 @@ import fs2.compression.Compression
 import fs2.io.net.Network
 import org.http4s.{HttpApp, HttpRoutes, Method}
 import org.http4s.ember.server.EmberServerBuilder
+import org.http4s.metrics.MetricsOps
+import org.http4s.otel4s.middleware.metrics.OtelMetrics
 import org.http4s.server.Server
 import org.http4s.server.middleware.{CORS, GZip}
 import org.typelevel.ci.CIString
+import org.typelevel.otel4s.metrics.MeterProvider
+import org.typelevel.otel4s.sdk.common.Diagnostic
+import org.typelevel.otel4s.sdk.exporter.prometheus.PrometheusMetricExporter
+import org.typelevel.otel4s.sdk.metrics.exporter.MetricExporter
 import pureconfig.ConfigSource
 import su.wps.blog.config.*
 import su.wps.blog.endpoints.*
 import su.wps.blog.repositories.*
 import su.wps.blog.repositories.sql.Slf4jDoobieLogHandler
 import su.wps.blog.services.*
+import su.wps.blog.telemetry.{Slf4jDiagnostic, Telemetry}
 import tofu.doobie.transactor.Txr
 
 import scala.concurrent.duration.*
@@ -47,6 +54,20 @@ object AppModule {
     }
     make[CacheService[F]].from { (c: CacheConfig) =>
       CacheServiceImpl.create[F](c.maxEntries)
+    }
+    make[Diagnostic[F]].fromEffect(Slf4jDiagnostic.create[F])
+    make[MetricExporter.Pull[F]].fromEffect { (diagnostic: Diagnostic[F]) =>
+      implicit val d: Diagnostic[F] = diagnostic
+      PrometheusMetricExporter.builder[F].build
+    }
+    make[MeterProvider[F]].fromEffect {
+      (exporter: MetricExporter.Pull[F], diagnostic: Diagnostic[F]) =>
+        implicit val d: Diagnostic[F] = diagnostic
+        Telemetry.meterProvider[F](exporter.metricReader)
+    }
+    make[MetricsOps[F]].fromEffect { (meterProvider: MeterProvider[F]) =>
+      implicit val mp: MeterProvider[F] = meterProvider
+      OtelMetrics.serverMetricsOps[F]()
     }
 
     make[PostRepository[ConnectionIO]].from(PostRepositoryImpl.create[ConnectionIO])
@@ -193,12 +214,20 @@ object AppModule {
       ) =>
         RoutesImpl.create[F](ps, cs, ts, pgs, hs, sks, es, sls, cts, as, fs, ls)
     }
-    make[HttpApp[F]].from { (routes: RoutesImpl[F], appConfig: AppConfig) =>
-      val withMiddleware = CacheMiddleware(ErrorHandler(routes.routes))
-      val allRoutes: HttpRoutes[F] =
-        LivenessRoutes.routes[F] <+> MetricsRoutes.routes[F] <+>
-          SwaggerRoutes.routes[F](routes.endpoints) <+> withMiddleware
-      mkHttpApp[F](appConfig, allRoutes)
+    make[HttpApp[F]].from {
+      (
+        routes: RoutesImpl[F],
+        appConfig: AppConfig,
+        exporter: MetricExporter.Pull[F],
+        metricsOps: MetricsOps[F],
+        diagnostic: Diagnostic[F]
+      ) =>
+        implicit val d: Diagnostic[F] = diagnostic
+        val withMiddleware = CacheMiddleware(ErrorHandler(routes.routes))
+        val allRoutes: HttpRoutes[F] =
+          LivenessRoutes.routes[F] <+> MetricsRoutes.routes[F](exporter) <+>
+            SwaggerRoutes.routes[F](routes.endpoints) <+> withMiddleware
+        mkHttpApp[F](appConfig, metricsOps, allRoutes)
     }
     make[Server].fromResource { (c: HttpServerConfig, app: HttpApp[F]) =>
       Lifecycle.fromCats(mkHttpServer[F](c, app))
@@ -252,6 +281,7 @@ object AppModule {
 
   private def mkHttpApp[F[_]: Async: Compression](
     appConfig: AppConfig,
+    metricsOps: MetricsOps[F],
     routes: HttpRoutes[F]
   ): HttpApp[F] = {
     val corsPolicy =
@@ -278,7 +308,9 @@ object AppModule {
       RateLimitMiddleware[F](appConfig.rateLimit.maxRequests, appConfig.rateLimit.windowSeconds)
     val rateLimited: HttpApp[F] = applyRateLimit(corsApp)
 
-    CorrelationIdMiddleware(SecurityHeadersMiddleware(MetricsMiddleware(gzipApp(rateLimited))))
+    CorrelationIdMiddleware(
+      SecurityHeadersMiddleware(MetricsMiddleware(metricsOps)(gzipApp(rateLimited)))
+    )
   }
 
   private def mkHttpServer[F[_]: Async: Network](
