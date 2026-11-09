@@ -22,7 +22,7 @@ object Dependencies {
     val catsEffectTesting = "1.8.0"
     val tapir = "1.13.32"
     val caffeine = "3.3.0"
-    val otel4sSdk = "0.19.4"
+    val otel4sSdk = "0.19.5"
     val http4sOtel4s = "0.19.0"
     val logstashLogbackEncoder = "9.0"
     val distage = "1.2.25"
