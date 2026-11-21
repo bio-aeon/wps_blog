@@ -2,7 +2,7 @@
   "name": "blog-ui-e2e",
   "private": true,
   "devDependencies": {
-    "@axe-core/playwright": "^4.9.1",
-    "@playwright/test": "^1.44.1"
+    "@axe-core/playwright": "^4.14.0",
+    "@playwright/test": "^1.65.1"
   }
 }

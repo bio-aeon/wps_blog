@@ -10,3 +10,9 @@ ignore = [
     # so the h2 code path is never reached — the fixed h2 0.4.16 covers the reqwest path.
     "RUSTSEC-2026-0258",
 ]
+
+# blog-ui is built and deployed only for Linux, so advisories confined to other OSes don't
+# apply, e.g. RUSTSEC-2026-0443 (Windows short names) in the actix-files 0.6 that leptos_actix
+# 0.8 still requires.
+[target]
+os = "linux"

@@ -1,8 +1,10 @@
 FROM rust:1.98-bookworm AS builder
 
+ARG BINARYEN_VERSION=version_133
+
 RUN apt-get update && apt-get install -y --no-install-recommends curl && \
     rm -rf /var/lib/apt/lists/* && \
-    curl -sSL https://github.com/WebAssembly/binaryen/releases/download/version_121/binaryen-version_121-x86_64-linux.tar.gz \
+    curl -sSL https://github.com/WebAssembly/binaryen/releases/download/${BINARYEN_VERSION}/binaryen-${BINARYEN_VERSION}-x86_64-linux.tar.gz \
       | tar -xz -C /usr/local --strip-components=1 && \
     rustup target add wasm32-unknown-unknown && \
     cargo install cargo-leptos --locked
