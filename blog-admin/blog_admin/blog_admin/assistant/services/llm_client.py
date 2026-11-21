@@ -19,8 +19,7 @@ class LLMResponse:
 class LLMClient(ABC):
 
     @abstractmethod
-    def generate(self, system_prompt, user_prompt,
-                 max_tokens=4096, temperature=0.7):
+    def generate(self, system_prompt, user_prompt, max_tokens=4096):
         """Generate text and return an LLMResponse."""
 
     def generate_json(self, system_prompt, user_prompt, max_tokens=4096):
@@ -35,10 +34,7 @@ class LLMClient(ABC):
             + "\n\nIMPORTANT: Respond ONLY with valid JSON. "
             "No markdown fences, no commentary."
         )
-        response = self.generate(
-            json_system, user_prompt,
-            max_tokens=max_tokens, temperature=0.4,
-        )
+        response = self.generate(json_system, user_prompt, max_tokens=max_tokens)
         text = response.content.strip()
         if text.startswith('```'):
             text = text.split('\n', 1)[-1].rsplit('```', 1)[0].strip()
@@ -57,14 +53,12 @@ class ClaudeClient(LLMClient):
         self.client = anthropic.Anthropic(api_key=api_key)
         self.model = model
 
-    def generate(self, system_prompt, user_prompt,
-                 max_tokens=4096, temperature=0.7):
+    def generate(self, system_prompt, user_prompt, max_tokens=4096):
         response = self.client.messages.create(
             model=self.model,
             system=system_prompt,
             messages=[{'role': 'user', 'content': user_prompt}],
             max_tokens=max_tokens,
-            temperature=temperature,
         )
         return LLMResponse(
             content=response.content[0].text,

@@ -1,7 +1,8 @@
 from django.forms import Textarea
 
-EASYMDE_CSS_SRI = 'sha384-uqD/OYCNfagd1EgXMgl5QedTD5K+B3e9b8GYo/41t7+Serf7CBxvl+tU1gHd+qd1'
-EASYMDE_JS_SRI = 'sha384-KtB38COewxfrhJxoN2d+olxJAeT08LF8cVZ6DQ8Poqu89zIptqO6zAXoIxpGNWYE'
+EASYMDE_VERSION = '2.21.0'
+EASYMDE_CSS_SRI = 'sha384-ZoLYv3S+AsZX+zhbN1D1+WPpc8f+DmLfxfgw+qn0Nq8wJPOYQQXEW5ZrRhcGozlG'
+EASYMDE_JS_SRI = 'sha384-mTM6vzy+/UiHrMBClNGViM9qEv0/26iCGqpJKhSzdnjrxbKjO3vkT62ujXQ8B5iv'
 
 
 class MarkdownWidget(Textarea):
@@ -11,6 +12,7 @@ class MarkdownWidget(Textarea):
 
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)
+        context['easymde_version'] = EASYMDE_VERSION
         context['easymde_css_sri'] = EASYMDE_CSS_SRI
         context['easymde_js_sri'] = EASYMDE_JS_SRI
         return context
