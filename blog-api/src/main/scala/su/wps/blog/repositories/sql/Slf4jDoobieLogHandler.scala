@@ -12,7 +12,7 @@ object Slf4jDoobieLogHandler {
   }
 
   private def logDoobieEvent[F[_]](logger: Logger[F]): LogEvent => F[Unit] = {
-    case Success(s, a, l, e1, e2) =>
+    case Success(s, a, l, e1, e2, _) =>
       logger.trace {
         s"""Successful Statement Execution:
            |
@@ -24,7 +24,7 @@ object Slf4jDoobieLogHandler {
          """.stripMargin
       }
 
-    case ProcessingFailure(s, a, l, e1, e2, t) =>
+    case ProcessingFailure(s, a, l, e1, e2, t, _) =>
       logger.error {
         s"""Failed Resultset Processing:
            |
@@ -37,7 +37,7 @@ object Slf4jDoobieLogHandler {
          """.stripMargin
       }
 
-    case ExecFailure(s, a, l, e1, t) =>
+    case ExecFailure(s, a, l, e1, t, _) =>
       logger.error {
         s"""Failed Statement Execution:
            |

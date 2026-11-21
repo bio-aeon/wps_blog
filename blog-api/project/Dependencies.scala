@@ -5,25 +5,25 @@ object Dependencies {
   object Versions {
     val tofu = "0.14.3"
     val specs2 = "4.23.0"
-    val http4s = "0.23.38"
-    val logback = "1.6.5"
-    val circe = "0.14.16"
-    val typesafeConfig = "1.4.9"
-    val pureconfig = "0.17.10"
-    val doobie = "1.0.0-RC13"
+    val http4s = "0.23.39"
+    val logback = "1.6.8"
+    val circe = "0.14.17"
+    val typesafeConfig = "1.4.10"
+    val pureconfig = "0.17.11"
+    val doobie = "1.0.0-RC14"
     val log4cats = "2.8.0"
     val mouse = "1.4.0"
-    val chimney = "2.0.0"
+    val chimney = "2.1.1"
     val fly4s = "2.0.0"
-    val flyway = "13.7.0"
-    val scalacheckShapeless = "1.3.1"
+    val flyway = "13.13.0"
+    val scalacheckShapeless = "1.3.2"
     val testcontainersScala = "0.44.1"
     val testcontainersPostgresql = "2.0.5"
     val catsEffectTesting = "1.8.0"
-    val tapir = "1.13.32"
-    val caffeine = "3.3.0"
-    val otel4sSdk = "0.19.4"
-    val http4sOtel4s = "0.19.0"
+    val tapir = "1.14.1"
+    val caffeine = "3.3.1"
+    val otel4sSdk = "0.19.5"
+    val http4sOtel4s = "0.20.0"
     val logstashLogbackEncoder = "9.0"
     val distage = "1.2.25"
   }
@@ -48,7 +48,7 @@ object Dependencies {
   val fly4s = "com.github.geirolz" %% "fly4s" % Versions.fly4s
   val flywayPostgresql = "org.flywaydb" % "flyway-database-postgresql" % Versions.flyway
   val scalacheckShapeless =
-    "com.github.alexarchambault" %% "scalacheck-shapeless_1.16" % Versions.scalacheckShapeless
+    "com.github.alexarchambault" %% "scalacheck-shapeless_1.18" % Versions.scalacheckShapeless
   val testcontainersScala = "com.dimafeng" %% "testcontainers-scala" % Versions.testcontainersScala
   val testcontainersPostgresql =
     "org.testcontainers" % "testcontainers-postgresql" % Versions.testcontainersPostgresql

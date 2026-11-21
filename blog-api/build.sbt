@@ -58,6 +58,9 @@ lazy val root = (project in file("."))
       catsEffectTestingSpecs2 % Test,
       distageFramework
     ),
+    // tofu-doobie 0.14.3 is built against doobie 1.0.0-RC13, and every doobie class and member
+    // it references resolves in RC14. Remove once tofu releases against RC14 or later.
+    libraryDependencySchemes += "org.typelevel" %% "doobie-core" % VersionScheme.Always,
     addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.13.4" cross CrossVersion.patch),
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
   )
